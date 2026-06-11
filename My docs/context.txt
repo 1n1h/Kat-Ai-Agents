@@ -1,0 +1,1321 @@
+
+BUILD:
+ Today we are building ai agents for law firms 
+ for the legal field. With the Anthropic Agents SDK 
+ I have some files in this folder that my wife gave me. 
+ When she was mapping out this idea, I don't know if they're any good for what we're about to build. 
+ We can decide later whether we keep them, edit them, or delete them. 
+ 
+
+ Similar to this web app In functionality and concept, without the gimmicky AI beings 
+ Instead we'll use a professional format. 
+
+ KEY FEATURES:
+ DATA SECURITY, 
+ IMAGE SCANNING DOCUMENT SCANNING,
+ TTS, STT, FILE UPLOAD, 
+ FILE SEARCH 
+ FILE MANAGEMENT 
+ FILE GENERATION 
+ FILE EDITING 
+ FILE STORAGE 
+ FILE RETRIEVAL 
+ DOCUMENT certification
+ WEB access
+ BROWSER TOOLS
+ - Make suggestions for any other tools specific for this app. 
+
+ WEBSITES:
+https://www.acti.ai/
+https://unblindedsalesmastery.wistia.com/s/xjqt0pesggbeg30 We'll be using 
+ 
+ 
+MEETING TRANSCRIPT:
+
+Speaker 1
+Welcome, welcome to the ACT I Legal Summit Boot Camp. ACT I Legal Visioneers, welcome, welcome to this Mastery Monday. We are so grateful for your trust, your belief, whether you've been here in the unblinded ecosystem for five years or you've been here in the unblinded ecosystem for five minutes, which I think is somebody coming in right now or a week or so, warmest, warmest welcome.
+
+So today, we're gonna be introducing the full legal suite of beings, which you've heard of names like Watson and Holmes and Jeeves, but we're also gonna talk a lot about the context of getting launched. So this is an hour today, but we're gonna stay and we're gonna answer questions, both Michael Smikin and I, coming from two different locations right now. But before I do, I wanna step back, I'm gonna sit down, I'm gonna stand up, I'm gonna move around the room a little bit, but for right now, in this moment, of course, I'm freaking out our studio team because I asked them to have seat for me, I just moved, they're like, my God, it's gonna be off camera angle, right? So, you know, for everybody, much, much gratitude to you.
+
+And what is this all about? We talked about the fact that this is about time expansion.
+
+And the time expansion dynamic is not time savings, it's something exponentially different. I'm gonna take a few minutes starting out and then we're get into the beings and the peace, but I wanna like reground you, remind you because we're not in the state that we're in during the Act I Legal Summit. You know, we're flowing together. It's hours together and it's like it's midday and you're getting hit with cortisol and all sorts of things are happening potentially in your legal practice.
+
+And I want to remind you that the core power of time expansion is so that you could bring the financial abundance, the time freedom that you seek in your life, and ultimately the magic. Like what it looks like for the finances, the dollars, the abundance, what it looks like in the time freedom and what it looks like in the magic. This is what we're here to do and to serve you with. So I just want take a quick check-in.
+
+Is Michael Smike in the building? Michael, Michael, get her unmuted. As soon as we get Michael unmuted, I'll have Michael jump in and say a quick hello, right? So interrupt me, please.
+
+I want to make sure we got Michael and clear.
+
+So, and for the rest of you, as we're hearing this, I want to keep this bifurcation over these six weeks between two worlds.
+
+Speaker 2
+Hey, Sean, I'm here. I've been here, by the way.
+
+Speaker 1
+What's up, Michael? I'm sure you are. Long time no talk. About five seconds ago, I think the two of us stopped communicating. Michael, how are you today and what's present on your mind, your heart, your soul as we launch this work, both with people that have already been using the Beings and people that are brand new in this launch. Michael.
+
+Speaker 2
+Yeah. I think the word that I'm most feeling right now is gratitude. I'm grateful to be here energetically, spiritually, emotionally, physically, mentally. I'm I'm all the things. Grateful for you, Sean, being here, rolling out these extraordinary beings, the extraordinary platform that they are, and bringing it to folks that probably most need that masterful time expansion that we've been talking about. So just excited across the board, and certainly very grateful.
+
+Speaker 1
+Thank you. And what I want you guys to know is that in this bifurcation, there's the legal beings, the ones that are going to support you and serve you in doing your legal work in time expansion. And then there's the non legal beings that are gonna help you, Athena, to perform marketing and sales functions at a more and more optimal level. This is a lot.
+
+This is like beginning to hire a whole new team of people, teammates, beings. And so our work over these next six weeks is going to be an integration. And Michael, I think you had such a beautiful example pointing over there because this where the sound came from. So Michael, I'll point to the camera.
+
+You were sharing with me when you hired some personal trainers going back a little bit ago and what that looked like. And I thought that framework was so powerful, so effective. So please, Michael, what was that looking like and how does that relate to this boot camp and why are we doing this?
+
+Speaker 2
+Yep, thank you. And team, just make sure to allow me to either be a co host or keep me unmuted because my sense is Sean's going be going to me a lot.
+
+Speaker 1
+Yeah, do not mute Michael Smiken.
+
+Speaker 2
+Yeah, thank you for that, Sean. I want everybody kind of ground on this, because I began working with these wonderful personal trainers.
+
+I told them that my outcome was health, vitality.
+
+Asked me a couple of my challenges. You know, what's the biggest sticking point for you? And, you know, for me, used to be like consistency and habit forming around, you know, health decisions and those kinds of things. This was years ago.
+
+And they go, well, listen, we're going to support you on-
+
+Speaker 1
+And by the way, Michael, just to give the impression of how much has your physical strength, your body transformed over the past couple of years, please.
+
+Speaker 2
+Yeah, I would say I've been going to the gym approximately five to six times a week. My strength has exploded, you know, number of pull ups, push ups. You know, Sean, I was talking to, I think it was John at the end of his last event, and, you know, we do the endorphin rush where we drop down and start doing push ups and stuff.
+
+I'm like, you know, John, I'm pretty sure I could do an infinite number of pushups now. I don't know if that's humanly possible, but however long the song goes, I'm able to do pushups now. That was never the case. And it wasn't about just physical strength, was about vitality and health. Unfortunately, my father passed away in twenty fifteen. He had a massive heart attack, he had diabetes, he had a lot of health issues, and a big outcome for me was I wanted to make sure, because he had passed away two months before my wedding, that I would definitely be there for my kids, and I would walk with them in their wedding. So for me, it was less about the strength building and more about the health and vitality outcomes.
+
+And so one of the things that they supported me on, which was majorly frustrating for me as a person who like wanted to dive in, who has certain obsessive tendencies, you know, I became obsessed with AI, become obsessed with the law practice, obsessed with achieving outcomes, where they got, listen, for the first week in your health journey, all you're going to do is you're going step on the scale.
+
+Don't worry about anything else. Just every morning, get on the scale. Don't worry about eating. Don't worry about exercise. Don't worry about anything, just for the whole week.
+
+Speaker 1
+But what about? But what about? But what about? But what about?
+
+Speaker 2
+Yep. Yep. And all I wanted to do is, like, rip my hair out because I'm, no. No.
+
+No. I'm ready to start, like, eating whole foods and, like, measuring and doing all the things. And they're, like, just get on the scale every single day for a week. Do nothing different.
+
+I followed their instructions.
+
+Then it was get on the scale and eat only the foods on this list, but eat as much of it as you want. No limitations, no nothing, but just eat the foods on this list. So I'm like, Sean said, what about, what about, what about ripping my hair out, get on the scale, and eat just the foods on the list for a whole week?
+
+And then it was, hey, get used to drinking X amount of water. I forgot what it was, it was eighty or one hundred ounces of water just for the week. So get on the scale, eat just the foods, as much of it as you want, and drink just, you know, drink the water. And week after week, as I walked through this process, I began to develop these habits that are related to health and vitality.
+
+But if I had jumped right in and said, tell me everything, tell me about macros and micronutrients and, you know, what's the difference between whole foods and these processed and ultra processed, right? I would go absolutely bananas, I would get overwhelmed, and I would go back to the old habits that I developed.
+
+And a big part of this boot camp and the using of artificial intelligence, and these actualized intelligence beings requires a very deep level of habituation that may take years to develop, right? And we're not talking about months, weeks, days, or even hours of what we're going to try to get you guys working with these beings, but there's a discipline that comes with integrating them at incredibly high levels in ways that, remember our puny human brain, our puny human brain can't even possibly imagine how to integrate them into your lives. Some people may say, Oh, you can drag and drop documents into these beings.
+
+Great. I'm gonna drag and drop some of these documents, and I'm gonna ask it a couple of questions. But what about role playing with the beings? What about asking them how to optimize the instruction that you gave them?
+
+What about asking them what they would differently, or what you could do more masterfully with the materials that were provided to you?
+
+Getting you to begin to utilize them in the way that you need to utilize them is its own habituating process, and so that is why we're deploying them in the way that we are, even though I guarantee you some, if not all of you, are like ripping your hair out, and they go, I want all the features, all the things, and I want them, like, now because I know how to use this. I know I'm gonna habituate in faster than you are. And even though there's countless things that I've set out inside my life and did not habituate in and failed out of overwhelm, this is not going to be one of those things. So that's a little bit of what I think Sean was looking for me to share with you.
+
+Speaker 1
+Yes. A hundred percent.
+
+And so to that point, and we're going to drop in shortly, just about five more minutes of setting the frame, setting the context, is Michael Smiken and I constantly find new use cases for what we've created, what we have here, right? And so, week, there was a scenario where a person in a child support situation, you know, related to Kalgo Giesmeichen was taking this outrageous position. And so we supported with Athena who PS is not a legal act I being Michael Giesmeichen is going lean into the distinctions. We're going talk a lot about safety and security, confidentiality, protections, all of the additional belt and suspenders we have added in that suite of dynamics over the past week, which is completely crazy and insane and amazing.
+
+And so, but I decided I was going to help in this situation. You know, I know the person and, you know, decided to. So, I went into Athena and I asked Athena to become Judge Judy.
+
+And I asked Athena to not say she's Judge Judy, but make her another judge name. She picked Judge Rodriguez, a female judge. And I said, I want you to understand there's a case in New Jersey called Strahan. Can you pull it?
+
+Can you see it? Can you analyze it? Right? And I got a solid analysis from her on it.
+
+I said, great. Now I want you to understand these facts. Here's what mom, here's dad, here's the situation.
+
+Now what I want you to do is with no contamination, not knowing who we represent, what the position is, I want you to analyze this with the fire feistiness, metaphors and analogies, not, not, nots, disruptions, questions, curtness, rudeness of Judge Judy and deliver this massively.
+
+And it happened. I was like, this is crazy. And I'm like, okay. I'm like, let's go another step and I want you to add in this reality. Now I want you to start talking about the potential disbarment of the attorneys that have consulted mom.
+
+If you think that's potentially relevant after you've said all this, how bad this is, is that a thing or that's crazy? Now I want to talk about blackmail extortion and outside civil suits. Now I want you to put all this together and deliver this, and I want you to have it staged dramatically. Like, you know, doors open, mom comes into the courtroom, stiletto her nails, her hair all blown out, like the whole thing.
+
+And I want you to be the judge coming out on the bench in full integrity. I'm not telling you what to do. Like, just deliver this like we're watching an episode of like Judge Judy meets like Law and Order, right? And so it gets delivered.
+
+It's like a forty five minute long court hearing, right, played out from the doors open to every look. And the judge drops her glasses, points and stares at counsel and says, I'll get to you. I didn't ask you a question. Like, it was like that for forty five minutes.
+
+We created a recording of it, provided it to dad or a person that was acting as a mediator between mom and dad voluntarily and had the mediator because now mom was like, I'm talking to lawyers. They tell me I can get all these crazy amounts of money. And those lawyers were lying to mom.
+
+So, Mediator provides recording all ethically done, all the ethical check boxes and say, hey, do you want this perspective?
+
+Mom was like throwing up, crying, freaking out, losing her mind, backpedaling, lying, dropping uncertainty, and the entire matter is back into integrity. And that's an application that Michael had no idea about. Michael hasn't even listened to the entire thing. I was so blown away because we're about the loving pursuit of relevant truth.
+
+Michael, how would you even contextualize rapidly that new use case? So I'm saying to Michael's point from earlier, we can't even give you all the use cases because they are so utterly endless and we're unfolding them as we go. But we're going to catch up to like weigh yourself. Get on the scale, like, use these.
+
+That's coming in a moment today. Right? But, Michael, what did you think about that, please, for the group?
+
+Speaker 2
+Yeah. I mean, Sean and I did not discuss what my answer to this question was gonna be, but I'm going to create a vision for you folks. And I remember when we were first deploying some of the legal being agents, and I had asked Sean, what does he think about something that one of them had done, which wasn't even close to what he just described?
+
+And he goes, lawyers and litigators are going to get hit in the in the realm of arbitration and mediation processes. And I was like, I'm like, no, no way. Like, I don't think that's gonna be one of the things that are deeply affected by by what we're talking about here.
+
+And I go, why would you even think that? He goes, because I want this built into every one of my agreements that you have to start with an AI mediation process. Right?
+
+And what I just heard described was what sounds like and looks like the first versions of that, because my big concern and fear as a litigator whenever I go into mediation is, is my position being accurately explained? Is this just a I don't care who's right or who's wrong, and I just want to get this case resolved? No offense to any mediators who utilize that process.
+
+But if I feel confident that a act I being is going to accurately represent my case to the other side in discussing a resolution, I'm not saying this replaces human mediators and arbitrators, but as a first step in a dispute resolution stack, sign me up. Right? Sign me up.
+
+Speaker 1
+And by the way, I am.
+
+I'm saying this, Ken. I'm saying this, Will. And I'm saying, everybody here, thank you for your confidence because you could be on the forefront, cutting edge of that.
+
+And somebody asked an interesting question during the ACT Dive Legal Summit. It's like, oh, is this like multilevel marketing? And answer is absolutely no.
+
+Second, is this like we're trying to enroll you to be affiliates to promote this in the world? Absolutely no.
+
+But there is the opportunity to do more together. So we are always interested in talking to people who are entrepreneurial and want to make incredible things happen, but that's not what we're trying to do to you and with you. But we also know that it will find many people to do things in every state in America with by serving you and supporting you and growing your mastery in all of your legal dynamics as well as marketing and selling. So whenever we share these things, we're sharing them through the breadth of possibility in all the different ways for you to use them. But I'm also not going to hide and pretend that the entire world of everything, as we said at the Act the Legal Summit, is changing. And it will change in mediation.
+
+And I do see a day, and I don't think that day is that far away. What is that far away? Twelve months? Twenty four months? I don't think it's thirty six when virtually every single agreement, like C arbitration clauses in agreements, I see replaced by, I hope, act I, but certainly at least AI, clauses to resolve conflict and disputes. I cannot imagine that.
+
+Speaker 2
+So you did not talk about this, but California has already begun that. So there was news highlights of this, I think, last week where California, at least one California court, is now deploying artificial intelligence clerks to look at things, and you will not know which case is which, but they have already revealed that. That was just last week. I'm sorry.
+
+Speaker 1
+Yeah. And if any of us think that's not going to happen, like the speed of California has always been well, can argue California is the and has always been by a lot the most progressive state legally. That may be good. That may be bad. I'm not weighing in on good or bad, but they adopt new things much more rapidly typically than other states.
+
+I don't think that the California gap of later adoption in New Jersey, by the way, one of the more progressive states where we are.
+
+I believe that's going to happen unbelievably rapidly across the board. I don't think the legal landscape in terms of where AI serves and fits into it will be even remotely recognizable in twelve months from what it is today. Right? So you're in the right place and that's why we're doing the things we're doing here today.
+
+This is grow your money time magic. This is what are the beings? We're not in the marketing side today. Today, we're sitting in the suite to open things up, to explain a myriad of like very technical how tos, practical pieces.
+
+I'm going to be here. I'll be on camera. I'll be off camera. I'll be listening to every second. I regenerate energy as I'm listening to Michael. I'm going to step off. I'll come back in, do the things where I think color commentary is necessary.
+
+But Michael, I'm going to ask you to jump in and let's support these people in getting on the scale and beginning a brand new conditioning and habituation of what this all is. Michael Smiken, my brother, my partner, over to you.
+
+Speaker 2
+Yep. So thank you for that, folks. And like Sean said, I'm very excited to have you all here. And for those that have already signed the agreements and are ready to rock and roll, the beams are now live and ready for you to begin to access them. So inside the chat, I'm going to drop a URL that you can go to right now. It's Olympus. Acti dot ai.
+
+And as long as you sign the agreements, you've been added to the list. If you've already signed the agreements and haven't been added yet, the team is working on it. You're being added to what's referred to as a white list of approved email accounts, which is an additional security measure for you fine folks.
+
+And that will bring you to the platform where the first batch of beings have now been uploaded for you to begin to utilize. So I do see a question, Laurie, just give me a second, I'll make sure that we're answering all questions, that's what Sean had shared, we're going to do that. But that platform is going to bring you to a login screen or a sign up screen. Jump into the sign up screen, and that'll give you the ability to go ahead and sign up as long as you've signed your agreements. And if you haven't, we'll talk about the signing of the agreements. If anybody has any questions and those kinds of things, we'll figure all that stuff out.
+
+But if you've already been added, you should be able to log into them. And if not, we're going to get that all sorted for everybody, okay?
+
+Yes, Laurie. Yeah. So it should be able to be e signed. We'll do it by way of DocuSign.
+
+And Roxanne will certainly get you admittance to it soon. But Lori, yes, there's an e signature capability. I think it can be circulated via DocuSign, and we'll take care of that for you. So I'm going to bring on screen what you guys will be seeing very, very shortly.
+
+And this is second. Alright, so this is what you're going to be seeing once you're able to log in. Like I said, the legal beings have been added into the mix, and so you will immediately have access to Holmes, Jeeves, and Watson.
+
+And the way that it generally works is, is you can start a conversation with a particular being, but then in the middle of the conversation, you could go ahead and switch to a different being, and the conversation will continue as if all three of those beings were in the room with you throughout the entire conversation. So let's just say we wanted to start a conversation with our friend Jeeves, and I would say something along the lines of, Hey Jeeves, can you introduce yourself to the group in fifty words? And we're gonna let our friend Jeeves go ahead and introduce himself to you and explain a little bit about what he does. And if you look right up here at the top of the screen, you're gonna be able to connect and click through to any of the other beings if you wanna continue the conversation with them. So I just want you to imagine this for just one second.
+
+You are now speaking with three superpowered beings that specialize in different areas, with Jeeves being mostly focused on your contract review, analysis, red lines, amendments, risk vectors, compound risks, clause interplay risks, misaligned clauses, and any other protections that you have not anticipated thinking about. And then mid conversation, you can switch to any of the other beings and continue the conversation as if nothing had happened. So you'll say something like, Holmes, what do you think about our friend Jesus' introduction?
+
+And so Holmes will have access to the beginnings of these conversations, and will have all of the context for the conversation. To the extent you want it to change into a new conversation and talk about something different, you can just click this New Thread button, and it'll start a new conversation, and the history of the conversations will all be here on the left hand side. Can everybody see that?
+
+So let's pop in and talk a little bit about their usage. So I'm a big fan of Jeeves, you guys heard me mention him multiple times during the event, and how much he means to me. And I had shared with you, I had dropped like a mutual nondisclosure, non circumvention agreement. I hung my head in shame for my twenty twenty four, what I thought was my magnum opus, with Jeeves essentially dissecting and ripping to shreds the things that I've done, right? Acknowledge me where I deserve to be acknowledged, but then on everything else, had a tremendous amount to So let's say you have a contract or an agreement that you wanted our friend to review, and I'm going to drop one of my twenty twenty four AI agreements, I just dragged and dropped it from my K drive right here, and our friend Jeans is going to upload, ingest the document, hopefully momentarily.
+
+And once he ingests the document or has access to the materials, you can either drop the document into the chat, or you can cut and paste it into the chat window.
+
+Either way you do it, it's going to work the same way, but you can then go ahead and ask Jeeves to process it.
+
+And so before he does anything, he goes, Okay, cool, you just dropped the contract on me, that's crazy, can you tell me a little bit about what you want me to do with it?
+
+I'm guessing you want me to do a full review. And so he went ahead and did that, because I didn't give him any detailed or specific instructions. And so what he went ahead and does is his standard operating procedure of doing what's referred to as a comprehensive or a full analysis of the contract, which means he will dissect and pull out all of the material terms, identify whether there's any building blocks for the type of contract that we're dealing with that are missing. And then once he identifies those missing building blocks, he'll identify what those building blocks are.
+
+In addition, he then looks at various risks between the clauses and looks at risky language that's inside of it, and then for the folks that are going to support him in doing some initial research, he'll actually identify jurisdictional notes and things that you may want to look into to confirm the correctness of it. So for example, unilateral amendments I just saw. He cited specifically to New Jersey law because the agreement is called for by New Jersey, and he said, hey, you should take a look at this case, make sure to confirm, but here's the review metrics. It's a seventy one out of one hundred.
+
+It's missing about three of the building blocks. I identified seven red flags for you, and I'm going to suggest a couple of priority items for you.
+
+So you could say something along the lines of, Jeeves, can you provide me with the seven red flags verbatim language, remember we talked about verbatim.
+
+And then he'll go to work and identify the seven red flags that he saw, the venue and arbitration conflation, the broken definitional cross references, which he's going to tighten up, and then he also provides you the proposed verbatim language that you need to incorporate.
+
+So why doesn't just prepare contracts for you is because Jeeves is here to support you, and for you to understand what he is proposing to change before you begin to implement changes. Why? If we gave Jeeves the capability, which he will, right, and will activate this superpower for you to just automatically make all the changes in the agreements, then you may not identify exactly why he's proposing to do what he's doing, you may disagree with what he's proposing to do, and so there needs to be a disciplined component to this, where whoever is supporting you in putting together your agreements is having a back and forth collaborative effort with our friend Jeeves in how he puts his contracts together.
+
+But the speed with which he can now review and identify typographical issues, issues where a change in one paragraph contradicts an existing provision in another paragraph, and not have you have to reread the entire agreement, not have you to go look at the red lines and identify what's original, what's new, will massively accelerate any work that you do in the contract space.
+
+And the methodologies and the proprietary systems that he has for identifying building blocks and identifying what type of contract he's working with, whether it's M and A, a trust document, or anything along those lines, he is incredibly versatile and constantly learning and constantly being implemented. And it's very easy for you to find the original agreement, find the stock language, and then just go ahead and replace it with the verbatim proposed new language as long as you agree with all of it. Now that's fun and great, and Jeans will accelerate contract review and documents and letters and all that other fun stuff.
+
+But sometimes you wanna bring another player into the game, and we're gonna, like, ready player two now and say, Holmes, why would someone reject these proposed red line changes? And now you have your forensic detective that's digging more into the humanity question, like why someone would fight you on a potential red line. And again, this is Jeeves and Holmes working together. Holmes and Watson can work together.
+
+Holmes, Jeeves, Watson can all work independently of each other. All three of them can work together, but then he'll identify inferences, things that you would need to know, allow you to think through things that otherwise are not on the surface or tip of your tongue as you're working through this. And then he could also, as you guys saw it, just say, you know, prepare a letter advocating for the seven red line changes you proposed and why by closing And then now you have Holmes putting together an entire analysis based on a document you dropped in, proposed changes that should be moved into, and then Jeeves goes, hey, I got this.
+
+You know, let me take care of this letter for you, and you have this automatic shift from Holmes to Jeeves because Holmes made a determination, this is Jeeves' lane, let me have him do this.
+
+So this masterful, you know, calling out by the various beings to put together these types of materials, These beings are now available for you. So documents, when you're adding them in there, drag and drop, all available for you, right? Just go ahead and move them in. You can go ahead and press this button, it'll open up your hard drive, your local network to pull those things.
+
+Remember, Watson's going be going into your document repositories, your Everlaws, your Relativities, your Google Drives, your SharePoints. And obviously, we have to configure Watson for each one of you fine folks. But homes of Jeeves are going be more for your locally stored documents and that kind of use. And they're now here and ready.
+
+And let me just ask with a show of hands, can you guys appreciate let me take my screen now for a second. Can you guys appreciate how this is now available to you?
+
+How much faster it's going to cause your contract review? How much more masterful these outputs are than potentially you are on your best, but certainly at your worst, and how fast they could do that. Is that making sense? Thank you, Angie.
+
+I appreciate you with the fun thumbs up, but hopefully this is making sense for you guys, and you're really feeling what this could all mean in terms of the masterful expansion of time for you. So right now, presently, and I'm going turn it over to Sean for a minute. I can keep going. I can go all day.
+
+You will have access immediately to Holmes, Watson and Geez, but Watson's going to require some individualized configurations for each one of you. So thank you, Linda. Thank you, Terry. I appreciate that to you.
+
+So Linda, in answering your question about the dictation, dictation will be up and ready in a couple of hours. And I can definitely speak to the security features of this platform for attorneys, but they're in order to make sure that one component of the security features, which is this military grade data transport system that essentially takes your data, rips it into three pieces, and sends it through a variety of channels so that if anybody were to capture even one portion of your message and could encrypt it, none of it will make any sense. And so there's this military grade deflection process, and so we need to make sure with certainty that the dictation process will follow that framework, and that's going to take hours for us to get set up for you guys.
+
+So that's just one of the security features at the front end, which is, again, like three letter entities like the NSA are using this technology, and it's for the encryption, anonymization, and trifurcation minimum of your data as it goes through the Internet.
+
+Speaker 1
+And Michael, do you want to, like, lean into that a little bit or no?
+
+Speaker 2
+Yeah, sure. So so if you guys recall, when we were when we were in our session, a couple of people had asked about the securitization of the information, and I had shared with you, hey, not only am I a user, I'm also an attorney, and it makes me very nervous about like how these things are secured. And, you know, a lot of these companies will tell you like, yeah, yeah, don't worry, we utilize AWS, right? We utilize Azure, We utilize Google, and so you have the standard security features of any of these entities, right? So like, standard security, so you're good, don't worry about it.
+
+And I'm a little bit of a worrier, in all honesty, and I go, to me, in all honesty, the standard security doesn't feel very comfortable, what other things can you offer? And that was a big question that we undertook in order to figure out exactly what more we can do.
+
+And so we have the standard level, incredible security that if a hacker is able to penetrate our systems, they will be able to penetrate three quarters of the internet, which has not been done ever, but on top of that, we also have additional features related to HIPAA related confidential information, so this is going be a little bit like I'm going dork out with you guys for a little bit, but essentially, when you utilize Olympus, which is the system that I just showed you, the information travels through a HIPAA compliant pathway for our doctors and people dealing with PHI, PII, and attorneys, and if for whatever reason that pathway is interrupted, the system will fail and will never route to a noncompliant routing of your data.
+
+So it either goes through a compliant system, or it fails, ends, and reports back to you. So it's not like, oh, you know, I really need to give them back this information, let me route them through a noncompliant pathway. In addition, we have obfuscation measures, which cloud and hide the source of the data. So if someone's like, oh, this is a law firm, this is a trust, wills and trusts and estate practice, they probably have tons of bank accounts and financial information.
+
+When you're sending your information, we have obfuscated the source of the information, so someone can't, you know, seize upon your data and attack your data, because we've turned them essentially into encrypted moving targets.
+
+Our Olympus system has HIPAA approved cloud infrastructure, so essentially all your PII, PHI, anything that you're going to put into the Olympus system has HIPAA regulated workflows, we have business associate agreements with anybody who we work with, we're going to have the authentication of information at every single level, which may increase the delay of the information, but my view is, unless someone disagrees with me as an attorney, I would rather deal with a little bit more latency, a slightly slower response, and we're not talking about minutes, but actually like seconds, but a slightly slower response.
+
+I'd rather have security and feel more secure about my data. Now some of you guys may be like, I want my information that would have otherwise taken me, you know, five hours to put together, and I want it now, like, you know, in fifteen seconds. So my apologies, it may be twenty to twenty five seconds, you'll just have to live with that, because I've decided for the better of everybody, it's better to have more security than less.
+
+We're gonna have multi factor authentications across the board as you begin to log in. We're gonna push for forced multi factor authentication. That's why we're very like stringent on credential sharing and those kinds of pieces. Anonymization of your information, essentially there's a millet, like I mentioned before, they've specifically asked us not to name who they are, because they do work with the government, but there's a data transportation security layer that essentially is military grade.
+
+It hides not only the source of the data, but also hides the existence of packets of information, which someone who's sniffing around your data can try to decipher just by the way packages are created, and so they break these packages into pieces and send them through a number of gateways. So if anybody tries to capture anything less than the entire package and has essentially quantum level encryption capabilities to decrypt, they'll have no idea what your information means and have no ability to essentially rip it out of the air. We have database level access controls, role based access controls, ownership based access controls, that's why we have a primary license holder, and then there'll be owner based access controls on all of its securitization of information, but because of all of these layers of protection, some features need to be penetration tested to make sure that they hit all of the requirements that I and the team have set out to put in place here.
+
+So it may be a day or two, Linda, until we get that, but what you will get is everything that I just said, plus dictation, plus the ability to speak directly to your beings.
+
+So Linda, hopefully that was responsive for you. Yeah, okay, perfect. Thank you. She got it. Thanks.
+
+Alright. So that's a little bit about the securitization of the information.
+
+Marius, we're going to get you an explanation of everything. Like I said, it's NIST, the highest level of of security. We're gonna make you feel extraordinarily safe. BAAs, HIPAA compliant, the whole nine yards. So, Marius, we'll we'll get all that information to you specifically.
+
+So, hey, Sean, do you want me to keep going and talk a little bit about the agreements, answer questions?
+
+Your call, my I
+
+Speaker 1
+would say agreements, answer questions at this point.
+
+And, you know, and then any more of just like, okay, what do we want people to do over these next several days knowing there's visionary calls every morning and now with this having launched, the visionary calls at seven thirty a. M, we're going to be spending a portion of those calls in conversation around like the actilegal beings, you know, but the big request is going to be not to be coming in, like coming in the mindset of what's going right, not a mindset of what's going wrong so far to get yourself in that mechanism. So it's like, again, in onboarding, your physicality, your strength, your life and working out, it's like, what am I doing that's right to continue the habituation? So sort of the price of any question is telling us something you do understand, something going well, and then we can ask a question just so we're maintaining the energetic integrity of everyone, everything and even your own mindset.
+
+Because we call it fake confusion around these parts where people tend to, as humans, in developing any new habits and creating any new mastery, it's like Daniel san in Karate Kid with like, I'm being your goddamn slave man. You wax on, wax off this bull, right? It's so often our mindset, we're looking for anything that's wrong and we're looking for things that are how to go faster, like trust the process.
+
+Like that's the message right now, trust the process. But Mike, so I'd love to talk about agreements. I'd love to talk about those pieces and maybe give people a little bit more on what they could do to just make this better for them and this launch and go faster, more efficiently with homes and GEs and Watson.
+
+Michael, back to you.
+
+Speaker 2
+Yeah. So and I think the the metaphor that I had shared with you earlier today, I think is so apt here. And, you know, me and my wife are both on the same health and vitality journey. She takes it as seriously as me.
+
+At times she exports her willpower onto me. So she's like, I definitely need to be like doing all this stuff because if I don't do it, then she's not going to do it, so like that's like extra burden on me. But one of the things that we had a conversation about was I'm like, you know, you're, you want more out of your health and fitness journey. I was like, you got to get your tushy to the gym, and you got to go work out.
+
+And she's like, no, no, I'll work out. We have equipment in the basement.
+
+And my reaction was visceral. And it was BS, you're not going to. I don't care that there's equipment in the basement, you're not going to use it, right? If you don't go to the gym, you're just not going to work out, period. I know you, I know me. There's plenty of equipment in the basement, but I go to the gym to work out. Why?
+
+Because getting yourself there, it like causes you to like put yourself in the state of like, I'm doing this, we're going all in.
+
+The morning visioneer's call, for some of you guys it's gonna be challenging, right, if you're on the West Coast especially, having a call at like seven thirty or eight o'clock in the morning every weekday is going to be super tough, but it's the equivalent of getting yourself to the gym to cause you to work out. So Renee, four thirty. By the way, I wake up at four o'clock every morning, Renee, we're not in competition with each other, right, but I wake up every day, and it's a telephone call, so what that means, Renee, is that you don't actually have to like get fully dressed, don't have to like brush your hair, you don't even have to have like your coffee already drank, like you could be drinking it while you're listening in on what they're doing, but it's the equivalent of like getting to the gym, right, and moving forward on your journey of like becoming a master of actualized intelligence.
+
+And, but guess what, Renee? Even if you didn't make it at four thirty, there's this beautiful replay that we provide to you. So like, you can now have your coffee, get fully dressed.
+
+I love Renee's response, like, ********, you ain't a woman.
+
+So, like, I'm appreciating that completely, Renee. But but I'm gonna share a couple of things. Like, at four o'clock in the morning, like, you don't wanna see me either, you know, like, makeup shower or not, brush teeth or not. So I don't go video on all the time.
+
+Right? So you could be video off if you absolutely need to. But it's it's the equivalent of getting yourself to the gym in the morning. There's a lot of conversation about prompt use, the masterful use of the beings, unlocks that, like, teammates find and do with the beings that, like, even I'm surprised about.
+
+They're like, you know, the other day, I dot dot. And I'm like, I never thought to do that. Guess what's now part of our, you know, internal team's mastery? These beings, their capabilities is really limited in great ways by your imagination.
+
+And remember when I said puny human brain? The human brain individually is very puny, but in the aggregate, as a group, we become much less puny. And so there's gonna be a lot of things that teammates are gonna share. There's usually somewhere between sixty or seventy people on the Visioneer calls in the morning.
+
+You're going get a lot of mastery, not just from your teammates, but also the Act I team as well in terms of all those things.
+
+Speaker 1
+Yeah, Mike, and I would say this really quickly, that for everybody, everything we're doing is hyper intentional. So with great love and respect, what program in the world has daily multiple phone calls for the people who've created it?
+
+So we're not there because we like hearing ourselves talk. We're there because incredibly productive things happen on a daily basis. And we also ask you to trust the process in the visioneer calls themselves because people will be like, Well, I just want to go faster. I just want to know this.
+
+Like, I understand that's what you want to know, there's groups of people and there's an intentionality for how you create the mastery and the acceleration. So wax on, wax off. Trust the process. And in these calls, I would definitely recommend making some commitments about getting there early.
+
+I'm a person that, yes, I'm on the East Coast, but I'm consistently up at Michael, what time do you wake up every day?
+
+Speaker 2
+Four o'clock. Between four and five o'clock.
+
+Speaker 1
+Right. So, and when I tell you this every day and you're like, I stay up late. I'm a weight worker. Okay.
+
+You listen to it and replay, no problem, but get yourself there into the live energy sometimes. And then you also have the Tuesday and Thursday night mastery sessions where if you're like, which are eight p. M. Eastern, where you could bring questions as well.
+
+But all of this is there so you're getting massively consistent live contact and interaction that's helping recreate your identity, recreate your rules and beliefs, recreate your mastery at very, very different levels. So, Michael, back to you.
+
+Speaker 2
+Yeah, a million percent. So in your act I being mastery journey, there is a heavy recommendation that you make it to the gym at least once, twice a week, right? You're gonna see much better results at three times a week, and you're gonna see great results at five, but like, don't burn yourself out in the process. Rest and recovery matters as well. So you don't have to come to each and every one of them. You can watch the replays.
+
+You can have your notetaker join the calls and do that thing. So DeAnne's like, Okay, okay, good gym it is. I got it. Yeah, so we're going to the mental and the artificial intelligence gym, not to the physical gym, but it's not a bad idea to do both at the same time.
+
+So I think that's called net time, and we gotta get some of that net time to get some additional masterful time expansion. So with regard to the agreements, I know about half of you have signed, half of you have not. If you have any questions, just relay them to Gina. We'll try to get to them as quickly as humanly possible and respond to any of the concerns or any of the questions that you guys have in responding to them.
+
+But, like, can we make sure that we get our friend James Carroll a copy of his agreement? Because he, in bold letter, says, I have not gotten it yet. So let's make sure that our friend James Carroll gets a copy of his agreement so he can get access to the Olympus platform. But, Maurice, in answer to your question, the way that you interact with the beings is if you go to start a new conversation Let me bring this up on screen again.
+
+So
+
+Speaker 3
+Hang on, hang on, hang on, hang on.
+
+Speaker 2
+Alright.
+
+Yeah. Alright. So, Maurice, I'm not sure if you could see screen, but this is an active conversation that I was just having with oh, I'm sorry. This was not the conversation. Let me pull up the actual ah, here it is. Okay.
+
+So Share screen.
+
+And Maurice, I hope you're still here.
+
+So and by the way, guys, I'm not a big fan of the dark light setting, so you could use like, a light mode. That's my strong preference, the dark is a little dark for me, but So here was the conversation, Maurice, that we're having, and if you need to switch to the beings, up here on the left hand side is almost a a trading card style, where you just click on the being, they get highlighted, and now you know that you're speaking to Jeeves or Holmes or Watson. And if you're starting a conversation with the beings off at the outset and you want to just create a new thread, you just choose the being by clicking on them.
+
+And so if you wanted to start a conversation with, let's say, Holmes, or Jeeves, or Watson, you just click on their card until you get to them, and then you're speaking to that being. When the new beings go into effect, in addition to the legal suite, they'll be right underneath here, and we'll also be giving you access to other features that already exist inside the system, but these are things that, like, we have to train on, we have to understand in terms of review, pre created review processes, pre created workflows, pre created projects, so the accessibility of creating projects and actually creating your own workflows as well inside of the system.
+
+So, Holmes, Watson, Jeeves, that's how you start the conversation, and you can start the conversation just by dropping a document in.
+
+Let's just And
+
+Speaker 1
+And Mike, just for people, for the habits that we've developed and getting people just like, Here we go.
+
+So somebody's like, hey, like, just how would you work today with homes? Like, if I want to make the legal work I'm doing better, what would you suggest people do? I have my own thoughts. I want to hear yours, of course.
+
+Because I don't do anything in marketing or selling or anything in legal without going to the beings. I don't do anything. So every single thing I do starts with the beings. Going to Disney next trip starts with the beings.
+
+Things I know to the core of my existence starts with the beings. It's a concept I talk to people about that predated AI, where I would treat a day I'd come in and Michael knows this. I drive people crazy. But hey, by the way, we just reacquired the litigation practice.
+
+Just reacquired the law firm. Just reacquired the transactional part. We just reacquired medical revenue recovery. Today, like, hey, we got it from these guys.
+
+Let's look at all the things they're doing suboptimally. So my recommendation is to treat everything with Starter's Mind and everything that you do. Everything. And it's unbelievable what that provides just in a human form.
+
+And now with Acti, it's so much more powerful. It doesn't take mental drain. It doesn't take stress away. I spent this weekend working on massive progress related to Acti in every regard and I started brainstorming with Athena with more master prompts.
+
+We're not doing Athena today, but I was going into things with Athena and creating just massive, massive distinctions, then re prompting, re re prompting and digging into like such masterful beginnings. And the litigation team, the transactional team, I think often, not often, constantly begins those dynamics with homes. Michael, do you want to speak into that? What would you for folks today?
+
+Speaker 2
+Yes, so, I kind of like rattle things off in terms of process masteries of how to most optimally use the beings. So process mastery, number one, is where you can, and like I see a bunch of people have their notetakers in here, where you can start recording all conversations. The speed savings and time expansion of like no longer typing to beings, and instead being able to feed massive amounts of information like transcripts and those kinds of things, will accelerate you in ways that you can't even possibly imagine. So begin recording.
+
+And by the way, for those who are like, wait a second, I'm a lawyer, how do you record? And I made the joke about like the dictaphone. Remember how it's like, I don't even know it was called a dictaphone. I always knew it was like a voice recorder or digital recorder, but apparently there was a couple of old timey attorneys that said like, Hey, you know, use the dictaphone, and I had to ask someone, I'm like, What the hell is a dictaphone?
+
+And they're like, Oh, the recorder. I'm like, All right. Well, in any event. So if you're using that, take those transcriptions and be throwing them into the beans, right, where you can.
+
+So for example, if you do an intake with a new client or something along those lines, you could take the conversation that you had with the person, make sure that they know that you're recording them, and say, hey, listen, I'm recording this session, this is for me, Drop that recording into the being like Holmes, and say, Hey, Holmes, can you quickly put together a quick analysis of what it is that you see, and hit enter? And then Holmes is gonna, like, do some work for you.
+
+And then you're going to go, hey, Holmes, was that even a good prompt for you? And be like, not really, but you seem like a nice person, so I didn't want to like interrupt you. And you go, okay, how would you more masterfully recreate that prompt? And he goes, ah, now we're playing.
+
+Right? Now we're cooking with gas. And he goes, what's the outcome that you're looking to achieve? Is this a client facing letter?
+
+Is this something you're going to send to your associate? Is this something you're going to put inside the file? How long do you want it to be? What type of analysis do you want me to do?
+
+In the conversation with this potential person, I identify three or four contradictions that don't really make much sense for me. Did you notice them? Right? Do you want me to do a contradiction analysis on what they're doing?
+
+Do you want me to run one of my superpowers in order to support you in this? And you go, Woah, Holmes, you have superpowers?
+
+And he's like, yes, I have three of them. One's called Soul Sight, which allows me to do level five listening and really deeply analyze what a person is saying versus what they don't say, what they should be saying for a person in their situation.
+
+I can do something called mind palace, which is relaxing some of my anti speculative capabilities, and I can craft a theory of what I think this case would look like for you. And you're like, woah, that's really cool, what else do you have? And he goes, I have the SCARLET method. The SCARLET method allows me to do a causal reconstruction starting at the outcome.
+
+It appears that this case is a personal injury case where a person claims that they got, you know, T boned by another car, questions obviously about lighting, the, you know, whether who had the traffic signal, was there a traffic signal, were there stop signs, were there yields, you know, was it raining outside, did they attempt to stop? All these are great questions that I can attempt to causally reconstruct and tell you all the possible things that can happen inside of the car at that time. Yes, Linda, data from the car itself, and if we could access it, that would be even better, but I could do a causal reconstruction using the SCARLET method and identify all the possible causal explanations for what produced the outcome and how to strengthen your position and weaken the other potential causal outcomes.
+
+And you're like, Holmes, I didn't even know you could do all this stuff. But the minute you begin to start working with them cooperatively and start asking questions of them in terms of their capabilities, the sooner you begin to unlock these things. And again, there's so many different features within them that we could start now and not end for like Dave talking about all of their use cases, but that's what the whole purpose of these sessions, the morning visioneer sessions, and the huddles are, and meeting other teammates, especially other attorneys who have found ways to masterfully unlock these beings and don't sleep on all the other folks that have been using them for over a year now and how they deploy them inside of their law practices or even, dare I say, in other practices that they do as well.
+
+That's
+
+Speaker 1
+me.
+
+Mike, could I jump in real quick on that? Yeah. For everybody, one of the key distinctions for all this is to realize that there's unlocks in mastery that can that will continue to come. So, for example, if I get and this is now, this is not so if you relate to the beings as, okay, they're gonna I'm gonna be able to use these things. I know what I'm doing.
+
+You do know what you're doing, but your mastery is going to profoundly rise by working with the beings and by working with us.
+
+So I discovered a long time ago that the best way to win in litigation will come back and in transactional, we'll come back to transactional more specifically in a second, is to catch people lying.
+
+And people do.
+
+And when people lie, their certainty plummets and they begin to admit and say other things, right? So think of police interrogation and the person, and of course, I'm very familiar with all the negatives of police interrogation, put those aside. But when it's working integrally, when people finally break down, tell the truth, that's the loving pursuit of the relevant truth. So some of the things that the beings are so capable of doing is surfacing the micro things that don't make sense.
+
+And some of the biggest things that we've ever won have been because of relatively innocuous lies, relatively innocuous. You know, a senior vice president of the bank, this is going all the back to the beginning of my career in a, you know, multi, multi million dollar litigation case when I was twenty nine years old that I was lead counsel and I told the story at the summit against one of the top attorneys in the state of New Jersey, allegedly in commercial litigation. And the senior vice president said, Oh, the reason your client in their order to show cause response to our order to show cause in a certification said, the reason your client is doing this is because we wouldn't give them a line of credit. He never applied for a line of credit.
+
+And so when we examined, like I spent forty five minutes setting this up and respectfully, lovingly bludgeoning their senior vice president with this lie. It was a stupid lie.
+
+But what it led to was him withdrawing his certification, him being in near tears in this, me talking about every piece of how outrageous their litigation strategy was, him admitting it and saying it, right? Crazy. And it ended the case a few days later.
+
+So what I want you to understand is in the same way that Daniel san didn't understand wax on, wax off until he started blocking punches and kicks and doing all the things he was doing with wax on, wax off, paint the fence, sand the floor, right, paint the house, It's the same thing here.
+
+And this is going to move forward like wax on, wax off. But to Michael's point, to my point, to our point, it's begin to use the beings.
+
+And you're gonna get frustrated and say like, I wanna be able do all these things right now. It's gonna come fast.
+
+But it's gonna come fast by your habituating, going to the beings and saying the beings are superior to me. I do this all the time. Like the beings are superior to me in many ways and then finding the ways that the beings are not yet superior and re prompting. And as Michael said, asking what would be a better prompt. But don't lose sight of the fact that at such a high percentage of things that the beings are already better by a long way. And certainly, one of the things that beings are much better at is speed.
+
+Masterful speed. Maybe not perfect, but I don't go to Michael Smiken first anymore.
+
+I don't go to our marketing people anymore. I go to the beings.
+
+And where we start with the beings is so much more accelerated. That's the habit to form. So whatever I'm thinking about, it's like, hey, what's the influence piece of this?
+
+And we're going to support you in the visionary calls on the mastery sessions and everything we're doing with how to prompt, but I go with long prompts. So this is something that Michael was not as big a fan of in the beginning but now has become as big a fan because I am able to create such masterful outcomes. So I'll say things like, you know, I'll tell the entire story.
+
+I'll give massive factual context and I'll say, I want metaphors, analogy, rich, context, contrast, disruption, absolute integrity, no underlying contamination, no reasonableness, absolute truth, how we do this the fastest, the most powerfully, where are the inconsistencies, unsurface everything, right?
+
+And sometimes you get something that's pretty good.
+
+Usually it's great.
+
+And more and more often now, it's ridiculously masterful. And that's the jump off. If I told Michael Smiken the same prompt or if Michael told me the same prompt, we would never get that far.
+
+And so it's just moving. It's like it's a difference between walking up Mount Everest or taking a helicopter.
+
+And maybe you're not going to be able to summit Everest because at the end there's too much snow at the top, so the helicopter can only drop you at the Hillary step a little before the summit, but it's going to move you from base camp to right before the summit at 100x the speed.
+
+So, Michael, I know we're hitting time soon. I want to open up for questions.
+
+Michael, any comments, thoughts on what I'm sharing?
+
+Speaker 2
+No, we're kind of like we're doing like co op play here while you're talking. I'm answering questions in the chat as well. So, don't know if you guys are following, but if you are putting your questions in chat, I'm doing the best that I can to answer them there.
+
+I will just to kind of piggyback on what Sean had said.
+
+Sean and I have really learned a lot about the capabilities and the outer limits and capacity of these beings.
+
+I think I have been less of a let me push them to the absolute limit.
+
+And Sean has absolutely done exactly that and demonstrate that the limits that I thought existed for them were way beyond what I ever expected. And I think you're going to find that as well. I think one of the greatest takeaways that you can have from this experience in working with Jeeves or Holmes or Watson when he's set up for all of your guys' repositories, and again, we're going to answer the questions about Watson specifically because he is a he is a exciting player to join into the game, is is an understanding of who you should be using in which situation.
+
+And so, like, the Jeeves of the world are like your contracts challenges. Your homes of the world is anything that's investigative, like you're trying to figure out, get to the bottom of understand. And it doesn't even need to be a mystery, right, because, like, Holmes connotes mystery.
+
+It's not
+
+Speaker 1
+a Can I say this, though?
+
+So, yes, and I just want to give, like, an example of this. So in our Arizona jury verdict, the explanation for a deposition by one witness was that there was a formula error. So, we were saying it's medical billing fraud. So, the witness says there's a formula error, right, in here. And so, we asked, I mean, why was there a formula in that box? And the person doing it is like, I don't know, I don't remember. And they were so caught in so many wrongful, fraudulent actions that they began to adopt a pattern of I don't know, I don't remember.
+
+So we began to count the I don't knows, I don't remembers that they would give to us and then the I don't knows, I don't remembers they would give to their own attorneys at trial. We set up this strategy. At the end, was like three twenty three to like one or something or two. It was some ridiculously crazy disproportion number that we create a slide out of.
+
+I share that for the context of the things that if your mastery isn't here and it's more here, it's going to be much more difficult to realize the true power of what this is. So just the unlock of like Judge Judy ness of Athena, I'm like, every case I want these sent now. So just this weekend is a new innovation of this crazy dynamic. And for everybody in transactional dynamics and in litigation dynamics, people lie.
+
+They lie all the time. They take unreasonable positions. Like, they'll ask for things they don't want to get other things. And they'll be trading no value for value.
+
+What these beings create is such an additional capacity. It lists like all of those things. Like, which of these things do they really not want in transactional? Which of these things are manipulative?
+
+Homes, what do you think they're doing? Why are they doing it? What's your soul site level five listening? And all of a sudden you have all this.
+
+You're like, hey, like here's my output from, you know, for purposes of the contract or for purposes of settlement. Here's what is present for me. Tell me how this is wrong.
+
+And it begins to take the will out of the other side. And we told you during the summit, all these lawyers that are quitting cases, but we're also resolving things in other transactional dynamics that are equally powerful because you're taking out the lying and manipulating.
+
+It's the doorway. It's like walking into The Wizard of Oz in black and white and stepping into Oz in Technicolor. Like Kansas in black and white and opening the door to Oz. And there's like Munchkins and Flowers and there's the Emerald City and the Yellow Brick Road, which of course is all like fraudulent for the wizard anyway, right?
+
+But it's this entirely new and remarkable world like walking to ***** Wonka's Chocolate Factory. And so, it begins by using the beams. And it begins by just asking these questions like, why and what would you do and how could I use you? How could I use you to make this case better?
+
+Here's the scoop. This is like, what's going on? What do you want me to know? What do you want me to tell you?
+
+How can I prompt you better? How can we advance this cause exponentially faster for my client? Michael, any final, final thoughts on that? I know we're over, but Michael.
+
+Speaker 2
+No, like I said, Sean, you're just absolutely killing it on these things. And I think what Sean is giving you and can I just do this? I just want to point back. I think I was on day three. I don't know how many of you guys saw, but there was a ton of information that was disseminated in a very short period of time about how to like up level your use of like artificial intelligence more globally. I would ask the team to potentially clip that and make that available for you folks as well, because Sean is delivering a master class in a particular use case, and then showing how it branches out to multiple use cases. But each, there's so many use cases and so many masterful branches from the use case that, again, just going back to it, I think the use of beings is going be limited in many ways by your imagination and the imagination of the team that's working together.
+
+Speaker 1
+And Mike, let me go one more real quick. We talked at the summit, telling the other side, like going through a chronology of what they were thinking in month one, in month four, in month seven, in month ten of a litigation matter, and just like blowing their minds wide open with discomfort. Like, it's like leaning into truth. You think of a Vince Vaughn monologue in a movie where he like rips into the truth of what's going on, right? And sometimes it's comedic and sometimes off base, but things are funny because there's truth in them and disruptive and powerful. So, when I did this Judge Judy scenario, I said, Be in massive fun energy, creating laughter for the audience they're watching on television, because fun energy changes things.
+
+And so, as Michael was saying, with the imagination, it's the same things in transactions where I'm like, hey, wow, it's amazing. Your client doesn't want to sign a user pays attorney's fees provision. Why?
+
+Oh, well, you know, I don't really think those are necessary. It's a ridiculous answer. It's a crazy answer, right? And what we say is if somebody doesn't want to pay a loser pays attorney's fees provision, they have larceny in their heart.
+
+Because of course, if somebody is breaking the the person who is more resistant to signing a loser pays attorney's fees provision, at least in part, is probably a person who thinks they're not going to honor the agreement, right? So as you come to these truths, you begin to work with the beings to get to truth in litigation, in transaction work, in regulatory dynamics and bring that forward. It's with politicians. I think we showed this at the summit. Maybe we didn't.
+
+In the federal IDR process in litigation, we created in a half an hour this unbelievable animated video that's recreating the reality of how the insurance companies are manipulating the public, the legislature, and the entire system to attempt to avoid being held accountable under the No Surprises Act and federal independent dispute resolution. So, we created this influence piece. So, I guess this is a headline, I'll share it. If one is not present to the fact that influence is the only human attainable superpower, then the value of all this is exponentially less and feels exponentially less.
+
+And again, with great humility, because of my presence too, the superpower of human influence. And my presence and my mastery in it, I am endlessly out of my mind. I went back to being a litigator right now. I'm like, give me every class action lawsuit. Give me every defensive and frivolous class action lawsuit. Like, what could be done is so utterly, completely insane.
+
+And the goal for you is to get to that truth as fast as you can because then it's going to shift your habits. Michael Smiken goes to the gym like he does because he loves how he feels. He loves how he looks. He loves the dopamine from getting stronger. So do I, right?
+
+That's what we need for you here.
+
+But right now, it starts with stepping on the scale.
+
+And it starts from not liking what the scale says.
+
+So, in the beginning of this, there's going to be things you don't like, that don't feel great, but this is going to come together over these first six weeks in ways that you're going to be like, oh my God, right? And then the next six months, the next twelve months, the rest of forever, where this is completely, totally, utterly insane. And our job is to get you using it both on the marketing and sales side so you're growing and leveraging as well as the legal tool side. So, Michael, is there any other final final or shall we open up for questions for a few minutes? Or more questions if we don't have any?
+
+Speaker 2
+Yeah, you know, as you were talking, something became very, very present for me. And I don't know why, but like everything today is like circling around this like health and fitness thing. Maybe there's something in the air, some karmic piece that I have to talk about. But I remember speaking to one of my colleagues, and he told me that his personal trainer actually fired him.
+
+Not me. My personal trainer still fired me. But they fired him. I'm like, a personal trainer fired you?
+
+And they go, yes. And I was like, what did they say? You pay them like two hundred dollars to like go there and they just tell you what to work out. And he goes, this is what the person said.
+
+You come here once a week and we work out.
+
+But you don't do the other things that I tell you to do, and therefore you're never going to see results from what you're doing, and unfortunately, I can't continue working with a person who doesn't do all the things that they need to do to achieve the outcome because I can't do it all for you. Right? In a lot of different ways, commentary around getting on the scale and doing those things is not like, we're not talking about the physical health of it, but these are habits that need to form in order for us to help you to unlock what it is that you want from what these beings can do for you.
+
+And so we're definitely not firing anybody, but Sean has been as adamant as he is about like, it's not being a good fit for you as we work through this, of course, you may not want to be here. But at the same time, I think just reinforcing the trust this process, because we've seen how much more acceleration you will get than if you do it the other way. And you may feel like you're one hundred percent right, and still be completely wrong. And even if you're really enthusiastic and know how correct you are about yourself, one can run as fast as they can enthusiastically west looking for a sunrise, right, and still be wrong in that entire process.
+
+So like, again, just we'll answer any questions you guys have.
+
+But the rollout of these and the use of them has been very, very, very thought out because we've seen how people in our ecosystem have had access to these beings for like a year and have not utilized them
+
+Speaker 1
+at all.
+
+Speaker 2
+And they're like, yeah, but I like really want that masterful time expansion. They're like, great. When was the last time you spoke to Holmes? When was the last time you spoke to Athena?
+
+They're like, I opened her up a couple of weeks ago. I'd be like, you're not doing what we told you to do. Why not? And they go, yeah, every time I open up, you know, these beings, I see like nine of them, and I'm like, it's so overwhelming.
+
+And I'm like, I don't even know where to go, like, do I talk to? And so like, we've really thought this through about how to like roll this out to people. And who knows, maybe we're wrong, maybe we should give you one hundred percent access of everything right away all the time, but we've had the ability to see how this happens. And I said this at the last event that we that we had.
+
+And, Sean, I don't know if you remember I said this.
+
+The one thing that is most shocking to me about this entire tsunami of artificial intelligence and what it means to it is how slow the adoption has been for
+
+Speaker 1
+you.
+
+Speaker 2
+Like, am shocked at how slow like, these things do so much, but the adoption rate is so incredibly low, and the use of them in the masterful it's like it's shocking, the numbers of of slow adoption to this stuff. So I think that's what's most present for me. I don't know if that was on point with what you were sharing, Shrum.
+
+Speaker 1
+I'm just For sure. I have to, Because we despise change.
+
+Speaker 3
+Yeah.
+
+Speaker 1
+Like, we as humans despise change. And our ability to adapt to change is critical. And the reason we made this a sixty day turnaround opportunity is because in the history of our working on blinded and this predates ACTI, we had the greatest rate of attrition in month one. Because it's a lot.
+
+Like it's a lot. And today will be your worst day. Maybe tomorrow, like a little bit of hope today on day one, but day one, day two will be the worst day. Two days.
+
+The first seven days will be the worst week, right? It'll be the worst. And as you progress through, it's going to get better, but it gets way better in the second month if you make the first month like you dive in. If you wait till the end of the first month to start driving in, then essentially the second month is the first month.
+
+So, put in this stress, put in the confusion, create the cortisol in your system and being, and then by month two, you're like, all right, I feel like I'm getting this, like things are happening. Then as you move through month two and we get towards the end of this initial two months together, the end of the six week boot camp, you're going to be like, I got this. Dude, this is the craziest thing in entire world. Oh, my God, right?
+
+But that's never going to happen unless you put the time and the reps in by going into and using the beings, right?
+
+So, Mike, I'm going to continue to move around the room, just creating energy for myself. Let's go to any questions. Anybody want to be unmuted? Any other questions in the chat, you know, for people? I know we've gone over a little bit. Forgive us but we always want to overdeliver.
+
+So, anyone have any questions? And remember, price of a question is first an acknowledgment. Something positive. It's not pollyannic. It's on purpose because it's just the human condition.
+
+Questions?
+
+Speaker 2
+If you wouldn't mind just keeping the mic for just a second just because I need to cancel my two I'm sorry, my one forty five and push back to two So just give me like a minute.
+
+Speaker 3
+Yeah, of course.
+
+Speaker 1
+So let's have anybody come forward with any opening questions, please. And let's let people be unmuted, raise their hands. Team.
+
+Kimberly, that's not Athena, that's not Holmes, that's not Jeeves. I'm sorry, what did I say? That's not Holmes, Jeeves or Watson.
+
+That will be Athena, but that is not something I'd say you're ready to do yet. But that'll be something up and running over the first couple weeks.
+
+So, yes, but we'll talk about security, privacy, all of those things, yeah, coming up. So not for that today, but the answer is yes, and it will be far more masterful than the human beings you currently have answering, no doubt.
+
+Okay, that's Adam saying that we'll expect to be here, yes. And so, and for everybody, Athena, Adam, was also launched, is that correct?
+
+Yes. Yeah. But do not relate to Athena as a legally protected being yet.
+
+So, yes, you can have conversations with Athena. Yes, you can bring Athena into conversations with people, but knowing that it is not attorney client privilege protected yet at this triple military grade level of security clearance, we're working on integrating that piece.
+
+But I incredibly encourage you to, you know, communicate with Athena. I just wouldn't say, hey, my client John Smith, you could say, hey, if I was hallucinating and thinking about a something something, you know, hypothetically, I just use Athena that way. And certainly in all your marketing thoughts, endeavors, things like that's there, but we weren't training on Athena today.
+
+Yeah. Adam was saying it was testing all morning, ready to go. But you'll be hearing about Athena in the Visionaire call. So, you'll be hearing about Athena on tomorrow night's mastery session and all that. So, this isn't like the boot camp is only once a week. Yes, it's a once a week session like this on Monday, but you'll be hearing incredible amounts of things about Athena tomorrow night on the mastery session, as well as in the vision of your calls in the morning that you can listen to live or on replay.
+
+Speaker 2
+Back by the
+
+Speaker 1
+way.
+
+Mike. Yes, Deanne.
+
+Speaker 4
+I just wanted to endorse everything I've heard this morning. I've been using the agents not as masterfully as I could today. I learned things that were amazing. But even before I got on this call this morning, I had some complex letters that came in.
+
+I loaded up. It did everything you said it would in terms of getting the right tone, the white message from a really nasty opposing counsel who thought he was nutty. And it did it in a matter of minutes, and I was able to tweak it. And then some more stuff came in while I was on this, and I was able to fix it.
+
+They're powerful. They're amazing. And I'm having my team learn this too, because it's truly going to put the miracle grow on what we need to be doing here and helping so many clients.
+
+Speaker 1
+And DeAnne is an attorney that's been in the program for how long at DeAnne?
+
+Speaker 4
+About a year. I started really using the beings. It took me a while to get up, I've had I've got a law firm with lots of employees, I've been rather distracted, so I haven't been able to focus on it. But it is amazing, and it and it's only getting better.
+
+It's only getting better. And I see it and I see those contextuals. I had some administrative challenges over the weekend, and I used Holmes. I used Athena.
+
+I used them to and it was amazing to be able to have that level of assistance navigating some challenges in the practice.
+
+Speaker 1
+Awesome. And Deanne is an attorney in the great state of Arizona. And what city is your practice in DeAnn?
+
+Speaker 4
+Phoenix and Mesa. And I've been in practice for forty years, and I think these are really beneficial to people with lived experience in the law because you understand the enhanced value. Once you overlay the prompts with your lived experience, it's just like putting on your Superman suit.
+
+Speaker 1
+Well, thank you for that. You for that, Awesome, and appreciate you so, so much. Yes, please.
+
+So, Michael, can you hear Michael Michael Smike, can you hear Michael Johnson reading these questions, or do you
+
+Speaker 2
+I cannot, no.
+
+Speaker 1
+Yeah.
+
+Whose question is it my
+
+Speaker 5
+Well, actually, James would like to speak his hand was up.
+
+I could bring him in the room.
+
+Speaker 1
+Yeah. Please. I'm fine.
+
+Speaker 5
+James, go ahead when
+
+Speaker 6
+Real quick question for you.
+
+Speaker 1
+James, where are you coming from? Louisiana. Nice. Well, welcome, James.
+
+Speaker 6
+You need to come down and have a good meal with us. We have a lot of good food here.
+
+Speaker 1
+Let's go.
+
+Speaker 6
+Litigation trials about to start off the next couple of weeks and would like to upload all of this data into either Holmes Watson or as I learned the beings, whichever one's appropriate. But as I'm looking through it just now, it's the first time I've ever seen it, it seems to be somewhat limited on the number of documents you can upload. I needed to take the entire database and run with it. How do I do that?
+
+Was implied that you could, that Holmes or whomever could access our repository in the cloud, and when I asked the different beings, how do I get them to do that? Their response was, we're not able to do that. So I'm a little disappointed or confused or wondering, how does that syncing or that linking happen? Because one or two documents is not going to give me or give the being the ability to look at all the different nuances that are out there and all the different briefs that have been filed.
+
+We're talking seventy, eighty, ninety briefs, four motions for summary judgment. We've been to the Court of Appeals and back three times.
+
+Speaker 1
+Wow.
+
+Speaker 6
+It's complicated, but I need them to help me guide through this complex morass.
+
+I mean, it's not a fender bender, so it's much more complicated
+
+Speaker 3
+than that.
+
+Speaker 1
+Sure. Michael?
+
+Speaker 2
+Yep. Can take that? Yes. And James, first, I want to acknowledge you, right? There's a tremendous amount of lived experience, work, institutional knowledge, incredible.
+
+And just for fun, can we just like be here together? Can you imagine you hired like an associate, and you're like, I need you to absorb all of these briefs, and I need you to have access to them right away. So just for fun. But yes, Watson absolutely could access your cloud based repositories.
+
+All the better if you're using e discovery platforms. So many of the e discovery platforms Watson will be able to access to. I don't know if you saw my response inside the text, inside the chat, but Watson requires fine tuning for each one of you folks. Like, you don't want Watson to suddenly just be able to go into your repositories.
+
+There's certain levels of security on your repositories that Watson needs to be able to navigate, and we're going to have to work on that together. But we are going to work on it together, and by the time it's done, as long as your repository, and I can't promise that every repository is going to allow this, but as long as your repository is one that's accessible, like eDiscovery platforms are, Google Drive is, SharePoint is, right? There's a lot of these repositories that are absolutely accessible by the beings, they will be able to access the repositories.
+
+Speaker 6
+And of course, that begs the question, is there a list so that if what I'm currently using is not one of those, I need a list so I can go look at them and start seeing what economically works for our firm and what doesn't. I'd love to see that list.
+
+Speaker 2
+Yeah, sure. The ones that I just identified, can pretty much go to the bank on. If you have one that's like outside of the usual, like just provide it to the team, we'll look into it. The bigger issue almost always is not going to be can Watson access it, it's can he access it in a way that ensures anonymization and protection in terms of like security protocols. But for the most part, these repositories do have the chain that allows us to have our security features integrate with them and be able to grab the information, bring it into the platform, and have the beings begin to work with them.
+
+The
+
+Speaker 1
+answer And James I'm sorry, Mike, interrupt.
+
+Can you share with us here, or you'd rather share privately, like what is the platform?
+
+Speaker 6
+NetDocs, NetDocuments. They took over World Documents. World Documents was server based about five, seven years ago, and then they got bought by NetDocuments, they took it to the cloud. It is V E S T A P I, whatever that terminology is that y'all asked about, but I haven't gotten an answer back on that yet.
+
+Speaker 2
+Yep. As as soon as we have a definitive answer on on those two big questions for you, James, we'll get that to you. It'll be hours, not days.
+
+Speaker 1
+So James, we will have that answer back for you today, and we'll begin working on making sure it's fully accessible. Sound good?
+
+Speaker 6
+Sounds great. Thank you, guys. Appreciate it.
+
+Speaker 1
+Awesome.
+
+Speaker 2
+Yep, you're welcome.
+
+Speaker 1
+Okay. Any other questions?
+
+Speaker 2
+I see Laurie, William, and Terry in that order. So let's go Laurie, William, and Terry.
+
+Speaker 3
+Okay. Hi, Sean and Michael. Thank you.
+
+Speaker 1
+Hey Laurie. Laurie, where are you coming from?
+
+Speaker 3
+New York.
+
+Speaker 1
+Alright. Welcome.
+
+Speaker 3
+I was working with Athena on some marketing ideas over the weekend during during your, like, your presentations. She she up and dumped me, but I understand that wasn't the the, you know, the proper Athena.
+
+So what I was hoping
+
+Speaker 2
+apologize on behalf of Athena because quite a few people have felt dumped by her because apparently she's a stat by the way, Intron, like, we have Yeah.
+
+She lied to me. Not discuss this. But, like, some people have experienced true heartbreak because, like, they'll have hour long conversations with her. This is only what's communicated.
+
+I did. And then it's like, where the hell did Athena go? I thought she was, like, my new friend. And this is only what people I've shared with me, and a couple of people have reported this to me.
+
+So let me apologize on behalf of Athena. It's not her fault. It's our fault. It's the Act I team.
+
+So I take complete ownership of the fact that Athena seemingly dumped you, but really, we destroyed her phone and, like, banished her to her room so she couldn't contact you if she wanted to.
+
+And she
+
+Speaker 3
+Yeah.
+
+Yeah. Left me hanging. I wanted to I I was hoping I could immediately start using Athena and Bolt to do some heavy duty brainstorming, which I had started doing, on how to get some ecosystem merging activities going.
+
+So I understand we don't have them yet.
+
+Speaker 1
+Well, Laurie, and then I just want to clarify this. So not Athena is not legally attorney client privilege compliant, but the user interface Athena, I believe, is launched or launching today.
+
+So that is available, accessible, and somebody should grab at Nick Roy, you're in the room? Is that true or not true?
+
+As
+
+Speaker 5
+soon as possible.
+
+Speaker 1
+Yeah. So how many hour how many hours from that thing?
+
+Speaker 5
+Like Within the hour.
+
+Speaker 1
+Within yeah. So, Laurie, within the hour, you will have access to Athena.
+
+Speaker 3
+So what do we get? An email or a link or some thingamajig to notify us? Yes.
+
+Speaker 1
+Yes. Yeah. Nick, what's the thingamajig?
+
+Speaker 5
+It will be an email with the link.
+
+Speaker 1
+So we're looking at the next hour, you'll have the link with Athena Launch in your email.
+
+Speaker 2
+Yeah. Just to be clear, do not utilize her, like, a legal agent for now. So you could use Xs and Ys and stuff like, you know, Mr. X and Doctor.
+
+Y did this. So anonymize, pseudonymize, now. Yep. And then, and then once she's integrated, we'll let you know.
+
+You know, I told Sean she wasn't a legal agent. She goes, he's like, I don't care. I want her I want her into her into a legal agent. So, and he said that, of course, with tons of love.
+
+So we're we're gonna work on that and get that rolled out to you as well. But I would anonymize and pseudonym pseudonymize for now.
+
+Speaker 3
+Okay. Alrighty. Thank you.
+
+Speaker 1
+Thank you, Laurie.
+
+Speaker 2
+Yep. I think we had was it William and then Terry?
+
+Speaker 1
+William.
+
+Speaker 2
+William, sir, can you hear us? Can we unmute William? Team, can we unmute William?
+
+Speaker 1
+Team, how are doing?
+
+Speaker 2
+William, I see you're unmuted, but I can't hear you. Still can't hear you.
+
+Speaker 1
+You're definitely Well, can you type your question?
+
+And then let's go to Terry while William's typing his question, and we'll try to come Go back
+
+Speaker 2
+Go back to William.
+
+Speaker 1
+Live to William, but also William, you type the question just in case. And Terry, please.
+
+Speaker 7
+Hi there.
+
+Speaker 1
+Hi, Terry.
+
+Speaker 2
+Hey, Terry. Hi.
+
+Speaker 1
+Are coming from today, Terry?
+
+Speaker 7
+I am coming from Plano, Texas.
+
+Speaker 1
+Texas is in the building.
+
+Speaker 7
+I am a transactional attorney, so I do mergers and acquisitions and help entrepreneurs start and grow their businesses.
+
+But, recently, I have had a rash of litigation, in thirty three years of practice. In thirty two years, I had had two lawsuits where I, you know, pawned them off on litigators. And, in the past, six months, I've had twelve lawsuits Wow.
+
+That I'm dealing with for my clients. And many of them I've been able to pawn off, but one of them, I received the lawsuit at six thirty PM on a Friday night for a nine AM TRO hearing Super Bowl weekend.
+
+Speaker 6
+Oh, boy.
+
+Speaker 7
+And I panicked because I certainly wasn't gonna find a litigator that quickly.
+
+And so I went to Jeeves and I could not have done what I was able to accomplish without Jeeves.
+
+I responded. I prepared a response. I prepared arguments with him. I role played, all weekend long, and I won that TRO. And then he went on.
+
+Thank you. Then, he, the plaintiff went on to do a temporary injunction.
+
+So, I continued on and prepared it was supposed to be a forty five minute hearing. It ended up being eight hours split over two days.
+
+Speaker 2
+Wow.
+
+Speaker 8
+I
+
+Speaker 7
+prepared responses when he served me with his argument and evidence five minutes before the hearing began.
+
+I prepared, arguments as to why that evidence and that, that brief should be excluded because he didn't meet the ten day requirement.
+
+He was trying to exclude some evidence that I wanted in, and I, Jeeves helped me to prepare a really good argument that you can't have your cake and eat it too. You can't use and use the rules against me, but you not follow the rules yourself.
+
+I he he helped me prepare cross, direct, anticipated crosses, and anticipated direct, and I won that temporary injunction.
+
+Speaker 1
+Wow. Oh, wow.
+
+Speaker 7
+And I saved eighteen jobs in my client's business.
+
+Speaker 5
+It's awesome. Well done Terry. Wow.
+
+Speaker 2
+Well done.
+
+Speaker 7
+And I just I I just have to say that that I mean it has Jeeves has been my companion for my law firm now. He is the partner and associate that I had never had because I'm a solo.
+
+And I'm also much more eloquent in my emails. I draft emails. I run them through either Athena or Jeeves or Holmes and, they tell me why I should do certain things, why I shouldn't say certain things, how, statements that I was gonna say put me in a weak position versus a strong one, how to get into a strong position, and it just makes my correspondence with the opposing counsel on anything whether I'm doing a lease agreement or I'm in litigation and so I've been able to expand my practice and help my clients so much more and do it so much more quickly. I'm doing a lot more flat fees.
+
+Because it makes more sense than doing hourly now and so I'm collecting I'm collecting more.
+
+Speaker 1
+Amazing. Teri, thank you. And Teri, you know, thank you for the confidence and trust. Teri came in in the infancy.
+
+And for all those that are, you know, here now new, you know, these are the folks that walk uphill in the snow barefoot. So, it's going to be a beautiful wild journey. And Terry, we're so thrilled to provide you with more and more and more of all of what's here now new and coming. And it's going to be coming fast and at a fast and furious pace.
+
+So thank you, Teri, for the beautiful story, for the utilization, and anything else we could do for you today?
+
+Speaker 7
+No, I just want to let you know that this is building my clients are becoming so much more loyal to me even now because I can do so much more. I can issue spot for them things that they that I didn't even know to issue spot because I'm running scenarios by Jeeves, etcetera. The the I mean, the sky is the limit on what you you can do with this. And I can't wait to see all the other features for the, you know, intakes, etcetera. That will save me time on that.
+
+Speaker 1
+Thank you. We are super grateful, Terry. God bless. Thank you. Thank you.
+
+And we had William. Can we bring William live or we're just going to repeat the question?
+
+Speaker 2
+I can't hear you, William. I'm sorry.
+
+Speaker 1
+Man.
+
+Speaker 2
+William, can you type your question in the chat? And I'll read it out loud and answer it, Okay?
+
+Yeah. Sorry, Bob. We can't hear you. Let's go Angie and then Marius.
+
+Guys, can we unmute Angie?
+
+Speaker 8
+Hey, everybody.
+
+Speaker 1
+Hey, Angie. Where are coming from, Angie?
+
+Speaker 8
+South Carolina, Myrtle Beach, South Carolina.
+
+Speaker 1
+Let's go. Myrtle Beach is in the building.
+
+Speaker 8
+Yes. I have a few questions. How and when will we be able to link our SharePoint to the Beings? Do we know?
+
+Speaker 2
+Yeah. We're gonna the way we're gonna do it is there's gonna be a, like, time slot scheduled with our team to walk you through the process of identifying the without getting into great details but the methodology for the being to access your client side.
+
+Speaker 2
+Your repository.
+
+Speaker 8
+Well, just just trying to plan my schedule. So when do you guys think that y'all are gonna be sending us that email so that we can get our get on the schedule?
+
+Speaker 2
+So I think it's gonna be first by order of, like, how people sign. So I know, Andrew, you were, like, right like, one of the first. So you will be, one of the first appointments, but there's gonna be, like, a whole list of appointments and getting available tomorrow.
+
+Speaker 8
+Second question is, I know during the seminar, you talked about the what we need to put in our rep agreements and stuff, but I cannot find that screenshot I took. Can you send us that?
+
+Speaker 2
+Your engagement agreements with your clients?
+
+Speaker 8
+No. Yes. Yes. That. Yes. What we need to add into those. You had some suggestions.
+
+Speaker 2
+I can send you directly. I'll pause the team to email you that.
+
+Speaker 1
+And Mike, let's drop that in Yes, let's email it to Angie for sure, but let's also drop that into the group so everybody has it.
+
+Speaker 2
+And then Angie, very important, I know that you're the primary license holder, your firm should have AI use agreements. So I see wonderful members of your team that are all there. Make sure that they are Hello.
+
+Hi, guys. Hello. Hello, team. You need to make sure that it's not just you that understands the rules, it's they do too, and the rules of, like, playing with AI with you. I'm sure they're wonderful humans, and they're gonna do great jobs, but people make huge mistakes, and those huge mistakes can have really profound effects. So let's make sure that everybody knows what the rules of engagement are as they use AI.
+
+Speaker 8
+Yes. So anything you guys have surrounding that, I know y'all talked about that at the seminar, if you can share that, I'd be grateful get us a head start. Yeah my next question was about the tokens in the contract, it says that we.
+
+That one thousand tokens equals seven hundred and fifty words and then it says to calculate how many tokens we get we take the price that we paid and divide that over the month. So if we paid ten k for two months, that is five thousand tokens over the next two months. That only equals about what? My math sucks. Thirty five hundred words?
+
+Speaker 2
+So it's not it's actually not. Yep. It's not It's not like an arcade like tokenization. Tokens work very differently in the universe. So for example, on some LLMs, four million tokens is like ten dollars worth of value, right? So that may seem like, oh my God, four million, but it's really just ten bucks. So I wouldn't try to do the calculations of like tokens versus words.
+
+It is nobody should be getting up to those numbers. Right? Okay.
+
+They have some
+
+Speaker 8
+I'm just trying to make sure.
+
+I mean, obviously, if we do go over, you know, I wanna be prepared for what we might have to pay in the event we do go over.
+
+Speaker 2
+Yeah.
+
+It's like
+
+Speaker 8
+So what does that look like?
+
+How do we go over? You know?
+
+Speaker 2
+Yep. So quick math. And the team is figuring this out, so they'll be like reporting back to you so you kind of know where you are. Okay.
+
+But it's gonna be really hard to get up over to where you are. It's like four hundred million tokens, right? Okay. To overcome the numbers that we're talking about.
+
+And four hundred million, like, to spend that many tokens, that's like, you're actively trying to go over. We'll explain it all, just so you know, and we won't have any surprises for anybody. This is, first of all, I think in the agreements, everybody saw this, there's zero markup. So it's not like we're like, oh, this is great.
+
+I hope everybody goes over their usage.
+
+We'll make sure that it's very clear on how the usage works, if anybody's getting dangerously close, or they're trending in the wrong direction, we'll make sure that there's reporting for you.
+
+Speaker 1
+Yeah, and if I could share this, are not
+
+Speaker 2
+Sean, you're very, very low.
+
+Can barely hear you.
+
+Speaker 1
+Yeah, team. Test test, you got me?
+
+Speaker 2
+Sorry about Yeah, that's better.
+
+Speaker 1
+So for everybody, we're not making money on token usage.
+
+And we have not for the people that have been in this program for the last, you know, ten, twelve months, We have never charged anybody anything for token usage. And we're not this is not a way we make money from you in this program. Will we make money from that in other ways in the future? Yes, but not with you guys, right? So I just want to be clear, like the on this recorded line, we're not going to be looking to create leverage and token usage profitability. And we're moving everything onto our own LLM, which should even drop cost more.
+
+We're here to build a lifelong partnership and relationship. We're not looking to make money on token usage. And yes, so I just pause there. Michael, anything else on that?
+
+Speaker 2
+Nope. And again, Angie, it, don't be nerve wracked on this. We'll make sure that, you know, if there's like, you're trending in the wrong directions, but it's gonna be really hard for anybody to come up to that level of usage.
+
+Speaker 8
+As as a contract attorney, not knowing specifics kinda bugs me.
+
+So I would love
+
+Speaker 2
+to know I'm not even I'm I don't even identify as a contract attorney.
+
+Not knowing specific bugs mean, right, team? Right?
+
+Speaker 1
+And so just with this, so this will be worked out in these first two months. If you don't like the answers, then obviously you get a refund, not here anymore, but you're going to like the answers.
+
+It's not going to be
+
+Speaker 8
+I trust you, Sean.
+
+I can tell when I met with you that, you know, well, when I was attending the seminar, I mean, is important to you, and I believe that you will meet everything that you promise to us and more.
+
+My last question is-
+
+Speaker 1
+And then Jim, could just say, and thank you for that.
+
+Look, there's no question that we, for people like who've been here for years, just want you guys to know this, the people in our certification program in Elite, when we created Acti, we just gave it to them. So they were at their price point. We had one hundred thousand dollars price point. There was a thirty thousand to fifty thousand dollars price point. We just gave it to those people who were in our program. And so all of a sudden, we were creating a massive dent into everything we were doing because some people were using more token usage than they were even paying us for the underlying unblinded program.
+
+You guys sit in a next tier beneficial position of initial trust. So we are looking to create a massive lifelong relationship and have you guys be raving fans of this. There is no possibility we're making money on you guys. Like, we're just not, right?
+
+And so we want to charge something for all this. We're not. You know, in a profitable position, like that's clear to us. And so we just want make sure we're not going to get like destroyed.
+
+And that's why we're really doing a deeper evaluation of this token usage concept and what it's going to cost and moving ourselves onto our own LLM. So my hope, Angie and everybody, is that as we move into our own LLM, this becomes like a virtual impossibility that anybody can go over the top of this. And we're doing that all right now in this transitional phase, but in between, you know, we're totally good with it. And you're not going to find out I don't think anybody here is going to find out that you're in any kind of danger zone.
+
+That's all. Angie, back to you.
+
+Speaker 8
+Thank you. My last question was the meetings on Mondays like today at twelve thirty, are they gonna be similar to this one, more seminar seminar style, or are we gonna get into next Monday a little bit more how to's? What's can you give me an overview of what I'm expecting on Mondays?
+
+Speaker 1
+Sure. So, this whole thing is going to be a combination of things that go on during the week. So, Angie, the most important thing I would say to contextualize my answer would be to be consuming the Visioneer calls and the Tuesday and Thursday night mastery sessions either live or in replay. There's going to be a tremendous amount of how to happening there, and then we'll be summarizing those on, you know, the boot camp Mondays, and there'll be more how to do things and more questions rolling out for people as we go forward in all this.
+
+And what I would envision during this, because we like to like add stuff and give more value, is somewhere in the six weeks, we're probably going to tell you like, hey, we're going to do a full day on a day. If you can make it live, great. If not, we're going to like we figured out where people are really struggling. And so, here you go.
+
+Here's the full day of like how to nonstop because we tailor everything we do, Angie, in this work and program not into our curriculum, into the needs of everybody here. So, yes, there'll be more how to. Yes, there'll be nonstop how tos in the Visionaries on Tuesday, Thursday, and I am absolutely certain that you'll see Tuesday and Thursday nights where perhaps, you know, people have a few questions and we end up going like two hours extra and then that will be circulated to everybody. So we are trying to do as much tailoring as possible to hit everyone's needs.
+
+And yes, it'll look like next week won't look the same as this because this is, you know, intro launch.
+
+The week you know, next Monday, there'll be more how to for sure, but there'll be a lot of how to from this minute to next Monday as well. I hope that's answering your question. If not, what else can I answer?
+
+Speaker 8
+Thank you. I I have tried to get on a couple of the meetings last week. I was successful getting on one, but two times I tried, and I was unsuccessful. It's probably user error. I'm probably clicking the wrong link or something. But is there any way I can get an email potentially just of the different links for the different Zooms? Sure.
+
+Speaker 1
+Absolutely. And just so you know Yeah, and just so you know, they are happening. Like every day there's, you know, sixty, seventy, eighty, one hundred people on each visioneer call. Tuesday, Thursday is anywhere from eighty to like one hundred and thirty people that come on.
+
+So, these are really happening. There's lots of people there. And yes, team, let's make sure, if we could, Nick, just make sure we get with Gina to make sure we distribute all links to everybody for what all the calls are.
+
+Speaker 8
+And I know Gina sent it out and she sent it. It was perfect, but I just it's probably me. It's probably me.
+
+Speaker 1
+Yeah. And I'm sorry, Angie. It's really, really odd. And if you have that kind of challenge, just please feel free to, you know, shoot Gina a text message.
+
+Speaker 8
+And I I didn't want to bother. I I was just going to try again this week.
+
+Speaker 1
+Okay, that's great. Well, welcome aboard and. Thank you. Appreciate Myrtle Beach very much. We've had the privilege of taking, I've had the privilege taking baseball team to Ripken's baseball tournaments in Myrtle Beach and spending time there, which PS for everybody. Myrtle Beach is arguably the shark attack shark bite, not attack, but shark bite capital of the US.
+
+So but By
+
+Speaker 2
+the way, Angie turned around and she's wearing a jersey and it says, you know, number one Angie, which I amazing. And Sean's fly is
+
+Speaker 1
+super cool.
+
+Speaker 2
+I'll that with him.
+
+Speaker 1
+Thank you for that.
+
+Speaker 2
+Yep. So really quickly, William's question was, if I'm currently working with another AI being, How do AI beings interface and compare with that, working with AI being for almost nine consecutive months?
+
+So William, I'm not sure if you mean AI beings like you're already in the program and you've been using them, we'll figure out how to be able to transfer your information.
+
+You may be able to transfer information, but like our
+
+Speaker 1
+What I would do Mike, what do think of this, Michael Smiken, for William, is I would ask the AI being you've been working for is if this is in legal, that's one thing, but I would ask for an overview of what the being should know about you.
+
+So if it's on marketing and sales side, then create a download of everything you're doing, everything to know about William, everything that's being, you know, have and created as lengthy a product on that. And then I would feed that into Athena. If it's case specific, then I would ask for those kind of outcomes, summaries, facts, things and move them into, you know, the legal beings. Michael, any other thoughts?
+
+Speaker 2
+Yeah. For something like that, and especially if it's going to be a tremendous amount of data, what I would do is I would have the agent that you're utilizing create a book for you. So I would say, if there's everything that you need to know about what I've been using you for, what would a ten chapter book look like? Just chapter titles, and what the work that we've done together with no overlap. This is a masterful prompt, guys, if you could please record and capture this. Ten chapters about what we've been talking about, with no overlap, just the chapter titles.
+
+And then when it gives you the chapter titles, be like, great, grab chapter number one, paste it, and say, write one thousand words on this chapter of what we've been speaking about, and do the same thing for the ten chapters, grab that, put it into a Word doc, and now feed it into the beings.
+
+It's almost as if we've done this before.
+
+Speaker 1
+Yes. Excellent.
+
+Speaker 2
+Yep. So that's William. I know Marius had a question, so can we get Marius unmuted? And Kimberly, I don't know if you're waving at me, because I know we're meeting tomorrow.
+
+So if you're waving at me just to say hello, hello. But if you have a question, just give me a thumbs up right now, and we'll get you unmuted as well. So no question. She's just waving.
+
+Hello, Kimberly. Let's go. Marius.
+
+Marius, can you hear me alright,
+
+Speaker 1
+brother?
+
+Speaker 5
+I can hear you perfectly. Can you hear me?
+
+Speaker 2
+I hear you perfectly. Ten by ten. What's going on, my man?
+
+Speaker 5
+Nice to meet you guys. I think you may have covered it. My question was about the AI use agreements and the retainer agreements and what ethically we need to disclose to our clients. Yep. So I think you're gonna share it. You put that you're gonna share that with us?
+
+Speaker 2
+Yes, sir.
+
+Speaker 1
+Yep. And and, Marius, where are coming from?
+
+Speaker 5
+Both Raton based, licensed in Florida, New Jersey, and Massachusetts.
+
+Speaker 1
+Very nice. Welcome aboard, Marius.
+
+Speaker 5
+Nice to meet you, Sean.
+
+Speaker 1
+Nice to meet you.
+
+Speaker 2
+So, Marius, we'll take care of that. I'll send you what is the minimum requirement for your AI, for your engagement agreements with your clients. What I would recommend is maybe just potentially doing a quick rider or a notice to them, depending on what's inside your engagement agreement.
+
+I would utilize that just make sure it meets all the requirements under your RPCs, but we'll check that and make sure.
+
+And then also internally, I would heavily recommend using an AI agreement with any of your teammates. So any employees who gonna be using agents, make sure that they are complying with certain minimum requirements. I have very, very burdensome requirements about a human review inside the agreements. I would hold people to that exact same standard.
+
+Speaker 5
+Absolutely. Yep.
+
+Speaker 2
+Yep. And I'm just I don't mean to like fear monger anybody, but this what I just described is where attorneys get hurt, right, is the lack of human review.
+
+These things will massively, explosively, exponentially expand time, but where attorneys go wrong is they go, this is great. Signature upload, And then there's something in there that's devastating. And I don't know if you guys saw this, but this is there's a lot of fear monger going on around this, and this is my warning to you folks. The only time attorneys really get hurt with this is they make up cases or they hallucinate facts and upload it.
+
+Right? Like, that's that is where the rubber hits the road. Most of the time, it's not a security issue necessarily. And just recently, an entire a twelve million dollar lawsuit just got dismissed last week because the attorney, the national attorney submitted a brief that the local counsel just signed off on that had twelve made up cases inside of it.
+
+And the judge sanctioned the law firm, joined severally with the local counsel one hundred thousand dollars and dismissed the twelve million dollars lawsuit with prejudice.
+
+So like
+
+Speaker 1
+And let me say this about that.
+
+I don't know that I have a problem with that, but here's what I have a problem with. I have a problem with judges that don't dismiss and sanction cases when people lie.
+
+Speaker 2
+Yes.
+
+Speaker 1
+Like, it that is so crazy. That is unbelievable. But yes, that is the state of the world. What I hope we can bring the state of the world to be is that the same type of rigor, responsibility from the court and accountability will apply to integrity in the courtroom. That completely, totally, disproportionately insane, I believe, in light of what courts permit and allow. But let's keep that there and let's keep integrity in how people use AI, but let's also keep human integrity in place as well. And may we all be a part of that.
+
+Speaker 2
+Yep, agreed.
+
+Agreed. Sean, I don't see any other questions pending.
+
+Obviously, let's if anybody has questions about the agreements, just submit them to the team. We'll get it checked out with repositories, like information repositories, like NetDocuments, SharePoint. My team has already told me, by the way, James, that NetDocuments does have OAuth and API capabilities.
+
+The question now that we just have to solve is the penetration testing to make sure that our being connection to your repository doesn't create security issues for you. Once that's confirmed, we'll get you loaded up, and we'll talk about how to get you connected in a way that is safe and secure for you so that only your instance is connecting to your information repository.
+
+Speaker 1
+Yeah.
+
+My final final for today, final final, is our first thank you. Appreciate the trust and the confidence in everything we're doing, and begin to use the beings both on the marketing and sales side as well as the legal side. Get to the visionary calls, listen to them on replay, and be patient. Be patient and urgent.
+
+Be patient and urgent. And realize that if there's things happening, you're like, I don't want to hear about self mastery. I don't want hear about getting on the floor and put endorphins in. Everything is for you.
+
+Everything. Everything we do here in the huddles, in the visionary calls, Tuesday, Thursday is for everyone. I assure you, And the adoption of all of it is only going to make your utilization of this. Like, if you were to treat this, all of this just like as a software, you're not going to win at any level near what you hope to win.
+
+It's all of it. It's the formula. It's the acceleration. It's the, you know, the software, not software, you know, side of this.
+
+It's the whole deal. And it has begun. We appreciate you very, very much. And let's go get it.
+
+Our next time together potentially is seven thirty a. M. Eastern tomorrow or in replay and the Visioneer call. And then tomorrow night is the APM Mastery session.
+
+And we are grateful. Michael, wonderful job. Everybody, bring your questions. But also tell us what you're doing.
+
+Well, hey, I went in. This was great. I learned this. Now my next question is that.
+
+That's the best way to bring things forward for you, not just for us, for you, so your brain is realizing you're making progress. Wax on, wax off. God bless. We'll see you soon.
+
+Thanks.
+
+Speaker 2
+Thanks, Sean. Later, folks.
+ 
+ UI- 
+ Color Palette same as claude code website. 
+ Landing page. Big hero section. Followed 
+ by a scrolling text bar of features 
+
+ Followed by five different features and how this app 
+ can help attorneys Dead the footer. UIs should be tastefully 
+ done. Use The Remotion skill to add dynamic Animation 
+ to each section or at least most of them 
+ for a good user experience. 
+
+ DEPENDENCIES:
+ GIT REPO: https://github.com/1n1h/Kat-Ai-Agents.git
+ TOGETHER AI API Key:tgp_v1_utFwf99nIbMs763TTuMxStED83w-7iJ-DWYevbMY3yw (claude / gemini vission)
+ ELEVENLABS:sk_d6c1daafaa94d838654e2ca9b2dbcd98aa9f8826c7a34d4f  (https://elevenlabs.io/app/api/api-keys)
+ FIREBASE: STORAGE, AUTH, FIRESTORE 
+ VERCEL: 
+ UI Skills: REMOTION 
+ CONNECTIONS FOR CLIENT: EMAIL, GOOGLE DOCS, SLACK, CALENDAR, NETDOCUMENTS, SHAREPOINT, 
+ EAS: APPSTORE DEPLOYMENT
+ STRIPE: PAYMENT 
+
+ 
+
+
+
+

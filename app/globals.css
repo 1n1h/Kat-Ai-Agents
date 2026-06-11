@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@theme {
+  /* Anthropic-adjacent paper palette */
+  --color-paper: #faf9f5;
+  --color-panel: #f0eee6;
+  --color-panel-deep: #e9e6da;
+  --color-ink: #1f1e1d;
+  --color-ink-soft: #4a463f;
+  --color-muted: #7a7468;
+  --color-faint: #a8a195;
+  --color-line: #e4e0d5;
+  --color-line-strong: #d3cec0;
+  --color-accent: #c6593c;
+  --color-accent-soft: #d97757;
+  --color-accent-wash: #f6e8e2;
+  --color-ok: #5a7a52;
+
+  --font-serif: var(--font-source-serif), Georgia, serif;
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* faint paper grain so large fields never read as flat white */
+.grain {
+  background-image: radial-gradient(
+      rgba(31, 30, 29, 0.025) 1px,
+      transparent 1px
+    );
+  background-size: 24px 24px;
+}
+
+::selection {
+  background: var(--color-accent-wash);
+  color: var(--color-accent);
+}
+
+/* ── staggered page-load reveal ─────────────────────────────── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.14s; }
+.rise-3 { animation-delay: 0.23s; }
+.rise-4 { animation-delay: 0.32s; }
+.rise-5 { animation-delay: 0.41s; }
+
+/* ── status caret while an agent works ──────────────────────── */
+@keyframes caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+.caret::after {
+  content: "▌";
+  margin-left: 2px;
+  color: var(--color-accent);
+  animation: caret 1s steps(1) infinite;
+}
+
+/* ── transcript prose (assistant turns) ─────────────────────── */
+.prose-legal {
+  font-family: var(--font-serif);
+  font-size: 1.0rem;
+  line-height: 1.75;
+  color: var(--color-ink);
+}
+.prose-legal h1,
+.prose-legal h2,
+.prose-legal h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+  margin: 1.6em 0 0.6em;
+}
+.prose-legal p { margin: 0.7em 0; }
+.prose-legal ul,
+.prose-legal ol {
+  margin: 0.7em 0;
+  padding-left: 1.4em;
+}
+.prose-legal ul { list-style: disc; }
+.prose-legal ol { list-style: decimal; }
+.prose-legal li { margin: 0.3em 0; }
+.prose-legal strong { font-weight: 600; }
+.prose-legal blockquote {
+  border-left: 2px solid var(--color-line-strong);
+  padding-left: 1em;
+  color: var(--color-ink-soft);
+  margin: 0.9em 0;
+}
+.prose-legal code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  padding: 0.08em 0.35em;
+}
+.prose-legal pre {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  margin: 0.9em 0;
+}
+.prose-legal pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+.prose-legal table {
+  border-collapse: collapse;
+  margin: 0.9em 0;
+  font-size: 0.92em;
+}
+.prose-legal th,
+.prose-legal td {
+  border: 1px solid var(--color-line-strong);
+  padding: 0.4em 0.7em;
+  text-align: left;
+}
+.prose-legal th {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--color-panel);
+}
+.prose-legal hr {
+  border: none;
+  border-top: 1px solid var(--color-line);
+  margin: 1.4em 0;
+}
+.prose-legal a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* thin scrollbars to keep the paper feel */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
