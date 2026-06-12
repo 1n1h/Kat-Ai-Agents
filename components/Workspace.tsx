@@ -97,7 +97,7 @@ function pickGreeting(): string {
 }
 
 const navRow =
-  "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 font-sans text-[15px] font-medium text-ink transition-colors hover:bg-panel-deep hover:text-ink";
+  "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 font-ui text-[15.5px] font-medium text-ink transition-colors hover:bg-panel-deep hover:text-ink";
 
 export default function Workspace() {
   const [ready, setReady] = useState(false);
@@ -605,10 +605,10 @@ export default function Workspace() {
               setAgentId(t.agentId);
               closeSidebarOnMobile();
             }}
-            className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14.5px] transition-colors ${
+            className={`w-full truncate rounded-lg px-2 py-2 pr-8 text-left text-[15px] transition-colors ${
               t.id === threadId
-                ? "bg-panel-deep font-medium text-ink"
-                : "text-ink-soft hover:bg-panel-deep hover:text-ink"
+                ? "bg-panel-deep font-semibold text-ink"
+                : "font-medium text-ink hover:bg-panel-deep"
             }`}
           >
             {t.starred && (
@@ -798,7 +798,7 @@ export default function Workspace() {
         />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-line bg-panel font-sans transition-transform duration-200 md:static md:transition-none ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-line bg-panel font-ui transition-transform duration-200 md:static md:transition-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"
         }`}
       >
@@ -895,10 +895,10 @@ export default function Workspace() {
                             setThreadId(null);
                             closeSidebarOnMobile();
                           }}
-                          className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14.5px] transition-colors ${
+                          className={`w-full truncate rounded-lg px-2 py-2 pr-8 text-left text-[15px] transition-colors ${
                             m.id === matterId
-                              ? "bg-panel-deep font-medium text-ink"
-                              : "text-ink-soft hover:bg-panel-deep hover:text-ink"
+                              ? "bg-panel-deep font-semibold text-ink"
+                              : "font-medium text-ink hover:bg-panel-deep"
                           }`}
                         >
                           {m.starred && (
@@ -985,7 +985,7 @@ export default function Workspace() {
           <div className="rise rise-3 px-3 pt-5" data-tour="threads">
             {starredThreads.length > 0 && (
               <>
-                <p className="px-2 pb-1 text-[13px] font-semibold text-ink-soft">
+                <p className="px-2 pb-1 text-[13.5px] font-semibold text-ink-soft">
                   Starred
                 </p>
                 <ul className="space-y-0.5 pb-3">
@@ -993,7 +993,7 @@ export default function Workspace() {
                 </ul>
               </>
             )}
-            <p className="px-2 pb-1 text-[13px] font-semibold text-ink-soft">
+            <p className="px-2 pb-1 text-[13.5px] font-semibold text-ink-soft">
               Recents
             </p>
             <ul className="space-y-0.5">

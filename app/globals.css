@@ -27,6 +27,8 @@
     "Segoe UI", sans-serif;
   --font-mono: var(--font-plex-mono, ui-monospace), ui-monospace, Consolas,
     monospace;
+  --font-ui: var(--font-inter, system-ui), system-ui, -apple-system,
+    "Segoe UI", sans-serif;
 }
 
 :root {

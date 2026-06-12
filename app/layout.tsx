@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Serif_4, Archivo, IBM_Plex_Mono } from "next/font/google";
+import { Source_Serif_4, Archivo, IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import PwaRegister from "@/components/PwaRegister";
 
@@ -20,6 +20,14 @@ const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-plex-mono",
   weight: ["400", "500"],
+});
+
+// UI font for the sidebar — cleaner and larger-feeling than Archivo at small
+// sizes, closer to the Claude app's navigation.
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -68,7 +76,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sourceSerif.variable} ${archivo.variable} ${plexMono.variable} antialiased`}
+        className={`${sourceSerif.variable} ${archivo.variable} ${plexMono.variable} ${inter.variable} antialiased`}
       >
         {/* dark is the default; apply .light before paint if the user chose it */}
         <script
