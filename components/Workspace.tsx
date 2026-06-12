@@ -30,12 +30,14 @@ import {
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { firebaseAuth, firebaseEnabled, signOut } from "@/lib/firebase";
 import {
+  deleteMatterDoc,
   deleteThreadDoc,
   migrateLocal,
   saveMatter,
   saveThread,
   watchWorkspace,
 } from "@/lib/firestoreStore";
+import FirmLogo, { FirmMark } from "./FirmLogo";
 import {
   getMyProfile,
   hasAccessGrant,
@@ -110,6 +112,10 @@ export default function Workspace() {
   const [filesOpen, setFilesOpen] = useState(true);
   const [newCaseOpen, setNewCaseOpen] = useState(false);
   const [newCaseName, setNewCaseName] = useState("");
+  const [confirmDeleteCase, setConfirmDeleteCase] = useState<string | null>(
+    null,
+  );
+  const [heroLeaving, setHeroLeaving] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [menuFor, setMenuFor] = useState<string | null>(null);
   const [menuMode, setMenuMode] = useState<"main" | "case" | "confirm">(
@@ -366,6 +372,33 @@ export default function Workspace() {
     setMenuFor(null);
   }
 
+  function deleteCase(id: string) {
+    const doomed = threads.filter((t) => t.matterId === id);
+    setThreads((prev) => prev.filter((t) => t.matterId !== id));
+    setMatters((prev) => {
+      const rest = prev.filter((m) => m.id !== id);
+      if (!rest.length) {
+        const general: Matter = {
+          id: uid(),
+          name: "General",
+          createdAt: Date.now(),
+        };
+        persistMatter(general);
+        setMatterId(general.id);
+        return [general];
+      }
+      if (matterId === id) setMatterId(rest[0].id);
+      return rest;
+    });
+    if (uidRef.current) {
+      const u = uidRef.current;
+      void deleteMatterDoc(u, id);
+      for (const t of doomed) void deleteThreadDoc(u, t.id);
+    }
+    setThreadId(null);
+    setConfirmDeleteCase(null);
+  }
+
   /** Sends a turn through the agents; returns the reply (voice mode reads it). */
   async function handleSend(
     text: string,
@@ -374,6 +407,11 @@ export default function Workspace() {
   ): Promise<string> {
     if (streaming || !matterId) return "";
     setDraft("");
+    // leaving the empty-thread hero: let the logo fade out gracefully
+    if (!activeThread?.messages.length) {
+      setHeroLeaving(true);
+      setTimeout(() => setHeroLeaving(false), 650);
+    }
 
     const content = attached.length
       ? `${text}\n\n[Documents added to this matter's working directory: ${attached.join(", ")}]`
@@ -657,14 +695,7 @@ export default function Workspace() {
         }`}
       >
         <div className="rise rise-1 flex items-center justify-between px-5 pt-5 pb-3">
-          <div>
-            <h1 className="font-serif text-lg leading-tight tracking-tight">
-              Sheehe <span className="text-accent">&amp;</span> Associates
-            </h1>
-            <p className="mt-0.5 font-mono text-[9px] tracking-[0.16em] text-muted">
-              EXPERIENCE · KNOWLEDGE · STRATEGY
-            </p>
-          </div>
+          <FirmLogo size="sm" />
           <button
             onClick={() => setSidebarOpen(false)}
             title="Close sidebar"
@@ -722,20 +753,40 @@ export default function Workspace() {
             {casesOpen && (
               <ul className="space-y-0.5 pb-1 pl-10">
                 {matters.map((m) => (
-                  <li key={m.id}>
+                  <li key={m.id} className="group relative">
                     <button
                       onClick={() => {
                         setMatterId(m.id);
                         setThreadId(null);
                         closeSidebarOnMobile();
                       }}
-                      className={`w-full truncate rounded-lg px-2 py-1.5 text-left text-[14px] transition-colors ${
+                      className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14px] transition-colors ${
                         m.id === matterId
                           ? "bg-panel-deep font-medium text-ink"
                           : "text-muted hover:bg-panel-deep hover:text-ink"
                       }`}
                     >
                       {m.name}
+                    </button>
+                    <button
+                      onClick={() =>
+                        confirmDeleteCase === m.id
+                          ? deleteCase(m.id)
+                          : setConfirmDeleteCase(m.id)
+                      }
+                      onBlur={() => setConfirmDeleteCase(null)}
+                      title={
+                        confirmDeleteCase === m.id
+                          ? "Click again to delete this case and its threads"
+                          : "Delete case"
+                      }
+                      className={`absolute top-1/2 right-1 -translate-y-1/2 rounded-md p-1 transition-opacity hover:bg-panel-deep ${
+                        confirmDeleteCase === m.id
+                          ? "text-accent opacity-100"
+                          : "text-muted opacity-0 group-hover:opacity-100 hover:text-accent"
+                      }`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </li>
                 ))}
@@ -937,10 +988,17 @@ export default function Workspace() {
           <ThemeToggle />
         </header>
 
-        {isEmpty ? (
-          /* ── new-thread hero: greeting, composer, pills ── */
-          <section className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 pb-16 sm:px-6">
+        {isEmpty || heroLeaving ? (
+          /* ── new-thread hero: logo, greeting, composer, pills ── */
+          <section
+            className={`flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 pb-16 transition-opacity duration-700 sm:px-6 ${
+              heroLeaving ? "opacity-0" : "opacity-100"
+            }`}
+          >
             <div className="w-full max-w-2xl">
+              <div className="logo-in mb-7 flex justify-center">
+                <FirmMark className="h-16 w-16 text-accent" />
+              </div>
               <h2 className="rise rise-2 mb-8 text-center font-serif text-3xl text-ink sm:text-4xl">
                 {greetingTpl.replace("{name}", firstName)}
               </h2>

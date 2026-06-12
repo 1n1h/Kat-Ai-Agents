@@ -81,6 +81,12 @@ export async function deleteThreadDoc(uid: string, id: string): Promise<void> {
   await deleteDoc(doc(db, "users", uid, "threads", id));
 }
 
+export async function deleteMatterDoc(uid: string, id: string): Promise<void> {
+  const db = firebaseDb();
+  if (!db) return;
+  await deleteDoc(doc(db, "users", uid, "matters", id));
+}
+
 /** One-time upload of pre-sync local conversations into the user's tree. */
 export async function migrateLocal(
   uid: string,
