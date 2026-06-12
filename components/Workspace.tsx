@@ -10,6 +10,7 @@ import {
   EllipsisVertical,
   FolderOpen,
   LogOut,
+  PanelLeft,
   Pencil,
   Plus,
   Settings,
@@ -100,6 +101,7 @@ export default function Workspace() {
   const [renameText, setRenameText] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -126,8 +128,14 @@ export default function Workspace() {
     setMatters(ms);
     setThreads(s.threads);
     setMatterId(ms[0].id);
+    setSidebarOpen(window.matchMedia("(min-width: 768px)").matches);
     setReady(true);
   }, []);
+
+  /** On phones the sidebar is an overlay — picking something dismisses it. */
+  function closeSidebarOnMobile() {
+    if (window.innerWidth < 768) setSidebarOpen(false);
+  }
 
   /* ── persist ── */
   useEffect(() => {
@@ -352,6 +360,7 @@ export default function Workspace() {
             onClick={() => {
               setThreadId(t.id);
               setAgentId(t.agentId);
+              closeSidebarOnMobile();
             }}
             className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14px] transition-colors ${
               t.id === threadId
@@ -478,18 +487,41 @@ export default function Workspace() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-paper text-ink">
-      {/* ── sidebar (Claude-style) ────────────────────────────── */}
-      <aside className="flex w-64 shrink-0 flex-col border-r border-line bg-panel font-sans">
-        <div className="rise rise-1 px-5 pt-5 pb-3">
+      {/* ── sidebar (Claude-style; overlay drawer on mobile) ──── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-line bg-panel font-sans transition-transform duration-200 md:static md:transition-none ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"
+        }`}
+      >
+        <div className="rise rise-1 flex items-center justify-between px-5 pt-5 pb-3">
           <h1 className="font-serif text-2xl tracking-tight">
             Counsel<span className="text-accent">OS</span>
           </h1>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            title="Close sidebar"
+            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+          >
+            <PanelLeft className="h-4.5 w-4.5" />
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto pb-4">
           {/* primary nav */}
           <nav className="rise rise-2 space-y-0.5 px-3 pt-2">
-            <button onClick={() => setThreadId(null)} className={navRow}>
+            <button
+              onClick={() => {
+                setThreadId(null);
+                closeSidebarOnMobile();
+              }}
+              className={navRow}
+            >
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-panel-deep text-ink-soft">
                 <Plus className="h-4 w-4" />
               </span>
@@ -532,6 +564,7 @@ export default function Workspace() {
                       onClick={() => {
                         setMatterId(m.id);
                         setThreadId(null);
+                        closeSidebarOnMobile();
                       }}
                       className={`w-full truncate rounded-lg px-2 py-1.5 text-left text-[14px] transition-colors ${
                         m.id === matterId
@@ -705,21 +738,34 @@ export default function Workspace() {
 
       {/* ── main ──────────────────────────────────────────────── */}
       <main className="grain flex min-w-0 flex-1 flex-col">
-        <header className="rise rise-2 flex items-center justify-between border-b border-line px-6 py-3">
-          <p className="truncate font-mono text-[11px] tracking-[0.22em] text-faint uppercase">
-            {activeMatter?.name ?? "—"}
-            {activeThread ? ` / ${activeThread.title}` : " / new thread"}
-            <span className="text-line-strong"> · </span>
-            <span className="text-muted">{agentById(agentId).name}</span>
-          </p>
+        <header className="rise rise-2 flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2.5">
+            {!sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                title="Open sidebar"
+                className="shrink-0 rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+              >
+                <PanelLeft className="h-4.5 w-4.5" />
+              </button>
+            )}
+            <p className="truncate font-mono text-[11px] tracking-[0.22em] text-faint uppercase">
+              {activeMatter?.name ?? "—"}
+              {activeThread ? ` / ${activeThread.title}` : " / new thread"}
+              <span className="hidden text-line-strong sm:inline"> · </span>
+              <span className="hidden text-muted sm:inline">
+                {agentById(agentId).name}
+              </span>
+            </p>
+          </div>
           <ThemeToggle />
         </header>
 
         {isEmpty ? (
           /* ── new-thread hero: greeting, composer, pills ── */
-          <section className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-6 pb-16">
+          <section className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-4 pb-16 sm:px-6">
             <div className="w-full max-w-2xl">
-              <h2 className="rise rise-2 mb-8 text-center font-serif text-4xl text-ink">
+              <h2 className="rise rise-2 mb-8 text-center font-serif text-3xl text-ink sm:text-4xl">
                 {greetingTpl.replace("{name}", firstName)}
               </h2>
               <div className="rise rise-3">{composer}</div>
@@ -748,7 +794,7 @@ export default function Workspace() {
                 bottomRef={bottomRef}
               />
             </section>
-            <div className="px-6 pb-4">
+            <div className="px-4 pb-4 sm:px-6">
               <div className="mx-auto max-w-3xl">
                 {composer}
                 <p className="mt-2 text-center font-mono text-[11px] tracking-wider text-faint">
@@ -768,7 +814,7 @@ export default function Workspace() {
             if (e.target === e.currentTarget) setNewCaseOpen(false);
           }}
         >
-          <div className="pop absolute top-32 left-[17rem] w-80 rounded-2xl border border-line-strong bg-panel p-5 shadow-2xl">
+          <div className="pop absolute top-24 left-1/2 w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-2xl border border-line-strong bg-panel p-5 shadow-2xl md:top-32 md:left-[17rem] md:w-80 md:translate-x-0">
             <h3 className="font-serif text-xl text-ink">New case</h3>
             <p className="mt-1 text-[13px] text-muted">
               e.g. Smith v. Allied, M&amp;A — Birch

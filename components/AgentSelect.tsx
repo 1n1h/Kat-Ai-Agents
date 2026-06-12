@@ -46,7 +46,7 @@ export default function AgentSelect({
       </button>
 
       {open && (
-        <div className="pop absolute right-0 bottom-full z-30 mb-2 max-h-[min(26rem,calc(100vh-9rem))] w-[22rem] overflow-y-auto rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl">
+        <div className="pop absolute right-0 bottom-full z-30 mb-2 max-h-[min(26rem,calc(100vh-9rem))] w-[min(22rem,calc(100vw-2.5rem))] overflow-y-auto rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl">
           <p className="px-3 pt-2 pb-1 font-mono text-[11px] tracking-[0.2em] text-faint uppercase">
             Specialists
           </p>

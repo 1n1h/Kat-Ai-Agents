@@ -25,7 +25,7 @@ function Turn({
   const label = isUser ? "You" : agentById(msg.agentId ?? "auto").name;
   return (
     <div
-      className={`grid grid-cols-[3.5rem_1fr] gap-x-4 py-6 ${
+      className={`grid grid-cols-[2.25rem_1fr] gap-x-3 py-6 sm:grid-cols-[3.5rem_1fr] sm:gap-x-4 ${
         noBorder ? "" : "border-b border-line"
       }`}
     >
@@ -73,7 +73,7 @@ export default function Transcript({
   bottomRef: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
-    <div className="mx-auto max-w-3xl px-6 pb-10">
+    <div className="mx-auto max-w-3xl px-4 pb-10 sm:px-6">
       {messages.map((m, i) => (
         <Turn
           key={i}
@@ -94,7 +94,7 @@ export default function Transcript({
       )}
 
       {streaming && (
-        <div className="grid grid-cols-[3.5rem_1fr] gap-x-4 py-5">
+        <div className="grid grid-cols-[2.25rem_1fr] gap-x-3 py-5 sm:grid-cols-[3.5rem_1fr] sm:gap-x-4">
           <span />
           <div className="flex items-start gap-4">
             <Spinner size={34} />
