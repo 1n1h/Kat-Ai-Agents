@@ -31,6 +31,12 @@ const VOICE_NOTE =
   "markdown, no lists, no headings. Offer to go deeper instead of " +
   "elaborating unprompted.]";
 
+const CLOUD_NOTE =
+  "\n\n[Cloud session: file tools are unavailable here. Work from the " +
+  "conversation only, and ask the user to paste any document text they " +
+  "want analyzed. The full file workspace runs on the firm's local " +
+  "install.]";
+
 const sanitize = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
 
 /** Each matter gets its own working directory; agents only ever see that dir. */
@@ -53,6 +59,88 @@ function buildPrompt(messages: ChatMessage[]): string {
 const enc = new TextEncoder();
 const line = (obj: unknown) => enc.encode(JSON.stringify(obj) + "\n");
 
+/**
+ * Cloud fallback: no agent runtime or disk, so chat runs on the direct
+ * Anthropic API. "Auto" becomes a fast haiku router that picks the
+ * specialist, whose persona then answers with streamed deltas.
+ */
+async function cloudChat(
+  messages: ChatMessage[],
+  agentId: AgentId,
+  voice?: boolean,
+): Promise<Response> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return Response.json(
+      { error: "ANTHROPIC_API_KEY is not configured." },
+      { status: 500 },
+    );
+  }
+  const { default: Anthropic } = await import("@anthropic-ai/sdk");
+  const client = new Anthropic();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        let chosen = agentId as Exclude<AgentId, "auto">;
+        if (agentId === "auto" || !SPECIALISTS[chosen]) {
+          controller.enqueue(line({ t: "status", text: "triaging request" }));
+          const pick = await client.messages.create({
+            model: MODEL_IDS.haiku,
+            max_tokens: 16,
+            system:
+              "You route legal requests to a specialist. Reply with exactly " +
+              "one id and nothing else: litigation-analysis | " +
+              "contract-review | drafting | citation-check | strategy.",
+            messages: [
+              {
+                role: "user",
+                content: messages[messages.length - 1].content.slice(0, 4000),
+              },
+            ],
+          });
+          const id = (
+            pick.content[0]?.type === "text" ? pick.content[0].text : ""
+          ).trim();
+          chosen = (
+            id in SPECIALISTS ? id : "strategy"
+          ) as Exclude<AgentId, "auto">;
+          controller.enqueue(
+            line({ t: "status", text: `delegating: ${chosen}` }),
+          );
+        }
+
+        const spec = SPECIALISTS[chosen];
+        const s = client.messages.stream({
+          model:
+            MODEL_IDS[(spec.model ?? "sonnet") as keyof typeof MODEL_IDS],
+          max_tokens: 8000,
+          system: spec.prompt + CLOUD_NOTE + (voice ? VOICE_NOTE : ""),
+          messages: messages.map(({ role, content }) => ({ role, content })),
+        });
+        s.on("text", (t) => controller.enqueue(line({ t: "delta", text: t })));
+        await s.finalMessage();
+        controller.enqueue(line({ t: "done" }));
+      } catch (err) {
+        controller.enqueue(
+          line({
+            t: "error",
+            text: err instanceof Error ? err.message : String(err),
+          }),
+        );
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "no-cache",
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json(
@@ -68,20 +156,18 @@ export async function POST(req: NextRequest) {
   }
 
   // the agent runtime is excluded from cloud deploys (function size limit);
-  // import it lazily so this route degrades with a clear message there
-  let query: typeof import("@anthropic-ai/claude-agent-sdk").query;
-  let cwd: string;
+  // import it lazily and fall back to the direct Anthropic API there
+  let query: typeof import("@anthropic-ai/claude-agent-sdk").query | null =
+    null;
+  let cwd = "";
   try {
     ({ query } = await import("@anthropic-ai/claude-agent-sdk"));
     cwd = matterDir(matterId);
   } catch {
-    return Response.json(
-      {
-        error:
-          "Chat runs on the local CounselOS install for now — the cloud version is a later phase.",
-      },
-      { status: 503 },
-    );
+    query = null;
+  }
+  if (!query || !cwd) {
+    return cloudChat(messages, agentId, voice);
   }
 
   const promptText = buildPrompt(messages) + (voice ? VOICE_NOTE : "");

@@ -66,8 +66,10 @@ function Turn({
   const isUser = msg.role === "user";
   const label = isUser ? "You" : agentById(msg.agentId ?? "auto").name;
   return (
-    <div className="grid grid-cols-[2.25rem_1fr] gap-x-3 py-6 sm:grid-cols-[3.5rem_1fr] sm:gap-x-4">
-      <span className="pt-1 text-right font-mono text-[12px] text-faint select-none">
+    // Bates locator hangs in the left margin so the text column stays
+    // flush with the composer below it
+    <div className="relative py-6">
+      <span className="absolute top-[1.55rem] -left-12 hidden w-9 text-right font-mono text-[12px] text-faint select-none sm:block">
         {bates(index)}
       </span>
       <div>
@@ -134,8 +136,7 @@ export default function Transcript({
       )}
 
       {streaming && (
-        <div className="grid grid-cols-[2.25rem_1fr] gap-x-3 py-5 sm:grid-cols-[3.5rem_1fr] sm:gap-x-4">
-          <span />
+        <div className="py-5">
           <div className="flex items-start gap-4">
             <Spinner size={34} />
             <div className="space-y-1 pt-1">

@@ -37,10 +37,13 @@ import VoiceMode from "./VoiceMode";
 import SettingsDialog from "./SettingsDialog";
 import { ConnectorsDialog } from "./connectors";
 import { getSettings, isLightTheme, setTheme } from "@/lib/settings";
+import { cloudList } from "@/lib/cloudFiles";
 
 interface MatterFile {
   name: string;
   size: number;
+  /** present for Firebase Storage files (cloud sessions) */
+  url?: string;
 }
 
 /** A few voices per time of day so the hero never feels canned. */
@@ -142,14 +145,30 @@ export default function Workspace() {
     if (ready) saveState({ matters, threads });
   }, [ready, matters, threads]);
 
-  /* ── case files ── */
+  /* ── case files: local working directory merged with cloud storage ── */
   useEffect(() => {
     if (!matterId) return;
-    fetch(`/api/files?matterId=${encodeURIComponent(matterId)}`)
-      .then((r) => r.json())
-      .then((d) => setFiles(d.files ?? []))
-      .catch(() => setFiles([]));
-  }, [matterId, streaming]);
+    let alive = true;
+    void (async () => {
+      const [server, cloud] = await Promise.all([
+        fetch(`/api/files?matterId=${encodeURIComponent(matterId)}`)
+          .then((r) => r.json())
+          .then((d) => (d.files ?? []) as MatterFile[])
+          .catch(() => [] as MatterFile[]),
+        cloudList(matterId),
+      ]);
+      if (!alive) return;
+      const merged = new Map<string, MatterFile>();
+      for (const f of server) merged.set(f.name, f);
+      for (const f of cloud) {
+        merged.set(f.name, { name: f.name, size: f.size, url: f.url });
+      }
+      setFiles([...merged.values()]);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [matterId, streaming, user]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -275,6 +294,7 @@ export default function Workspace() {
 
     const blocks: string[] = [];
     const filesMade = new Set<string>();
+    let deltaIdx = -1; // cloud chat streams partial text as deltas
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -310,6 +330,14 @@ export default function Workspace() {
               };
               if (ev.t === "text" && ev.text) {
                 blocks.push(ev.text);
+                deltaIdx = -1;
+                setLive(blocks.join("\n\n"));
+              } else if (ev.t === "delta" && ev.text) {
+                if (deltaIdx === -1) {
+                  deltaIdx = blocks.length;
+                  blocks.push("");
+                }
+                blocks[deltaIdx] += ev.text;
                 setLive(blocks.join("\n\n"));
               } else if (ev.t === "status" && ev.text) {
                 setStatuses((prev) => [...prev, ev.text!]);
@@ -614,8 +642,13 @@ export default function Workspace() {
                     {files.map((f) => (
                       <li key={f.name}>
                         <a
-                          href={`/api/files/download?matterId=${encodeURIComponent(matterId)}&name=${encodeURIComponent(f.name)}`}
-                          download
+                          href={
+                            f.url ??
+                            `/api/files/download?matterId=${encodeURIComponent(matterId)}&name=${encodeURIComponent(f.name)}`
+                          }
+                          download={f.name}
+                          target={f.url ? "_blank" : undefined}
+                          rel={f.url ? "noopener" : undefined}
                           className="block truncate rounded px-2 py-1 font-mono text-[12px] text-muted transition-colors hover:bg-panel-deep hover:text-ink"
                           title={`Download ${f.name}`}
                         >
@@ -756,7 +789,7 @@ export default function Workspace() {
 
       {/* ── main ──────────────────────────────────────────────── */}
       <main className="grain flex min-w-0 flex-1 flex-col">
-        <header className="rise rise-2 flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-6">
+        <header className="rise rise-2 flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
             {!sidebarOpen && (
               <button

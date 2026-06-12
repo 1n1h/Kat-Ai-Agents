@@ -70,9 +70,43 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     // a failed model download would otherwise poison every later request
     ttsPromise = null;
+    // cloud deploys exclude the kokoro stack — fall back to ElevenLabs there
+    const el = await elevenLabsTTS(clean);
+    if (el) return el;
     return Response.json(
       { error: err instanceof Error ? err.message : "TTS failed." },
       { status: 500 },
     );
+  }
+}
+
+/**
+ * ElevenLabs fallback for cloud sessions. Flash model + 64kbps mp3 keeps
+ * per-character cost minimal; voice-mode replies are already brief.
+ */
+async function elevenLabsTTS(text: string): Promise<Response | null> {
+  const key = process.env.ELEVENLABS_API_KEY;
+  if (!key) return null;
+  try {
+    const res = await fetch(
+      "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM?output_format=mp3_44100_64",
+      {
+        method: "POST",
+        headers: { "xi-api-key": key, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: text.slice(0, 1500),
+          model_id: "eleven_flash_v2_5",
+        }),
+      },
+    );
+    if (!res.ok) return null;
+    return new Response(res.body, {
+      headers: {
+        "Content-Type": "audio/mpeg",
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch {
+    return null;
   }
 }

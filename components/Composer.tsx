@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import type { AgentId } from "@/lib/agent-meta";
+import { cloudUpload } from "@/lib/cloudFiles";
 import AgentSelect from "./AgentSelect";
 
 export default function Composer({
@@ -84,8 +85,16 @@ export default function Composer({
       form.set("matterId", matterId);
       for (const f of list) form.append("files", f);
       const res = await fetch("/api/files", { method: "POST", body: form });
-      const data = (await res.json()) as { saved?: string[] };
-      setAttached((prev) => [...prev, ...(data.saved ?? [])]);
+      if (res.ok) {
+        const data = (await res.json()) as { saved?: string[] };
+        setAttached((prev) => [...prev, ...(data.saved ?? [])]);
+      } else {
+        // cloud deploy has no disk — upload to Firebase Storage instead
+        const saved = await cloudUpload(matterId, list);
+        setAttached((prev) => [...prev, ...saved]);
+      }
+    } catch {
+      /* upload failed — chips simply don't appear */
     } finally {
       setUploading(false);
     }
