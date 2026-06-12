@@ -5,7 +5,7 @@ import AuthDialog from "@/components/AuthDialog";
 import LandingHeader from "./LandingHeader";
 import TrustBar from "./TrustBar";
 import Hero from "./Hero";
-import OrchestrationDiagram from "./OrchestrationDiagram";
+import OrchestrationShowcase from "./OrchestrationShowcase";
 import AgentCards from "./AgentCards";
 import Capabilities from "./Capabilities";
 import TrustSection from "./TrustSection";
@@ -56,16 +56,16 @@ export default function LandingPage() {
                 You speak to the orchestrator. It runs the rest.
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-center text-[15.5px] leading-relaxed text-ink-soft">
-                The orchestrator triages your matter and delegates each step to
-                the right specialist — analysis before drafting, validation
-                before delivery. Hover any node to see what it does.
+                Watch one request move through the orchestration layer — planned,
+                routed to each specialist, drafted, and citation-checked before it
+                returns to you.
               </p>
             </div>
             <div
               className={revealClass(diagram.shown, "mt-12")}
               style={{ transitionDelay: diagram.shown ? "120ms" : undefined }}
             >
-              <OrchestrationDiagram />
+              <OrchestrationShowcase />
             </div>
           </div>
         </section>

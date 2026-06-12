@@ -1,0 +1,798 @@
+/* Scoped styles for the orchestration showcase. Everything is namespaced under
+   .cos-orch so none of these generic class names leak into the rest of the app.
+   Fonts are mapped to the CounselOS type stack. */
+
+.cos-orch {
+  --bg: #1d1e19;
+  --side: #171813;
+  --deep: #121310;
+  --surface: #2b2c25;
+  --surface-2: #32332b;
+  --border: #3a3b32;
+  --border-lt: #4a4b40;
+  --text: #eceadf;
+  --muted: #8b8e82;
+  --green: #7fd99a;
+  --green-dim: #3a5a45;
+  --green-glow: rgba(127, 217, 154, 0.25);
+  --amber: #e6b35a;
+  --red: #e0705f;
+  --paper: #edeade;
+  --ink: #2b2b26;
+  --mono: var(--font-mono);
+  --sans: var(--font-sans);
+  --serif: var(--font-serif);
+
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  font-family: var(--sans);
+  color: var(--text);
+}
+.cos-orch * {
+  box-sizing: border-box;
+}
+
+.cos-orch .frame {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--bg);
+  height: 640px;
+}
+
+.cos-orch .ticker {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+}
+.cos-orch .ticker-box {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 15px;
+  background: rgba(18, 19, 16, 0.78);
+  backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+.cos-orch .ticker-box .cursor {
+  display: inline-block;
+  width: 6px;
+  height: 11px;
+  background: var(--green);
+  vertical-align: -1px;
+  margin-left: 6px;
+  animation: cosBlink 1s steps(1) infinite;
+}
+@keyframes cosBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ===== SCENE 1 · THE REAL UI ===== */
+.cos-orch .ui-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 10;
+  background: var(--bg);
+}
+.cos-orch .sidebar {
+  width: 196px;
+  flex-shrink: 0;
+  background: var(--side);
+  border-right: 1px solid #26271f;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  font-size: 12.5px;
+}
+.cos-orch .logo {
+  font-family: var(--serif);
+  font-size: 19px;
+  letter-spacing: 0.01em;
+  margin-bottom: 22px;
+}
+.cos-orch .logo b {
+  font-weight: 600;
+  color: var(--text);
+}
+.cos-orch .logo span {
+  color: var(--green);
+  font-weight: 600;
+}
+.cos-orch .side-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #c9c8bb;
+  padding: 8px 8px;
+  border-radius: 8px;
+}
+.cos-orch .side-item svg {
+  width: 15px;
+  height: 15px;
+  stroke: #9a9d90;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cos-orch .side-sub {
+  margin-left: 14px;
+  color: #9a9d90;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.cos-orch .side-sub.active {
+  background: #26271f;
+  color: var(--text);
+}
+.cos-orch .side-label {
+  font-size: 10.5px;
+  color: #6e7166;
+  margin: 16px 8px 6px;
+}
+.cos-orch .side-empty {
+  font-size: 11px;
+  color: #5f6258;
+  font-style: italic;
+  margin: 2px 8px;
+}
+.cos-orch .side-foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #23241d;
+}
+.cos-orch .avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #d96a3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+}
+.cos-orch .side-foot .un {
+  font-size: 12px;
+  font-weight: 600;
+}
+.cos-orch .side-foot .st {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.cos-orch .main {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+.cos-orch .crumb {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.3em;
+  color: #6e7166;
+  text-transform: uppercase;
+  padding: 18px 24px;
+}
+.cos-orch .crumb b {
+  color: #9a9d90;
+  font-weight: 400;
+}
+
+.cos-orch .home {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 36px;
+}
+.cos-orch .greet {
+  font-family: var(--serif);
+  font-size: 34px;
+  color: var(--text);
+  margin-bottom: 30px;
+}
+.cos-orch .composer {
+  width: min(620px, 100%);
+  background: #26271f;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 16px 12px;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.3);
+}
+.cos-orch .composer .field {
+  min-height: 46px;
+  font-size: 13px;
+  color: #d8d6c9;
+  line-height: 1.55;
+  padding: 2px 4px;
+}
+.cos-orch .attach {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #2e2f27;
+  border: 1px solid var(--border-lt);
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+  max-width: 300px;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+}
+.cos-orch .fico {
+  width: 32px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--paper);
+  color: #b3402e;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  flex-shrink: 0;
+  box-shadow: inset 0 -10px 14px -12px rgba(0, 0, 0, 0.5);
+}
+.cos-orch .fmeta {
+  flex: 1;
+  min-width: 0;
+}
+.cos-orch .fname {
+  font-size: 12px;
+  color: #e3e1d4;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cos-orch .fsub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.cos-orch .fsub .fsize {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+}
+.cos-orch .fbar {
+  flex: 1;
+  height: 3px;
+  border-radius: 3px;
+  background: #3c3e34;
+  overflow: hidden;
+  display: block;
+}
+.cos-orch .fbar i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--green);
+  border-radius: 3px;
+}
+.cos-orch .fdone {
+  font-size: 10px;
+  color: var(--green);
+  opacity: 0;
+  font-weight: 700;
+}
+.cos-orch .composer .cos-caret {
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  background: var(--green);
+  vertical-align: -2px;
+}
+.cos-orch .composer .row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+}
+.cos-orch .composer .plus {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b8e82;
+  font-size: 17px;
+}
+.cos-orch .composer .grow {
+  flex: 1;
+}
+.cos-orch .composer .model {
+  font-size: 12px;
+  color: #b9b8ab;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.cos-orch .composer .model svg {
+  width: 11px;
+  height: 11px;
+  stroke: #8b8e82;
+  fill: none;
+  stroke-width: 2;
+}
+.cos-orch .cicon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cos-orch .cicon svg {
+  width: 15px;
+  height: 15px;
+  stroke: #9a9d90;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cos-orch .send-up {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #33342b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cos-orch .send-up svg {
+  width: 14px;
+  height: 14px;
+  stroke: #cfcec2;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cos-orch .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  justify-content: center;
+  margin-top: 18px;
+  max-width: 680px;
+}
+.cos-orch .chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  border: 1px solid #383930;
+  border-radius: 9px;
+  padding: 8px 13px;
+  font-size: 12px;
+  color: #c9c8bb;
+}
+.cos-orch .chip .em {
+  font-size: 11px;
+}
+.cos-orch .chip .gm {
+  color: #ea4335;
+  font-weight: 700;
+  font-family: var(--sans);
+}
+.cos-orch .chip .dr {
+  color: #4f8df5;
+  font-weight: 700;
+}
+.cos-orch .chip .cal {
+  color: #34a853;
+  font-weight: 700;
+}
+.cos-orch .chip svg {
+  width: 13px;
+  height: 13px;
+  stroke: var(--green);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cos-orch .thread {
+  position: absolute;
+  inset: 0;
+  padding: 54px 38px 70px;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+}
+.cos-orch .msg {
+  max-width: 74%;
+  padding: 12px 15px;
+  border-radius: 13px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.cos-orch .msg.user {
+  background: #27342a;
+  border: 1px solid var(--green-dim);
+  align-self: flex-end;
+  color: #dfe8df;
+  opacity: 0;
+  transform: translateY(8px);
+}
+.cos-orch .msg.reply {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  align-self: flex-start;
+  opacity: 0;
+  transform: translateY(8px);
+}
+.cos-orch .msg.reply .rh {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cos-orch .msg.reply .rl {
+  font-size: 12.5px;
+  color: #d8d6cb;
+  margin: 4px 0;
+  opacity: 0;
+  transform: translateY(5px);
+}
+.cos-orch .msg.reply .rl span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  margin-right: 8px;
+}
+.cos-orch .chip-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  opacity: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--green);
+  border: 1px solid var(--green-dim);
+  border-radius: 6px;
+  padding: 4px 9px;
+  background: #1d2a20;
+}
+.cos-orch .msg-attach {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #bcd4c0;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--green-dim);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  width: fit-content;
+}
+.cos-orch .mfico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 23px;
+  border-radius: 4px;
+  background: var(--paper);
+  color: #b3402e;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+/* ===== SCENE 2 · BACKEND ===== */
+.cos-orch .backend {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  opacity: 0;
+  background:
+    radial-gradient(90% 70% at 50% 0%, rgba(127, 217, 154, 0.05), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(255, 255, 255, 0.022) 39px 40px),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(255, 255, 255, 0.022) 39px 40px),
+    var(--deep);
+}
+.cos-orch .rail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  will-change: transform;
+}
+.cos-orch .station {
+  position: relative;
+  width: 480px;
+  flex-shrink: 0;
+  height: 100%;
+  padding-top: 118px;
+}
+.cos-orch .railline {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #32342b;
+}
+.cos-orch .raillit {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--green);
+  transform: scaleX(0);
+  transform-origin: left;
+  box-shadow: 0 0 8px var(--green-glow);
+}
+.cos-orch .node {
+  position: absolute;
+  top: 150px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--paper);
+  border: 1px solid #d9d5c4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+}
+.cos-orch .node svg {
+  width: 26px;
+  height: 26px;
+  stroke: #2e8a55;
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cos-orch .station.lit .node {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(127, 217, 154, 0.35), 0 0 38px var(--green-glow);
+}
+.cos-orch .agent-name {
+  position: absolute;
+  top: 196px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: 100%;
+}
+.cos-orch .agent-name .n {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+}
+.cos-orch .agent-name .r {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.cos-orch .spot {
+  position: absolute;
+  top: 248px;
+  left: 50%;
+  transform: translateX(-50%) translateY(14px);
+  width: 374px;
+  background: var(--paper);
+  border: 1px solid #d9d5c4;
+  border-radius: 12px;
+  padding: 15px 17px;
+  opacity: 0;
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.6);
+}
+.cos-orch .spot .what {
+  font-size: 12px;
+  color: #33332c;
+  line-height: 1.5;
+  margin-bottom: 11px;
+  font-weight: 500;
+}
+.cos-orch .step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #3f3e33;
+  padding: 5px 0;
+  opacity: 0;
+  transform: translateX(-6px);
+}
+.cos-orch .step .tick {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #b5b19c;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.cos-orch .step .tick svg {
+  width: 9px;
+  height: 9px;
+  stroke: #fff;
+  stroke-width: 3.6;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cos-orch .step .tick svg path {
+  stroke-dasharray: 14;
+  stroke-dashoffset: 14;
+}
+.cos-orch .step.failstep .tick {
+  border-color: #d9a294;
+}
+.cos-orch .step.failstep {
+  color: #9c3a28;
+  font-weight: 600;
+}
+.cos-orch .out {
+  margin-top: 12px;
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #1d5c37;
+  border: 1px solid #9cc7a8;
+  border-left: 3px solid #2e8a55;
+  border-radius: 7px;
+  padding: 7px 11px;
+  background: #dcedde;
+  opacity: 0;
+  transform: translateY(6px);
+}
+.cos-orch .out.warn {
+  color: #7a5410;
+  border-color: #d9c08a;
+  border-left-color: #b97f1d;
+  background: #f3e3bd;
+}
+.cos-orch .plan .step .num {
+  font-size: 10px;
+  color: #8a8672;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.cos-orch .packet {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  width: 44px;
+  height: 32px;
+  z-index: 3;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+.cos-orch .packet .paper {
+  width: 100%;
+  height: 100%;
+  background: var(--paper);
+  border: 1px solid #d9d5c4;
+  border-radius: 6px;
+  box-shadow: 0 0 20px var(--green-glow), 0 5px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: center;
+  padding: 0 8px;
+}
+.cos-orch .packet .paper i {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: #b3afa0;
+}
+.cos-orch .packet .paper i:nth-child(2) {
+  width: 70%;
+}
+
+.cos-orch .replay {
+  position: absolute;
+  right: 14px;
+  bottom: 13px;
+  font-family: var(--mono);
+  font-size: 10px;
+  z-index: 40;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  background: rgba(18, 19, 16, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.cos-orch .replay:hover {
+  color: var(--green);
+  border-color: var(--green-dim);
+}
+
+@media (max-width: 760px) {
+  .cos-orch .sidebar {
+    display: none;
+  }
+  .cos-orch .frame {
+    height: 600px;
+  }
+  .cos-orch .station {
+    width: 330px;
+  }
+  .cos-orch .spot {
+    width: 294px;
+  }
+  .cos-orch .greet {
+    font-size: 24px;
+  }
+  .cos-orch .chips {
+    gap: 6px;
+  }
+  .cos-orch .chip {
+    font-size: 10.5px;
+    padding: 6px 9px;
+  }
+  .cos-orch .ticker-box {
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    max-width: 92vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cos-orch .ticker-box .cursor {
+    animation: none;
+  }
+}
