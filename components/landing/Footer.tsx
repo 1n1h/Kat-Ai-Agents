@@ -9,14 +9,15 @@ export default function Footer() {
             <span className="font-serif text-[13px] text-accent">✳</span>
           </span>
           <span className="font-serif text-[15px] text-ink">
-            Counsel<span className="text-accent">OS</span>
+            Sheehe <span className="text-accent">&amp;</span> Associates
           </span>
         </div>
         <p className="font-mono text-[11px] tracking-[0.16em] text-faint uppercase">
-          Privileged &amp; confidential · The AI workspace for attorneys
+          Privileged &amp; confidential · Experience. Knowledge. Strategy.
         </p>
         <p className="text-[12px] text-muted">
-          © {new Date().getFullYear()} CounselOS
+          © {new Date().getFullYear()} Sheehe &amp; Associates, P.A. · Powered
+          by CounselOS
         </p>
       </div>
     </footer>

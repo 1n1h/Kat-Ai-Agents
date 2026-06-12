@@ -38,7 +38,7 @@ export default function LandingHeader({
           <span className="font-serif text-[15px] text-accent">✳</span>
         </span>
         <span className="font-serif text-lg text-ink">
-          Counsel<span className="text-accent">OS</span>
+          Sheehe <span className="text-accent">&amp;</span> Associates
         </span>
       </div>
 

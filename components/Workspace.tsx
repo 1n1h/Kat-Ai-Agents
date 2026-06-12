@@ -623,9 +623,14 @@ export default function Workspace() {
         }`}
       >
         <div className="rise rise-1 flex items-center justify-between px-5 pt-5 pb-3">
-          <h1 className="font-serif text-2xl tracking-tight">
-            Counsel<span className="text-accent">OS</span>
-          </h1>
+          <div>
+            <h1 className="font-serif text-lg leading-tight tracking-tight">
+              Sheehe <span className="text-accent">&amp;</span> Associates
+            </h1>
+            <p className="mt-0.5 font-mono text-[9px] tracking-[0.16em] text-muted">
+              EXPERIENCE · KNOWLEDGE · STRATEGY
+            </p>
+          </div>
           <button
             onClick={() => setSidebarOpen(false)}
             title="Close sidebar"

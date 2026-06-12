@@ -63,7 +63,7 @@ export default function Tour({
     const raw: Step[] = [
       {
         popover: {
-          title: "Welcome to CounselOS",
+          title: "Welcome to the firm's AI workspace",
           description:
             "A 30-second tour of the essentials. You can skip any time, and you'll only see this once.",
         },

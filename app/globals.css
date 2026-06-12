@@ -5,20 +5,21 @@
   the `.light` class on <html> switches to the paper palette.
 */
 @theme {
-  --color-paper: #262624;
-  --color-panel: #1f1e1c;
-  --color-panel-deep: #30302e;
-  --color-ink: #eceae2;
-  --color-ink-soft: #c2c0b6;
-  --color-muted: #9b968c;
-  --color-faint: #6e6a61;
-  --color-line: #393834;
-  --color-line-strong: #4a4843;
-  --color-accent: #5fae7f;
-  --color-accent-soft: #79c096;
-  --color-accent-wash: #26392e;
-  --color-input: #30302e;
-  --color-ok: #7a9a6f;
+  /* Sheehe & Associates: deep litigation navy with brass accents */
+  --color-paper: #0f1b26;
+  --color-panel: #0a141d;
+  --color-panel-deep: #182a3b;
+  --color-ink: #ece6d8;
+  --color-ink-soft: #c7c0ae;
+  --color-muted: #9b9587;
+  --color-faint: #6f6b60;
+  --color-line: #1e3144;
+  --color-line-strong: #2d4459;
+  --color-accent: #c9a55c;
+  --color-accent-soft: #dbbc77;
+  --color-accent-wash: #2b2414;
+  --color-input: #182a3b;
+  --color-ok: #7c9a6d;
 
   /* inner fallbacks keep the stack valid even if a webfont fails to load */
   --font-serif: var(--font-source-serif, Georgia), Georgia, serif;
@@ -30,28 +31,28 @@
 
 :root {
   --grain-dot: rgba(255, 255, 255, 0.02);
-  --color-code: #8cc9a0; /* green inline-code chips */
+  --color-code: #d9be82; /* brass inline-code chips */
   color-scheme: dark;
 }
 
 .light {
-  --color-paper: #faf9f5;
-  --color-panel: #f0eee6;
-  --color-panel-deep: #e9e6da;
-  --color-ink: #1f1e1d;
-  --color-ink-soft: #4a463f;
-  --color-muted: #7a7468;
-  /* darkened from #a8a195 so faint text is legible on the vanilla cards */
-  --color-faint: #8a8270;
-  --color-line: #e4e0d5;
-  --color-line-strong: #d3cec0;
-  --color-accent: #3a7d54;
-  --color-accent-soft: #4f9a6c;
-  --color-accent-wash: #e2efe5;
-  --color-input: rgba(255, 255, 255, 0.6);
+  --color-paper: #f7f4ec;
+  --color-panel: #efeae0;
+  --color-panel-deep: #e4ddcd;
+  --color-ink: #1c2630;
+  --color-ink-soft: #3d4b58;
+  --color-muted: #69757f;
+  /* kept dark enough that faint text stays legible on the cream cards */
+  --color-faint: #8b8576;
+  --color-line: #e1daca;
+  --color-line-strong: #cec5b0;
+  --color-accent: #8f6f33;
+  --color-accent-soft: #a9894c;
+  --color-accent-wash: #f0e7d1;
+  --color-input: rgba(255, 255, 255, 0.65);
   --color-ok: #5a7a52;
-  --grain-dot: rgba(31, 30, 29, 0.025);
-  --color-code: #2e7048;
+  --grain-dot: rgba(28, 38, 48, 0.03);
+  --color-code: #7a5c20;
   color-scheme: light;
 }
 

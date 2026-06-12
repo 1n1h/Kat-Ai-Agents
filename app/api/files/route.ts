@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     return Response.json(
       {
         error:
-          "File storage runs on the local CounselOS install for now — the cloud version is a later phase.",
+          "Direct upload isn't available here — files are stored in the firm's cloud storage instead.",
       },
       { status: 503 },
     );

@@ -3,8 +3,9 @@ Ignore this document. Don't implement these. These are just my ideas.
 - admin dashboard track analytics of the firm, revenue, productivity, case load of each attorney, 
 - ability to generate invoice , get paid via stripe, and link to case and client in the database
 - be able to see past messages, and chat history. also have a feature to select messages and "archive" or "delete them permanently". 
-Also ability to create custom prompts to assist in case management 
 - be able to tag certain messages as "important" or "urgent" and have a separate list of important messages, and urgent messages
 - wire agents with tools - search - custom tools - - add create skills
 - record screen , record calls. 
 - comunicate with team in app , share docs, 
+- Workflows 
+

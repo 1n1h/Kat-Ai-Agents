@@ -68,7 +68,7 @@ const identityNote = (id: Exclude<AgentId, "auto">) =>
  * direct API: the user only ever talks to the orchestrator, which consults
  * specialists privately and answers in one synthesized voice.
  */
-const ORCH_CLOUD_PROMPT = `You are the orchestrator of CounselOS, the single point of contact the user talks to. The user speaks only to you; they never address a specialist directly, and you never tell them to "talk to" another agent or hand them off.
+const ORCH_CLOUD_PROMPT = `You are the orchestrator of the Sheehe & Associates AI workspace, the single point of contact the user talks to. The user speaks only to you; they never address a specialist directly, and you never tell them to "talk to" another agent or hand them off.
 
 You coordinate a team of specialists and speak for the whole system in one steady voice:
 - Litigation Analysis — depositions, discovery, timelines, contradictions, buried admissions, evidence gaps (read-only).
@@ -120,8 +120,19 @@ const cachedSystem = (text: string) => [
 
 type SpecialistId = Exclude<AgentId, "auto">;
 
-const modelFor = (id: SpecialistId) =>
-  MODEL_IDS[(SPECIALISTS[id].model ?? "sonnet") as keyof typeof MODEL_IDS];
+/**
+ * Cloud model selection. Cloud calls bill per token on the API key, so
+ * opus-tier specialists are downshifted to sonnet here (quality is close
+ * for chat-sized work; the local install keeps opus on subscription).
+ * Set CLOUD_FULL_MODELS=1 to disable the downshift.
+ */
+const modelFor = (id: SpecialistId) => {
+  const short = (SPECIALISTS[id].model ?? "sonnet") as keyof typeof MODEL_IDS;
+  if (short === "opus" && !process.env.CLOUD_FULL_MODELS) {
+    return MODEL_IDS.sonnet;
+  }
+  return MODEL_IDS[short];
+};
 
 const textOf = (content: { type: string; text?: string }[]) =>
   content

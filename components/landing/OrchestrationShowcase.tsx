@@ -665,7 +665,7 @@ export default function OrchestrationShowcase() {
                 verify every citation.
               </div>
               <div className="msg reply" id="reply">
-                <div className="rh">CounselOS · Orchestrated</div>
+                <div className="rh">Sheehe &amp; Associates · Orchestrated</div>
                 <div className="rl">
                   <span>01</span>3 risk clauses flagged — severity ranked (§8.2,
                   §11.4, §14.1)
