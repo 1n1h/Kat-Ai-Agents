@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Briefcase,
   Cable,
@@ -114,6 +115,10 @@ export default function Workspace() {
   const [newCaseName, setNewCaseName] = useState("");
   const [caseMenuFor, setCaseMenuFor] = useState<string | null>(null);
   const [caseMenuMode, setCaseMenuMode] = useState<"main" | "confirm">("main");
+  /* anchor (viewport coords) for whichever kebab menu is open */
+  const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [renamingCaseId, setRenamingCaseId] = useState<string | null>(null);
   const [renameCaseText, setRenameCaseText] = useState("");
   const [heroLeaving, setHeroLeaving] = useState(false);
@@ -565,7 +570,17 @@ export default function Workspace() {
   if (!ready) return null;
 
   const menuItem =
-    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13.5px] text-ink transition-colors hover:bg-panel";
+    "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] text-ink transition-colors hover:bg-panel";
+
+  /* fixed-position panel anchored to the trigger, clamped to the viewport */
+  const menuStyle = menuPos
+    ? {
+        left: Math.max(8, Math.min(menuPos.x - 176, window.innerWidth - 184)),
+        top: Math.min(menuPos.y + 4, window.innerHeight - 230),
+      }
+    : undefined;
+  const menuPanel =
+    "pop fixed z-[80] w-44 rounded-lg border border-line-strong bg-panel-deep p-1 shadow-2xl";
 
   const renderThreadRow = (t: Thread) => (
     <li key={t.id} className="group relative">
@@ -602,7 +617,10 @@ export default function Workspace() {
           </button>
           <button
             data-thread-menu
-            onClick={() => {
+            onClick={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              setMenuPos({ x: r.right, y: r.bottom });
+              setCaseMenuFor(null);
               setMenuFor(menuFor === t.id ? null : t.id);
               setMenuMode("main");
             }}
@@ -615,87 +633,141 @@ export default function Workspace() {
           >
             <EllipsisVertical className="h-4 w-4" />
           </button>
-
-          {menuFor === t.id && (
-            <div
-              data-thread-menu
-              className="pop absolute top-8 right-0 z-40 w-56 rounded-xl border border-line-strong bg-panel-deep p-1.5 shadow-2xl"
-            >
-              {menuMode === "main" && (
-                <>
-                  <button className={menuItem} onClick={() => toggleStar(t)}>
-                    <Star
-                      className={`h-4 w-4 ${t.starred ? "fill-accent text-accent" : "text-muted"}`}
-                    />
-                    {t.starred ? "Unstar" : "Star"}
-                  </button>
-                  <button className={menuItem} onClick={() => startRename(t)}>
-                    <Pencil className="h-4 w-4 text-muted" />
-                    Rename
-                  </button>
-                  <button
-                    className={menuItem}
-                    onClick={() => setMenuMode("case")}
-                  >
-                    <Briefcase className="h-4 w-4 text-muted" />
-                    Add to Case
-                  </button>
-                  <hr className="my-1 border-line" />
-                  <button
-                    className={`${menuItem} text-accent hover:text-accent`}
-                    onClick={() => setMenuMode("confirm")}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </button>
-                </>
-              )}
-
-              {menuMode === "case" && (
-                <>
-                  <button
-                    className={`${menuItem} text-muted`}
-                    onClick={() => setMenuMode("main")}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Move to…
-                  </button>
-                  <hr className="my-1 border-line" />
-                  {matters
-                    .filter((m) => m.id !== t.matterId)
-                    .map((m) => (
-                      <button
-                        key={m.id}
-                        className={menuItem}
-                        onClick={() => moveThread(t.id, m.id)}
-                      >
-                        <Briefcase className="h-4 w-4 text-muted" />
-                        <span className="truncate">{m.name}</span>
-                      </button>
-                    ))}
-                  {matters.length < 2 && (
-                    <p className="px-2.5 py-2 text-[12.5px] text-faint italic">
-                      No other cases yet.
-                    </p>
-                  )}
-                </>
-              )}
-
-              {menuMode === "confirm" && (
-                <button
-                  className={`${menuItem} text-accent hover:text-accent`}
-                  onClick={() => deleteThread(t.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete permanently?
-                </button>
-              )}
-            </div>
-          )}
         </>
       )}
     </li>
   );
+
+  /* kebab menus render through a portal so nothing in the sidebar's
+     stacking contexts can paint over them */
+  const openThread = menuFor ? threads.find((t) => t.id === menuFor) : null;
+  const openCase = caseMenuFor
+    ? matters.find((m) => m.id === caseMenuFor)
+    : null;
+
+  const threadMenuPortal =
+    openThread && menuStyle && typeof document !== "undefined"
+      ? createPortal(
+          <div data-thread-menu className={menuPanel} style={menuStyle}>
+            {menuMode === "main" && (
+              <>
+                <button
+                  className={menuItem}
+                  onClick={() => toggleStar(openThread)}
+                >
+                  <Star
+                    className={`h-3.5 w-3.5 ${openThread.starred ? "fill-accent text-accent" : "text-muted"}`}
+                  />
+                  {openThread.starred ? "Unstar" : "Star"}
+                </button>
+                <button
+                  className={menuItem}
+                  onClick={() => startRename(openThread)}
+                >
+                  <Pencil className="h-3.5 w-3.5 text-muted" />
+                  Rename
+                </button>
+                <button className={menuItem} onClick={() => setMenuMode("case")}>
+                  <Briefcase className="h-3.5 w-3.5 text-muted" />
+                  Add to Case
+                </button>
+                <hr className="my-1 border-line" />
+                <button
+                  className={`${menuItem} text-accent hover:text-accent`}
+                  onClick={() => setMenuMode("confirm")}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete
+                </button>
+              </>
+            )}
+            {menuMode === "case" && (
+              <>
+                <button
+                  className={`${menuItem} text-muted`}
+                  onClick={() => setMenuMode("main")}
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  Move to…
+                </button>
+                <hr className="my-1 border-line" />
+                {matters
+                  .filter((m) => m.id !== openThread.matterId)
+                  .map((m) => (
+                    <button
+                      key={m.id}
+                      className={menuItem}
+                      onClick={() => moveThread(openThread.id, m.id)}
+                    >
+                      <Briefcase className="h-3.5 w-3.5 shrink-0 text-muted" />
+                      <span className="truncate">{m.name}</span>
+                    </button>
+                  ))}
+                {matters.length < 2 && (
+                  <p className="px-2 py-1.5 text-[12px] text-faint italic">
+                    No other cases yet.
+                  </p>
+                )}
+              </>
+            )}
+            {menuMode === "confirm" && (
+              <button
+                className={`${menuItem} text-accent hover:text-accent`}
+                onClick={() => deleteThread(openThread.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete permanently?
+              </button>
+            )}
+          </div>,
+          document.body,
+        )
+      : null;
+
+  const caseMenuPortal =
+    openCase && menuStyle && typeof document !== "undefined"
+      ? createPortal(
+          <div data-thread-menu className={menuPanel} style={menuStyle}>
+            {caseMenuMode === "main" ? (
+              <>
+                <button
+                  className={menuItem}
+                  onClick={() => toggleCaseStar(openCase)}
+                >
+                  <Star
+                    className={`h-3.5 w-3.5 ${openCase.starred ? "fill-accent text-accent" : "text-muted"}`}
+                  />
+                  {openCase.starred ? "Unstar" : "Star"}
+                </button>
+                <button
+                  className={menuItem}
+                  onClick={() => startCaseRename(openCase)}
+                >
+                  <Pencil className="h-3.5 w-3.5 text-muted" />
+                  Rename
+                </button>
+                <hr className="my-1 border-line" />
+                <button
+                  className={`${menuItem} text-accent hover:text-accent`}
+                  onClick={() => setCaseMenuMode("confirm")}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete
+                </button>
+              </>
+            ) : (
+              <button
+                className={`${menuItem} text-accent hover:text-accent`}
+                onClick={() => deleteCase(openCase.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete case &amp; threads?
+              </button>
+            )}
+          </div>,
+          document.body,
+        )
+      : null;
 
   const composer = (
     <Composer
@@ -740,7 +812,13 @@ export default function Workspace() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto pb-4">
+        <div
+          className="flex-1 overflow-y-auto pb-4"
+          onScroll={() => {
+            setMenuFor(null);
+            setCaseMenuFor(null);
+          }}
+        >
           {/* primary nav */}
           <nav className="rise rise-2 space-y-0.5 px-3 pt-2">
             <button
@@ -829,7 +907,10 @@ export default function Workspace() {
                         </button>
                         <button
                           data-thread-menu
-                          onClick={() => {
+                          onClick={(e) => {
+                            const r = e.currentTarget.getBoundingClientRect();
+                            setMenuPos({ x: r.right, y: r.bottom });
+                            setMenuFor(null);
                             setCaseMenuFor(caseMenuFor === m.id ? null : m.id);
                             setCaseMenuMode("main");
                           }}
@@ -842,50 +923,6 @@ export default function Workspace() {
                         >
                           <EllipsisVertical className="h-4 w-4" />
                         </button>
-
-                        {caseMenuFor === m.id && (
-                          <div
-                            data-thread-menu
-                            className="pop absolute top-8 right-0 z-40 w-56 rounded-xl border border-line-strong bg-panel-deep p-1.5 shadow-2xl"
-                          >
-                            {caseMenuMode === "main" ? (
-                              <>
-                                <button
-                                  className={menuItem}
-                                  onClick={() => toggleCaseStar(m)}
-                                >
-                                  <Star
-                                    className={`h-4 w-4 ${m.starred ? "fill-accent text-accent" : "text-muted"}`}
-                                  />
-                                  {m.starred ? "Unstar" : "Star"}
-                                </button>
-                                <button
-                                  className={menuItem}
-                                  onClick={() => startCaseRename(m)}
-                                >
-                                  <Pencil className="h-4 w-4 text-muted" />
-                                  Rename
-                                </button>
-                                <hr className="my-1 border-line" />
-                                <button
-                                  className={`${menuItem} text-accent hover:text-accent`}
-                                  onClick={() => setCaseMenuMode("confirm")}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                className={`${menuItem} text-accent hover:text-accent`}
-                                onClick={() => deleteCase(m.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                Delete case &amp; its threads?
-                              </button>
-                            )}
-                          </div>
-                        )}
                       </li>
                     ),
                   )}
@@ -1202,6 +1239,9 @@ export default function Workspace() {
         onClose={() => setSettingsOpen(false)}
         userEmail={user?.email}
       />
+
+      {threadMenuPortal}
+      {caseMenuPortal}
 
       {needsOnboarding && user?.uid && user.email && (
         <Onboarding
