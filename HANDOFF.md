@@ -75,6 +75,15 @@ Firm-pivot TODO:
     httpOnly refresh cookies, cached ~50min. outlook_create_draft never
     sends — drafts only, by design. For Vercel: mirror the six env vars
     + production redirect URIs in each provider console.
+  - **Status 2026-06-12 (late)**: ALL five connectable rows verified
+    CONNECTED locally (Outlook, Dropbox, Gmail, Drive, Calendar) plus
+    web_search (Tavily) tested end-to-end. Outlook gotcha that cost an
+    hour: TWO Entra registrations existed; env pointed at the dead
+    personal-only "Brown Intelligence Group" app — correct app is
+    "CounselOS" (client id 81528174-e042-43a1-a613-8f024e04a0b7).
+    Azure rule: GUID-shaped strings are IDs, never secrets.
+    Vercel still needs: the 7 connector env vars (correct CounselOS
+    values) + production redirect URIs + redeploy.
   - **Gmail caveat**: consent screen in Testing → only the 5 test users
     can connect; refresh tokens die after 7 days (reconnect).
   - **MyCase: pending** — Kat is registering at developers.mycase.com
