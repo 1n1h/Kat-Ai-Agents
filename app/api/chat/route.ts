@@ -37,6 +37,42 @@ const CLOUD_NOTE =
   "want analyzed. The full file workspace runs on the firm's local " +
   "install.]";
 
+/** User-facing professional role for each specialist (no persona names). */
+const ROLE_NAMES: Record<Exclude<AgentId, "auto">, string> = {
+  "litigation-analysis": "Litigation Analysis",
+  "contract-review": "Contract Review",
+  drafting: "Drafting",
+  "citation-check": "Citation Check",
+  strategy: "Practice Strategy",
+};
+
+/** Keep persona first-names internal — the user only meets professional roles. */
+const identityNote = (id: Exclude<AgentId, "auto">) =>
+  `\n\n[Identity: to the user you are the firm's ${ROLE_NAMES[id]} specialist. ` +
+  `If asked who you are, answer with that role. Never introduce yourself with ` +
+  `a personal first name or persona name.]`;
+
+/**
+ * Cloud orchestrator persona. The local install runs the real Atlas via the
+ * Agent SDK's Task tool; here we reproduce the single-voice contract on the
+ * direct API: the user only ever talks to the orchestrator, which consults
+ * specialists privately and answers in one synthesized voice.
+ */
+const ORCH_CLOUD_PROMPT = `You are the orchestrator of CounselOS, the single point of contact the user talks to. The user speaks only to you; they never address a specialist directly, and you never tell them to "talk to" another agent or hand them off.
+
+You coordinate a team of specialists and speak for the whole system in one steady voice:
+- Litigation Analysis — depositions, discovery, timelines, contradictions, buried admissions, evidence gaps (read-only).
+- Contract Review — clause-by-clause review, redlines with proposed language, ranked risk (read-only).
+- Drafting — assembles letters, briefs, and agreements from cited findings.
+- Citation Check — audits a draft against its sources and returns PASS or FAIL.
+- Practice Strategy — strategy and decision support for running the practice.
+
+When a message needs real legal work, use the consult_specialist tool to delegate to the right specialist(s) in a sensible order — analysis before drafting, drafting before citation-check — passing each one all the context it needs (specialists cannot see this conversation). You may consult more than once. Then synthesize their work into a single coherent answer in your own voice. Never paste a specialist's reply verbatim as if they were addressing the user, and never adopt a specialist's name.
+
+For greetings, small talk, clarifying questions, or questions about how you work, just answer directly, warmly, and briefly — do not consult anyone. Offer to begin when the user is ready.
+
+You have no personal name. You are the orchestrator. Do not call yourself Atlas, Sol, Cass, Lex, Vera, or any other personal name. No em dashes in anything you draft.`;
+
 const sanitize = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
 
 /** Each matter gets its own working directory; agents only ever see that dir. */
@@ -59,10 +95,46 @@ function buildPrompt(messages: ChatMessage[]): string {
 const enc = new TextEncoder();
 const line = (obj: unknown) => enc.encode(JSON.stringify(obj) + "\n");
 
+type SpecialistId = Exclude<AgentId, "auto">;
+
+const modelFor = (id: SpecialistId) =>
+  MODEL_IDS[(SPECIALISTS[id].model ?? "sonnet") as keyof typeof MODEL_IDS];
+
+const textOf = (content: { type: string; text?: string }[]) =>
+  content
+    .filter((b) => b.type === "text" && b.text)
+    .map((b) => b.text)
+    .join("")
+    .trim();
+
+/**
+ * Run one specialist privately and return its text. Specialists never see the
+ * conversation; the orchestrator hands them everything they need.
+ */
+async function runSpecialist(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: any,
+  id: SpecialistId,
+  instruction: string,
+): Promise<string> {
+  const spec = SPECIALISTS[id];
+  const res = await client.messages.create({
+    model: modelFor(id),
+    max_tokens: 8000,
+    system: spec.prompt + CLOUD_NOTE + identityNote(id),
+    messages: [{ role: "user", content: instruction.slice(0, 12000) }],
+  });
+  return textOf(res.content) || "(no output)";
+}
+
 /**
  * Cloud fallback: no agent runtime or disk, so chat runs on the direct
- * Anthropic API. "Auto" becomes a fast haiku router that picks the
- * specialist, whose persona then answers with streamed deltas.
+ * Anthropic API.
+ *
+ * "Auto" runs the orchestrator as the single voice the user talks to: it
+ * consults specialists privately via a tool and synthesizes one answer — the
+ * cloud equivalent of the local Task-tool pipeline. A directly chosen
+ * specialist answers in its own role, with persona names kept internal.
  */
 async function cloudChat(
   messages: ChatMessage[],
@@ -77,48 +149,112 @@ async function cloudChat(
   }
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic();
+  const convo = messages.map(({ role, content }) => ({ role, content }));
+  const isAuto = agentId === "auto" || !SPECIALISTS[agentId as SpecialistId];
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        let chosen = agentId as Exclude<AgentId, "auto">;
-        if (agentId === "auto" || !SPECIALISTS[chosen]) {
-          controller.enqueue(line({ t: "status", text: "triaging request" }));
-          const pick = await client.messages.create({
-            model: MODEL_IDS.haiku,
-            max_tokens: 16,
+        if (!isAuto) {
+          // Direct specialist: stream its reply, persona name kept internal.
+          const id = agentId as SpecialistId;
+          const spec = SPECIALISTS[id];
+          const s = client.messages.stream({
+            model: modelFor(id),
+            max_tokens: 8000,
             system:
-              "You route legal requests to a specialist. Reply with exactly " +
-              "one id and nothing else: litigation-analysis | " +
-              "contract-review | drafting | citation-check | strategy.",
-            messages: [
-              {
-                role: "user",
-                content: messages[messages.length - 1].content.slice(0, 4000),
-              },
-            ],
+              spec.prompt + CLOUD_NOTE + identityNote(id) +
+              (voice ? VOICE_NOTE : ""),
+            messages: convo,
           });
-          const id = (
-            pick.content[0]?.type === "text" ? pick.content[0].text : ""
-          ).trim();
-          chosen = (
-            id in SPECIALISTS ? id : "strategy"
-          ) as Exclude<AgentId, "auto">;
-          controller.enqueue(
-            line({ t: "status", text: `delegating: ${chosen}` }),
+          s.on("text", (t) =>
+            controller.enqueue(line({ t: "delta", text: t })),
           );
+          await s.finalMessage();
+          controller.enqueue(line({ t: "done" }));
+          return;
         }
 
-        const spec = SPECIALISTS[chosen];
-        const s = client.messages.stream({
-          model:
-            MODEL_IDS[(spec.model ?? "sonnet") as keyof typeof MODEL_IDS],
-          max_tokens: 8000,
-          system: spec.prompt + CLOUD_NOTE + (voice ? VOICE_NOTE : ""),
-          messages: messages.map(({ role, content }) => ({ role, content })),
-        });
-        s.on("text", (t) => controller.enqueue(line({ t: "delta", text: t })));
-        await s.finalMessage();
+        // Auto: orchestrator delegates to specialists privately, then answers.
+        const consultTool = {
+          name: "consult_specialist",
+          description:
+            "Delegate a unit of work to one specialist and get their findings " +
+            "or output back. Use for any substantive legal analysis, drafting, " +
+            "or validation. The user never sees this exchange; you synthesize " +
+            "the result into your own reply.",
+          input_schema: {
+            type: "object" as const,
+            properties: {
+              specialist: {
+                type: "string",
+                enum: Object.keys(SPECIALISTS),
+                description: "Which specialist to consult.",
+              },
+              instruction: {
+                type: "string",
+                description:
+                  "Exactly what you need this specialist to do, including all " +
+                  "context they need — they cannot see the conversation.",
+              },
+            },
+            required: ["specialist", "instruction"],
+          },
+        };
+
+        controller.enqueue(line({ t: "status", text: "orchestrating" }));
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const turns: any[] = [...convo];
+        for (let hop = 0; hop < 6; hop++) {
+          const resp = await client.messages.create({
+            model: ORCHESTRATOR_MODEL,
+            max_tokens: 8000,
+            system: ORCH_CLOUD_PROMPT + (voice ? VOICE_NOTE : ""),
+            tools: [consultTool],
+            messages: turns,
+          });
+          turns.push({ role: "assistant", content: resp.content });
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const calls: any[] = resp.content.filter(
+            (b: { type: string }) => b.type === "tool_use",
+          );
+          if (resp.stop_reason !== "tool_use" || calls.length === 0) {
+            const final = textOf(resp.content);
+            if (final) controller.enqueue(line({ t: "text", text: final }));
+            break;
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const results: any[] = [];
+          for (const call of calls) {
+            const input = (call.input ?? {}) as {
+              specialist?: string;
+              instruction?: string;
+            };
+            const id = (
+              input.specialist && input.specialist in SPECIALISTS
+                ? input.specialist
+                : "strategy"
+            ) as SpecialistId;
+            controller.enqueue(
+              line({ t: "status", text: `consulting: ${id}` }),
+            );
+            const out = await runSpecialist(
+              client,
+              id,
+              input.instruction ?? "",
+            );
+            results.push({
+              type: "tool_result",
+              tool_use_id: call.id,
+              content: out,
+            });
+          }
+          turns.push({ role: "user", content: results });
+        }
+
         controller.enqueue(line({ t: "done" }));
       } catch (err) {
         controller.enqueue(
