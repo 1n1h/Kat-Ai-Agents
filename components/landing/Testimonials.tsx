@@ -54,24 +54,23 @@ export default function Testimonials() {
           {TESTIMONIALS.map((t, i) => (
             <figure
               key={t.name}
-              className={revealClass(
-                shown,
-                "flex flex-col rounded-3xl border border-line bg-panel p-6",
-              )}
+              className={revealClass(shown)}
               style={{ transitionDelay: shown ? `${i * 90}ms` : undefined }}
             >
-              <Quote className="h-7 w-7 text-accent/50" />
-              <blockquote className="mt-3 flex-1 font-serif text-[16.5px] leading-relaxed text-ink-soft">
-                {t.quote}
-              </blockquote>
-              <figcaption className="mt-5 border-t border-line pt-4">
-                <span className="block font-sans text-[14px] font-semibold text-ink">
-                  {t.name}
-                </span>
-                <span className="block font-mono text-[10.5px] tracking-[0.1em] text-muted uppercase">
-                  {t.role}
-                </span>
-              </figcaption>
+              <div className="card-hover flex h-full flex-col rounded-3xl border border-line-strong bg-panel p-6">
+                <Quote className="h-7 w-7 text-accent/50" />
+                <blockquote className="mt-3 flex-1 font-serif text-[16.5px] leading-relaxed text-ink-soft">
+                  {t.quote}
+                </blockquote>
+                <figcaption className="mt-5 border-t border-line pt-4">
+                  <span className="block font-sans text-[14px] font-semibold text-ink">
+                    {t.name}
+                  </span>
+                  <span className="block font-mono text-[10.5px] tracking-[0.1em] text-muted uppercase">
+                    {t.role}
+                  </span>
+                </figcaption>
+              </div>
             </figure>
           ))}
         </div>

@@ -42,12 +42,10 @@ export default function AgentCards() {
 
         {/* orchestrator — featured */}
         <div
-          className={revealClass(
-            shown,
-            "mt-12 rounded-3xl border border-accent/40 bg-accent-wash/40 p-7 sm:p-8",
-          )}
+          className={revealClass(shown, "mt-12")}
           style={{ transitionDelay: shown ? "60ms" : undefined }}
         >
+          <div className="card-hover rounded-3xl border border-accent/40 bg-accent-wash/40 p-7 sm:p-8">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent text-paper shadow-lg">
               <Hub className="h-6 w-6" />
@@ -69,6 +67,7 @@ export default function AgentCards() {
           <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-ink-soft">
             {orchestrator.blurb}
           </p>
+          </div>
         </div>
 
         {/* specialists grid */}
@@ -78,12 +77,10 @@ export default function AgentCards() {
             return (
               <div
                 key={a.id}
-                className={revealClass(
-                  shown,
-                  "group rounded-3xl border border-line bg-panel p-6 transition-colors hover:border-line-strong hover:bg-panel-deep",
-                )}
+                className={revealClass(shown)}
                 style={{ transitionDelay: shown ? `${120 + i * 80}ms` : undefined }}
               >
+                <div className="group card-hover h-full rounded-3xl border border-line-strong bg-panel p-6 hover:bg-panel-deep">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30 transition-colors group-hover:bg-accent group-hover:text-paper group-hover:ring-transparent">
                     <Icon className="h-[22px] w-[22px]" />
@@ -98,6 +95,7 @@ export default function AgentCards() {
                 <p className="mt-3.5 text-[14.5px] leading-relaxed text-ink-soft">
                   {a.blurb}
                 </p>
+                </div>
               </div>
             );
           })}
