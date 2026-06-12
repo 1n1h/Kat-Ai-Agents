@@ -135,6 +135,28 @@ export default function Tour({
         },
       },
       {
+        element: '[data-tour="suggestions"]',
+        intent: "composer",
+        popover: {
+          title: "Quick starts",
+          description:
+            "Not sure where to begin? Tap a suggestion below the input — draft a demand letter, build a timeline, review a contract, and more — to prefill a strong prompt.",
+          side: "top",
+          align: "center",
+        },
+      },
+      {
+        element: '[data-tour="theme"]',
+        intent: "composer",
+        popover: {
+          title: "Light or dark",
+          description:
+            "Prefer a brighter workspace? Tap here any time to switch between light and dark mode — your choice is remembered.",
+          side: "bottom",
+          align: "end",
+        },
+      },
+      {
         popover: {
           title: "You're all set",
           description:
