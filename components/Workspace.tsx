@@ -722,7 +722,8 @@ export default function Workspace() {
                 {greetingTpl.replace("{name}", firstName)}
               </h2>
               <div className="rise rise-3">{composer}</div>
-              <div className="rise rise-4 mt-4">
+              {/* slightly wider than the composer so six pills hold one row */}
+              <div className="rise rise-4 mt-4 sm:-mx-16">
                 <SuggestionPills
                   onAction={(agent, prompt) => {
                     setAgentId(agent);
