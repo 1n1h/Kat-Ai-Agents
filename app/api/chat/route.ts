@@ -105,6 +105,19 @@ function buildPrompt(messages: ChatMessage[]): string {
 const enc = new TextEncoder();
 const line = (obj: unknown) => enc.encode(JSON.stringify(obj) + "\n");
 
+/**
+ * System prompt as a cacheable block: the persona + firm context + tool
+ * guidance prefix repeats on every message and every orchestration hop, so
+ * prompt caching cuts its input cost ~90% after the first call.
+ */
+const cachedSystem = (text: string) => [
+  {
+    type: "text" as const,
+    text,
+    cache_control: { type: "ephemeral" as const },
+  },
+];
+
 type SpecialistId = Exclude<AgentId, "auto">;
 
 const modelFor = (id: SpecialistId) =>
@@ -131,7 +144,7 @@ async function runSpecialist(
   const res = await client.messages.create({
     model: modelFor(id),
     max_tokens: 8000,
-    system: spec.prompt + CLOUD_NOTE + identityNote(id),
+    system: cachedSystem(spec.prompt + CLOUD_NOTE + identityNote(id)),
     messages: [{ role: "user", content: instruction.slice(0, 12000) }],
   });
   return textOf(res.content) || "(no output)";
@@ -189,9 +202,10 @@ async function cloudChat(
             const s = client.messages.stream({
               model: modelFor(id),
               max_tokens: 8000,
-              system:
+              system: cachedSystem(
                 spec.prompt + CLOUD_NOTE + identityNote(id) + firmCtx +
-                guidance + (voice ? VOICE_NOTE : ""),
+                  guidance + (voice ? VOICE_NOTE : ""),
+              ),
               tools: [hostedSearch, ...connTools],
               messages: turns,
             });
@@ -269,9 +283,10 @@ async function cloudChat(
           const resp = await client.messages.create({
             model: ORCHESTRATOR_MODEL,
             max_tokens: 8000,
-            system:
+            system: cachedSystem(
               ORCH_CLOUD_PROMPT + firmCtx + guidance +
-              (voice ? VOICE_NOTE : ""),
+                (voice ? VOICE_NOTE : ""),
+            ),
             tools: [consultTool, hostedSearch, ...connTools],
             messages: turns,
           });

@@ -108,7 +108,13 @@ Firm-pivot TODO:
    "Connect" stubs in `components/connectors.tsx`.
 5. **Cloud file intelligence** — let cloud chat read Storage files (inline
    small text/PDF into prompts) so document review works deployed.
-6. **Stripe** (project doc phase 4) — landing exists now; add pricing +
+6. **Anthropic platform features** (Kat asked, assessed 2026-06-12):
+   prompt caching DONE on cloud path (cachedSystem). Future: wire
+   Anthropic Skills (docx/pdf/xlsx via code-execution container, beta)
+   into cloud Drafting for real formatted documents — fits cloud-file
+   work; Batch API for future bulk jobs (overnight discovery
+   summarization), not interactive chat. Advisor tool: skipped.
+7. **Stripe** (project doc phase 4) — landing exists now; add pricing +
    checkout when Kat decides tiers.
 7. **Phase 2 leftovers**: OCR/scanning tier (Together key set), file
    search, in-app draft viewer/editor.
