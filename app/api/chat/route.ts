@@ -9,6 +9,12 @@ import {
 } from "@/agents/registry";
 import type { AgentId } from "@/lib/agent-meta";
 import { firmContext } from "@/lib/firmContext";
+import {
+  anthropicToolDefs,
+  availableTools,
+  executeConnectorTool,
+  type ConnectorTokens,
+} from "@/lib/connectorTools";
 
 export const runtime = "nodejs";
 export const maxDuration = 600;
@@ -144,8 +150,10 @@ async function cloudChat(
   agentId: AgentId,
   voice?: boolean,
   userEmail?: string | null,
+  tokens: ConnectorTokens = {},
 ): Promise<Response> {
   const firmCtx = firmContext(userEmail);
+  const connTools = anthropicToolDefs(tokens);
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json(
       { error: "ANTHROPIC_API_KEY is not configured." },
@@ -162,20 +170,57 @@ async function cloudChat(
       try {
         if (!isAuto) {
           // Direct specialist: stream its reply, persona name kept internal.
+          // Connector tools (Dropbox/Outlook/Gmail) loop until a final text.
           const id = agentId as SpecialistId;
           const spec = SPECIALISTS[id];
-          const s = client.messages.stream({
-            model: modelFor(id),
-            max_tokens: 8000,
-            system:
-              spec.prompt + CLOUD_NOTE + identityNote(id) + firmCtx +
-              (voice ? VOICE_NOTE : ""),
-            messages: convo,
-          });
-          s.on("text", (t) =>
-            controller.enqueue(line({ t: "delta", text: t })),
-          );
-          await s.finalMessage();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const turns: any[] = [...convo];
+          let streamedAny = false;
+          for (let hop = 0; hop < 5; hop++) {
+            const s = client.messages.stream({
+              model: modelFor(id),
+              max_tokens: 8000,
+              system:
+                spec.prompt + CLOUD_NOTE + identityNote(id) + firmCtx +
+                (voice ? VOICE_NOTE : ""),
+              ...(connTools.length ? { tools: connTools } : {}),
+              messages: turns,
+            });
+            let firstDelta = true;
+            s.on("text", (t) => {
+              if (firstDelta && streamedAny) {
+                controller.enqueue(line({ t: "delta", text: "\n\n" }));
+              }
+              firstDelta = false;
+              streamedAny = true;
+              controller.enqueue(line({ t: "delta", text: t }));
+            });
+            const final = await s.finalMessage();
+            turns.push({ role: "assistant", content: final.content });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const calls: any[] = final.content.filter(
+              (b: { type: string }) => b.type === "tool_use",
+            );
+            if (final.stop_reason !== "tool_use" || calls.length === 0) break;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const results: any[] = [];
+            for (const call of calls) {
+              controller.enqueue(
+                line({ t: "status", text: `using: ${call.name}` }),
+              );
+              const out = await executeConnectorTool(
+                call.name,
+                (call.input ?? {}) as Record<string, unknown>,
+                tokens,
+              );
+              results.push({
+                type: "tool_result",
+                tool_use_id: call.id,
+                content: out,
+              });
+            }
+            turns.push({ role: "user", content: results });
+          }
           controller.enqueue(line({ t: "done" }));
           return;
         }
@@ -216,7 +261,7 @@ async function cloudChat(
             model: ORCHESTRATOR_MODEL,
             max_tokens: 8000,
             system: ORCH_CLOUD_PROMPT + firmCtx + (voice ? VOICE_NOTE : ""),
-            tools: [consultTool],
+            tools: [consultTool, ...connTools],
             messages: turns,
           });
           turns.push({ role: "assistant", content: resp.content });
@@ -234,6 +279,23 @@ async function cloudChat(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const results: any[] = [];
           for (const call of calls) {
+            if (call.name !== "consult_specialist") {
+              // connector tool (Dropbox / Outlook / Gmail)
+              controller.enqueue(
+                line({ t: "status", text: `using: ${call.name}` }),
+              );
+              const out = await executeConnectorTool(
+                call.name,
+                (call.input ?? {}) as Record<string, unknown>,
+                tokens,
+              );
+              results.push({
+                type: "tool_result",
+                tool_use_id: call.id,
+                content: out,
+              });
+              continue;
+            }
             const input = (call.input ?? {}) as {
               specialist?: string;
               instruction?: string;
@@ -307,14 +369,66 @@ export async function POST(req: NextRequest) {
   } catch {
     query = null;
   }
+  // connector refresh tokens ride in httpOnly cookies
+  const tokens: ConnectorTokens = {
+    dropbox: req.cookies.get("dbx_refresh")?.value,
+    outlook: req.cookies.get("ms_refresh")?.value,
+    gmail: req.cookies.get("g_refresh")?.value,
+  };
+
   if (!query || !cwd) {
-    return cloudChat(messages, agentId, voice, userEmail);
+    return cloudChat(messages, agentId, voice, userEmail, tokens);
   }
 
   const promptText = buildPrompt(messages) + (voice ? VOICE_NOTE : "");
 
   const isAuto = agentId === "auto" || !SPECIALISTS[agentId as never];
   const spec = isAuto ? null : SPECIALISTS[agentId as Exclude<AgentId, "auto">];
+
+  // expose connector tools to the local runtime as an in-process MCP server
+  const liveTools = availableTools(tokens);
+  let mcpServers: Record<string, unknown> = {};
+  let mcpToolNames: string[] = [];
+  if (liveTools.length) {
+    const { createSdkMcpServer, tool } = await import(
+      "@anthropic-ai/claude-agent-sdk"
+    );
+    const { z } = await import("zod");
+    mcpServers = {
+      connectors: createSdkMcpServer({
+        name: "connectors",
+        version: "1.0.0",
+        tools: liveTools.map((t) =>
+          tool(
+            t.name,
+            t.description,
+            Object.fromEntries(
+              Object.entries(t.params).map(([k, p]) => {
+                const base =
+                  p.type === "number"
+                    ? z.number().describe(p.description)
+                    : z.string().describe(p.description);
+                return [k, p.required ? base : base.optional()];
+              }),
+            ),
+            async (args) => ({
+              content: [
+                {
+                  type: "text" as const,
+                  text: await executeConnectorTool(
+                    t.name,
+                    args as Record<string, unknown>,
+                    tokens,
+                  ),
+                },
+              ],
+            }),
+          ),
+        ),
+      }),
+    };
+    mcpToolNames = liveTools.map((t) => `mcp__connectors__${t.name}`);
+  }
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -330,9 +444,18 @@ export async function POST(req: NextRequest) {
             model: isAuto
               ? ORCHESTRATOR_MODEL
               : MODEL_IDS[(spec!.model ?? "sonnet") as keyof typeof MODEL_IDS],
+            ...(mcpToolNames.length
+              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                { mcpServers: mcpServers as any }
+              : {}),
             ...(isAuto
-              ? { agents: SPECIALISTS, allowedTools: ["Task"] }
-              : { allowedTools: (spec!.tools as string[]) ?? [] }),
+              ? { agents: SPECIALISTS, allowedTools: ["Task", ...mcpToolNames] }
+              : {
+                  allowedTools: [
+                    ...((spec!.tools as string[]) ?? []),
+                    ...mcpToolNames,
+                  ],
+                }),
           },
         });
 

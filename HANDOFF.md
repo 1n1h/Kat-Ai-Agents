@@ -64,21 +64,23 @@ Firm-pivot TODO:
   evaluate Tauri vs Electron wrapping the Next app; the local-install
   agent runtime fits a desktop bundle naturally.
 - **Connectors to build** (status as of 2026-06-12 evening):
-  - **Dropbox: OAuth flow LIVE** — app created, DROPBOX_APP_KEY/SECRET in
-    env, /api/connectors/dropbox/{start,callback} + status/disconnect
-    built, Connect button real in the dialog. Refresh token lives in an
-    httpOnly cookie (`dbx_refresh`). **Next: agent tools** (list/search/
-    read Dropbox files in chat — mint access tokens from the refresh
-    cookie server-side). Add the same env vars + the production redirect
-    URI on Vercel before testing there.
-  - **Outlook/M365: blocked on a tenant** — Kat's personal MS account has
-    no directory; she's signing up for Azure free (or firm tenant later).
-    Then: Entra app registration → MS_CLIENT_ID/SECRET → Graph flow.
-  - **MyCase: in progress** — developers.mycase.com logs in with the
-    firm's MyCase credentials (Kat has Phil's); register an app there
-    for client ID/secret. Redirect URI pattern:
-    /api/connectors/mycase/callback.
-  - Then Google family.
+  - **Dropbox, Outlook, Gmail: OAuth flows + AGENT TOOLS LIVE.** All creds
+    in .env.local (DROPBOX_APP_KEY/SECRET, MS_CLIENT_ID/SECRET,
+    GOOGLE_CLIENT_ID/SECRET). lib/connectorTools.ts is the single
+    registry (9 tools: dropbox search/list/read; outlook mail search/
+    read/calendar/create-draft; gmail search/read) consumed by BOTH
+    paths: cloud (Anthropic tools in the orchestrator loop + a
+    direct-specialist tool loop) and local (in-process SDK MCP server,
+    tools allowed as mcp__connectors__*). Access tokens minted from
+    httpOnly refresh cookies, cached ~50min. outlook_create_draft never
+    sends — drafts only, by design. For Vercel: mirror the six env vars
+    + production redirect URIs in each provider console.
+  - **Gmail caveat**: consent screen in Testing → only the 5 test users
+    can connect; refresh tokens die after 7 days (reconnect).
+  - **MyCase: pending** — Kat is registering at developers.mycase.com
+    with the firm's credentials. When MYCASE_CLIENT_ID/SECRET exist:
+    copy the dropbox connector pattern + add matter/contact/deadline
+    tools to lib/connectorTools.ts.
 
 ## Next session — TODO (rough priority)
 
