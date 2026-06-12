@@ -71,7 +71,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="grain relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-paper px-6">
+    <div className="grain relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-paper px-6">
       {/* ambient accent glow behind the card */}
       <div
         className="pointer-events-none absolute inset-0"

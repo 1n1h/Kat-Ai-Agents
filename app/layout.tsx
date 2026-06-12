@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Source_Serif_4, Archivo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -20,6 +20,15 @@ const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
   weight: ["400", "500"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  // when the on-screen keyboard opens, shrink the layout instead of
+  // panning it (keeps the composer anchored on mobile)
+  interactiveWidget: "resizes-content",
+};
 
 export const metadata: Metadata = {
   title: "CounselOS — AI workspace for attorneys",

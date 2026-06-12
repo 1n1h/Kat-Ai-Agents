@@ -501,7 +501,7 @@ export default function Workspace() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-paper text-ink">
+    <div className="flex h-dvh overflow-hidden bg-paper text-ink">
       {/* ── sidebar (Claude-style; overlay drawer on mobile) ──── */}
       {sidebarOpen && (
         <div

@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
   const out = new FormData();
   out.set("file", audio, audio.name || "turn.webm");
   out.set("model_id", "scribe_v1");
+  // no "(peaceful purring)"-style annotations in legal dictation
+  out.set("tag_audio_events", "false");
 
   const res = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
     method: "POST",
