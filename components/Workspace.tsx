@@ -57,7 +57,7 @@ function pickGreeting(): string {
 }
 
 const navRow =
-  "flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-[15px] text-ink-soft transition-colors hover:bg-panel-deep hover:text-ink";
+  "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 font-sans text-[14px] text-ink-soft transition-colors hover:bg-panel-deep hover:text-ink";
 
 export default function Workspace() {
   const [ready, setReady] = useState(false);
@@ -71,6 +71,8 @@ export default function Workspace() {
   const [connectorsOpen, setConnectorsOpen] = useState(false);
   const [casesOpen, setCasesOpen] = useState(true);
   const [filesOpen, setFilesOpen] = useState(true);
+  const [newCaseOpen, setNewCaseOpen] = useState(false);
+  const [newCaseName, setNewCaseName] = useState("");
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -128,14 +130,16 @@ export default function Workspace() {
   const fullName = user?.displayName?.trim() || user?.email || "Counsel";
   const firstName = fullName.split(/[\s@]+/)[0];
 
-  function addCase() {
-    const name = window.prompt("Case name (e.g. Smith v. Allied, M&A — Birch)");
-    if (!name?.trim()) return;
-    const m: Matter = { id: uid(), name: name.trim(), createdAt: Date.now() };
+  function createCase() {
+    const name = newCaseName.trim();
+    if (!name) return;
+    const m: Matter = { id: uid(), name, createdAt: Date.now() };
     setMatters((prev) => [...prev, m]);
     setMatterId(m.id);
     setThreadId(null);
     setCasesOpen(true);
+    setNewCaseOpen(false);
+    setNewCaseName("");
   }
 
   function updateThread(id: string, fn: (t: Thread) => Thread) {
@@ -250,7 +254,7 @@ export default function Workspace() {
   return (
     <div className="flex h-screen overflow-hidden bg-paper text-ink">
       {/* ── sidebar (Claude-style) ────────────────────────────── */}
-      <aside className="flex w-72 shrink-0 flex-col border-r border-line bg-panel">
+      <aside className="flex w-64 shrink-0 flex-col border-r border-line bg-panel font-sans">
         <div className="rise rise-1 px-5 pt-5 pb-3">
           <h1 className="font-serif text-2xl tracking-tight">CounselOS</h1>
         </div>
@@ -281,12 +285,12 @@ export default function Workspace() {
                 title="New case"
                 onClick={(e) => {
                   e.stopPropagation();
-                  addCase();
+                  setNewCaseOpen(true);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.stopPropagation();
-                    addCase();
+                    setNewCaseOpen(true);
                   }
                 }}
               >
@@ -485,6 +489,49 @@ export default function Workspace() {
           </>
         )}
       </main>
+
+      {/* new-case panel — anchored beside the sidebar, in the app's skin */}
+      {newCaseOpen && (
+        <div
+          className="fixed inset-0 z-50"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setNewCaseOpen(false);
+          }}
+        >
+          <div className="pop absolute top-32 left-[17rem] w-80 rounded-2xl border border-line-strong bg-panel p-5 shadow-2xl">
+            <h3 className="font-serif text-xl text-ink">New case</h3>
+            <p className="mt-1 text-[13px] text-muted">
+              e.g. Smith v. Allied, M&amp;A — Birch
+            </p>
+            <input
+              autoFocus
+              value={newCaseName}
+              onChange={(e) => setNewCaseName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") createCase();
+                if (e.key === "Escape") setNewCaseOpen(false);
+              }}
+              placeholder="Case name"
+              className="mt-3 w-full rounded-xl border border-line bg-input px-3.5 py-2.5 text-[15px] text-ink outline-none placeholder:text-faint focus:border-accent"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setNewCaseOpen(false)}
+                className="rounded-lg px-3.5 py-2 text-[13.5px] text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createCase}
+                disabled={!newCaseName.trim()}
+                className="rounded-lg bg-accent px-4 py-2 text-[13.5px] font-semibold text-paper transition-colors hover:bg-accent-soft disabled:opacity-40"
+              >
+                Create case
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConnectorsDialog
         open={connectorsOpen}

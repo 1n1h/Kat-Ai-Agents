@@ -4,11 +4,21 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { agentById, type AgentId } from "@/lib/agent-meta";
 import type { Msg } from "@/lib/store";
+import TurnActions from "./TurnActions";
+import Spinner from "./Spinner";
 
 /** Bates-style margin numbering — every turn in the record gets a locator. */
 const bates = (n: number) => String(n + 1).padStart(3, "0");
 
-function Turn({ msg, index }: { msg: Msg; index: number }) {
+function Turn({
+  msg,
+  index,
+  showActions,
+}: {
+  msg: Msg;
+  index: number;
+  showActions?: boolean;
+}) {
   const isUser = msg.role === "user";
   const label = isUser ? "You" : agentById(msg.agentId ?? "auto").name;
   return (
@@ -35,6 +45,7 @@ function Turn({ msg, index }: { msg: Msg; index: number }) {
             </ReactMarkdown>
           </div>
         )}
+        {!isUser && showActions && <TurnActions text={msg.content} />}
       </div>
     </div>
   );
@@ -58,7 +69,7 @@ export default function Transcript({
   return (
     <div className="mx-auto max-w-3xl px-6 pb-10">
       {messages.map((m, i) => (
-        <Turn key={i} msg={m} index={i} />
+        <Turn key={i} msg={m} index={i} showActions />
       ))}
 
       {live && (
@@ -71,15 +82,18 @@ export default function Transcript({
       {streaming && (
         <div className="grid grid-cols-[3.5rem_1fr] gap-x-4 py-5">
           <span />
-          <div className="space-y-1">
-            {statuses.slice(-3).map((s, i) => (
-              <p key={i} className="font-mono text-[12px] text-muted">
-                <span className="text-accent">→</span> {s}
+          <div className="flex items-start gap-4">
+            <Spinner size={34} />
+            <div className="space-y-1 pt-1">
+              {statuses.slice(-3).map((s, i) => (
+                <p key={i} className="font-mono text-[12px] text-muted">
+                  <span className="text-accent">→</span> {s}
+                </p>
+              ))}
+              <p className="caret font-mono text-[12px] text-faint">
+                {live ? "writing" : "on the record"}
               </p>
-            ))}
-            <p className="caret font-mono text-[12px] text-faint">
-              {live ? "writing" : "on the record"}
-            </p>
+            </div>
           </div>
         </div>
       )}

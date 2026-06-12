@@ -20,9 +20,12 @@
   --color-input: #30302e;
   --color-ok: #7a9a6f;
 
-  --font-serif: var(--font-source-serif), Georgia, serif;
-  --font-sans: var(--font-archivo), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  /* inner fallbacks keep the stack valid even if a webfont fails to load */
+  --font-serif: var(--font-source-serif, Georgia), Georgia, serif;
+  --font-sans: var(--font-archivo, system-ui), system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono, ui-monospace), ui-monospace, Consolas,
+    monospace;
 }
 
 :root {
@@ -103,6 +106,32 @@ body {
 }
 .pop {
   animation: pop 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ── luma square loader (thinking / executing) ──────────────── */
+.luma-spin {
+  position: relative;
+}
+.luma-spin span {
+  position: absolute;
+  border-radius: 50px;
+  box-shadow: inset 0 0 0 2.5px var(--color-accent);
+  animation: luma 2.5s infinite;
+}
+.luma-spin span:nth-child(2) {
+  animation-delay: -1.25s;
+  box-shadow: inset 0 0 0 2.5px var(--color-muted);
+}
+@keyframes luma {
+  0%    { inset: 0 55% 55% 0; }
+  12.5% { inset: 0 55% 0 0; }
+  25%   { inset: 55% 55% 0 0; }
+  37.5% { inset: 55% 0 0 0; }
+  50%   { inset: 55% 0 0 55%; }
+  62.5% { inset: 0 0 0 55%; }
+  75%   { inset: 0 0 55% 55%; }
+  87.5% { inset: 0 0 55% 0; }
+  100%  { inset: 0 55% 55% 0; }
 }
 
 /* ── status caret while an agent works ──────────────────────── */
