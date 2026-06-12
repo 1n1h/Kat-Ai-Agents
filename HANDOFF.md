@@ -1,175 +1,130 @@
-# CounselOS — Session Handoff
+# Sheehe & Associates AI Workspace — Handoff
 
-_Last updated: 2026-06-12 (after merging the mobile agent's landing-page +
-iOS-fix branch). Repo: https://github.com/1n1h/Kat-Ai-Agents (main, all
-pushed). Deploy: kat-ai-agents.vercel.app (auto-deploys from main).
-Workflow prefs for cloud/mobile agents live in `CLAUDE.md` (work on a
-branch, validate with `npm run build`, PR into main)._
+_Last updated: 2026-06-12 (end of a full build day). Repo:
+https://github.com/1n1h/Kat-Ai-Agents (main, all pushed). Production:
+kat-ai-agents.vercel.app (auto-deploys from main). A separate
+mobile/cloud agent also commits via branches + PRs (its workflow rules
+are in CLAUDE.md) — always `git pull` + `npm install` before starting._
 
-## Where things stand
+## What is DONE and working
 
-**Working today — local install** (`npm run dev`, needs `.env.local`):
-- Full agent pipeline via Claude Agent SDK: orchestrator (Atlas) delegating
-  via Task tool to Litigation Analysis (Sol), Contract Review (Cass),
-  Drafting (Lex), Citation Check, Strategy (Vera). Personas in
-  `agents/*/*.system.md`.
-- Case workspace: cases + threads (localStorage), per-case working dirs
-  under `uploads/`, uploads, agent-written deliverables with in-chat
-  download chips + PDF/DOCX/XLSX conversion (`/api/files/download`).
-- Voice: Kokoro TTS (free, local, 7 voices), ElevenLabs Scribe STT,
-  hands-free voice mode (VAD + barge-in), dictation mic.
-- Firebase auth (Google + email), settings dialog, dark/light, mobile
-  drawer sidebar, one-time Driver.js walkthrough tour.
+**Both environments (local + deployed):**
+- Agent pipeline: orchestrator + 5 specialists (personas in
+  `agents/*/*.system.md`); local runs the Claude Agent SDK (user's
+  subscription), deployed runs the direct Anthropic API with a cloud
+  orchestrator that consults specialists privately. Prompt caching on;
+  cloud specialists downshift opus→sonnet (CLOUD_FULL_MODELS=1 to
+  disable).
+- Firm context: company profile + employee profile (matched by login
+  email, `lib/firmContext.ts`) + self-onboarded profiles
+  (`users/{uid}/profile/self`) injected into every chat.
+- Connectors LIVE with agent tools (`lib/connectorTools.ts`): Dropbox
+  (search/list/read), Outlook (mail search/read, calendar, drafts-only
+  email), Gmail (search/read), Google Drive (search/read incl. Docs
+  export), Google Calendar. One Google grant covers Gmail+Drive+Cal.
+- Web search: hosted Anthropic search primary, Tavily backup
+  (tavily_search), hard never-fabricate rule in every prompt.
+- Firestore sync: cases/threads under `users/{uid}/...`, realtime
+  across devices, localStorage migration on first sign-in.
+- Team access + onboarding: admins (lib/team.ts ADMIN_EMAILS = Kat +
+  Travis, mirrored in Firestore rules) grant by email in Settings;
+  granted users get the role wizard on first sign-in.
+- Sheehe rebrand: navy/brass palette, SVG S-seal lockup (FirmLogo),
+  hero logo fade-in/out, landing/metadata/tour renamed; "Powered by
+  CounselOS" credit in landing footer.
+- Voice: Kokoro TTS local (free) / ElevenLabs fallback deployed (voice
+  EXAVITQu4vr4xnSDxMaL, env ELEVENLABS_VOICE_ID overrides), Scribe
+  STT, voice mode w/ VAD + barge-in, dictation mic, concise-voice
+  cost rule, iOS audio unlock (lib/audioPlayback).
+- Files: per-case uploads (local disk locally, Firebase Storage
+  deployed), agent-written deliverables with download chips +
+  PDF/DOCX/XLSX conversion (local only), star/rename/delete menus on
+  cases and threads (portal-rendered).
 
-**Working today — cloud (Vercel)**:
-- Chat: direct Anthropic API fallback. "Auto" now runs a real cloud
-  orchestrator persona — single voice, consults specialists privately
-  (`ORCH_CLOUD_PROMPT` in `app/api/chat/route.ts`); picking a specialist
-  directly uses that persona. Streamed deltas. No file tools — agents ask
-  for pasted text.
-- Voice: Scribe STT + ElevenLabs TTS fallback. iOS playback fixed via
-  `lib/audioPlayback.ts` (`primeAudioPlayback()` must be called inside the
-  user gesture — keep that pattern for any new audio).
-- Uploads → Firebase Storage (`matters/{uid}/{caseId}/`); Files list merges
-  local + cloud. Storage + Firestore rules were given to Kat — **verify
-  they're published** if uploads fail.
+## REMAINING TASKS (priority order Kat set)
 
-**Marketing landing page** (mobile agent, 2026-06-12):
-- Signed-out visitors on the deployed site see the landing
-  (`components/landing/`): header, hero, scrolling trust bar/marquee,
-  cinematic GSAP orchestration showcase, testimonials, waitlist dialog.
-  Sign-in lives on the landing. View it while signed in with
-  `?preview=landing`. Animation deps: gsap, driver.js.
+1. **MyCase connector** — BLOCKED on credentials. Kat registers at
+   developers.mycase.com using the firm's MyCase login → put
+   MYCASE_CLIENT_ID/SECRET in env (local + Vercel) → copy the dropbox
+   route pattern (`app/api/connectors/dropbox/`) → add matter/contact/
+   deadline/billing tools to lib/connectorTools.ts → add "mycase" to
+   CONNECTABLE in components/connectors.tsx. Redirect URI:
+   /api/connectors/mycase/callback (both hosts).
+2. **Cloud file intelligence** — deployed agents can't read files
+   uploaded into the app (Firebase Storage). Options: inline small
+   text/PDF into prompts via Storage download; AND wire Anthropic
+   Skills (docx/pdf/xlsx via code-execution container, beta) so cloud
+   Drafting produces real formatted documents. PDF reading works
+   locally (runtime Read) but not in cloud chat.
+3. **Microsoft 365 connector row** (currently "Soon") — same CounselOS
+   Entra app, add Files.Read.All / Sites.Read.All delegated scopes +
+   OneDrive/Word tools. Small job now that Outlook works.
+4. **Desktop application** (Kat: "way later") — evaluate Tauri vs
+   Electron wrapping the app; local agent runtime fits a desktop
+   bundle naturally.
 
-## PIVOT (2026-06-12): single-firm deployment — Sheehe & Associates, P.A.
+## SMALLER OPEN ITEMS
 
-This web app now serves one firm: https://sheeheandassociates.com (FL
-commercial/insurance litigation boutique; see `firm/company-profile.md`).
-Firm context is injected into every chat (company profile for everyone;
-matching employee profile by signed-in email — see `lib/firmContext.ts`).
-Firm stack: **Microsoft 365 / Outlook, MyCase, Dropbox** (+ Google kept).
+- **Waitlist rules**: the landing waitlist IS wired (submitWaitlist →
+  Firestore `waitlist` collection) but the published rules BLOCK it.
+  Kat must add: `match /waitlist/{id} { allow create: if true; allow
+  read, update, delete: if false; }` — or hide the waitlist for a
+  firm-internal deployment.
+- **Roster data pending**: Phil's real email (psheehe@ is an
+  unverified guess in firm/employees/phillip-sheehe.md), Johanna's
+  preferred login email, Brooksly's email + last name. Update
+  frontmatter + grant access in Settings.
+- **Vanity auth domain retry** (parked): rewrites for /__/auth are in
+  next.config.ts and verified; Google rejected redirect_uri_mismatch —
+  almost certainly the URI was added to the wrong OAuth client. Recipe:
+  Firebase console → Authentication → Sign-in method → Google → Web
+  SDK configuration → copy THAT client id → add
+  https://kat-ai-agents.vercel.app/__/auth/handler to that client →
+  wait 10 min → set NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+  kat-ai-agents.vercel.app in both envs.
+- **Google project split** (when the firm onboards for real): the
+  consent screen is in Testing to allow Gmail/Drive restricted scopes,
+  which limits Google *sign-in* to the 6 test users and expires Google
+  connector tokens every 7 days. Clean fix: second GCP project for
+  connector OAuth only; Firebase project's screen goes back to
+  production.
+- **Landing polish**: real firm logo assets exist in My docs/Logos
+  (award badges: AV Preeminent, Top Rated Lawyers, Bar Register) —
+  good for the trust bar; testimonials are placeholders; consider
+  firm-specific hero copy.
+- **Verify Vercel env hygiene**: ANTHROPIC_MODEL should be
+  claude-sonnet-4-6 (cost); NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN reverted
+  to ai-paralegal-b0b9d.firebaseapp.com; MS_CLIENT_ID is the CounselOS
+  app (81528174-e042-43a1-a613-8f024e04a0b7); all 7 connector vars
+  present.
+- **Vercel "TypeCheck" deployment check** fails flakily ("unexpectedly
+  — try redeploying") — an integration artifact, not our code (tsc is
+  clean). Remove the integration if it annoys.
+- **Phase-2 leftovers**: OCR tier (TOGETHER_API_KEY is set), in-app
+  file search, draft viewer/editor.
+- **Stripe** — deferred; single-firm pivot changes the billing story.
+- **Future design**: firms/{firmId} shared matters (multi-attorney
+  shared cases) needs its own rules + data model decision.
+- **Kat's ideas list** (My docs/ideas.txt — marked "don't implement
+  yet"): admin analytics dashboard, invoicing via Stripe, message
+  archive/tagging, screen/call recording, in-app team chat, workflows.
 
-Firm-pivot TODO:
-- **Employee onboarding flow: BUILT (2026-06-12).** Admins (lib/team.ts
-  ADMIN_EMAILS: Kat + Travis) grant access by email in Settings → Team
-  access; granted users get a one-time wizard on sign-in (role,
-  supports, focus) → users/{uid}/profile/self → injected as agent
-  context with each chat. ⚠ REQUIRES a Firestore rules addition Kat
-  must publish (inside the documents match block):
+## GOTCHAS
 
-      match /access/{email} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null
-                     && request.auth.token.email in [
-                       'katherine@amploconsulting.com',
-                       'travis@curvaapp.com'
-                     ];
-      }
-
-  Keep that admin list in sync with lib/team.ts ADMIN_EMAILS.
-- **Pending roster data**: Phil's email (psheehe@ unverified), Johanna's
-  preferred email (jsheehe@ published; Kat confirming), Brooksly's email
-  and last name. Katherine Rodriguez = legalassistant@sheeheandassociates.com.
-- **Rebrand to Sheehe & Associates** (Kat approved): wordmark, palette,
-  landing copy. Their site: navy/professional; tagline "Experience.
-  Knowledge. Strategy."
-- **Desktop application** (Kat): plan a packaged desktop build —
-  evaluate Tauri vs Electron wrapping the Next app; the local-install
-  agent runtime fits a desktop bundle naturally.
-- **Connectors to build** (status as of 2026-06-12 evening):
-  - **Dropbox, Outlook, Gmail: OAuth flows + AGENT TOOLS LIVE.** All creds
-    in .env.local (DROPBOX_APP_KEY/SECRET, MS_CLIENT_ID/SECRET,
-    GOOGLE_CLIENT_ID/SECRET). lib/connectorTools.ts is the single
-    registry (9 tools: dropbox search/list/read; outlook mail search/
-    read/calendar/create-draft; gmail search/read) consumed by BOTH
-    paths: cloud (Anthropic tools in the orchestrator loop + a
-    direct-specialist tool loop) and local (in-process SDK MCP server,
-    tools allowed as mcp__connectors__*). Access tokens minted from
-    httpOnly refresh cookies, cached ~50min. outlook_create_draft never
-    sends — drafts only, by design. For Vercel: mirror the six env vars
-    + production redirect URIs in each provider console.
-  - **Status 2026-06-12 (late)**: ALL five connectable rows verified
-    CONNECTED locally (Outlook, Dropbox, Gmail, Drive, Calendar) plus
-    web_search (Tavily) tested end-to-end. Outlook gotcha that cost an
-    hour: TWO Entra registrations existed; env pointed at the dead
-    personal-only "Brown Intelligence Group" app — correct app is
-    "CounselOS" (client id 81528174-e042-43a1-a613-8f024e04a0b7).
-    Azure rule: GUID-shaped strings are IDs, never secrets.
-    Vercel still needs: the 7 connector env vars (correct CounselOS
-    values) + production redirect URIs + redeploy.
-  - **Gmail caveat**: consent screen in Testing → only the 5 test users
-    can connect; refresh tokens die after 7 days (reconnect).
-  - **MyCase: pending** — Kat is registering at developers.mycase.com
-    with the firm's credentials. When MYCASE_CLIENT_ID/SECRET exist:
-    copy the dropbox connector pattern + add matter/contact/deadline
-    tools to lib/connectorTools.ts.
-
-## Next session — TODO (rough priority)
-
-1. **Wire the waitlist dialog** — it's UI-only today (submits nowhere).
-   Easiest: write entries to Firestore `waitlist/` (needs a small rules
-   addition) or a mailto/Formspree stopgap.
-2. **Verify cloud e2e on phone** — chat reply, voice loop, upload to
-   Storage (rules!), landing → sign-in → workspace flow.
-3. **Thread/case sync via Firestore** — move matters/threads from
-   localStorage to `users/{uid}/...` so phone and desktop share state.
-   Published rules already allow this shape.
-4. **Google connectors (Gmail, Drive, Docs, Calendar)** — Kat creates the
-   OAuth client in the existing GCP project (consent screen: Internal if
-   Amplo has Workspace, else Testing mode); then OAuth callback route,
-   tokens in `users/{uid}/connectors`, expose as agent tools. Replaces the
-   "Connect" stubs in `components/connectors.tsx`.
-5. **Cloud file intelligence** — let cloud chat read Storage files (inline
-   small text/PDF into prompts) so document review works deployed.
-6. **Anthropic platform features** (Kat asked, assessed 2026-06-12):
-   prompt caching DONE on cloud path (cachedSystem). Future: wire
-   Anthropic Skills (docx/pdf/xlsx via code-execution container, beta)
-   into cloud Drafting for real formatted documents — fits cloud-file
-   work; Batch API for future bulk jobs (overnight discovery
-   summarization), not interactive chat. Advisor tool: skipped.
-7. **Stripe** (project doc phase 4) — landing exists now; add pricing +
-   checkout when Kat decides tiers.
-7. **Phase 2 leftovers**: OCR/scanning tier (Together key set), file
-   search, in-app draft viewer/editor.
-8. **Polish backlog**: voice VAD thresholds in noisy rooms; PDF
-   letterhead/caption templates; landing copy pass with Kat (testimonials
-   are placeholders); rotate suggestion pool per Kat's practice areas.
-
-## Parked: vanity auth domain (Google popup text)
-
-Attempted 2026-06-12: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-kat-ai-agents.vercel.app with /__/auth proxy rewrites (rewrites are
-still in next.config.ts and verified serving the Firebase handler on
-both localhost and prod). Google kept rejecting with
-redirect_uri_mismatch even after Kat added the vercel handler URI to
-"Web client (auto created by Google Service)" — likely she edited the
-WRONG client (Firebase's is usually "auto created by Firebase
-Service") or propagation lag. REVERTED authDomain to
-ai-paralegal-b0b9d.firebaseapp.com (env, both local and Vercel) so
-sign-in works. To retry: Firebase console → Authentication →
-Sign-in method → Google → Web SDK configuration → copy the exact Web
-client ID → in GCP Clients open THAT client → add redirect URI
-https://kat-ai-agents.vercel.app/__/auth/handler → wait 10 min →
-flip the env var back on both environments.
-
-## Gotchas for the next agent
-
-- `npm run build` while `npm run dev` is running breaks the dev server
-  (.next clobbered) — restart dev after building.
+- `npm run build` while `npm run dev` runs clobbers .next — restart dev.
 - Heavy deps (agent SDK, kokoro/onnx, transformers) are excluded from
-  Vercel bundles via `outputFileTracingExcludes`; chat/tts import them
-  lazily and fall back. Don't re-import them top-level in those routes.
-- All audio playback goes through `lib/audioPlayback.ts`; call
-  `primeAudioPlayback()` inside the triggering tap/click or iOS will
-  silently block playback.
-- `AgentSelect` renders its menu through a portal (mobile clipping) —
-  follow that pattern for new dropdowns near the composer.
-- `.env.local` holds all keys (Anthropic, ElevenLabs, Together, Stripe,
-  Firebase NEXT_PUBLIC_*); Vercel env mirrors it. `google_services.json`
-  is the Android artifact — gitignored, unused by web.
-- User-facing copy says **case**, code says **matter** — intentional.
-- Persona names (Sol/Cass/Lex/Atlas/Vera) are internal only; the cloud
-  orchestrator prompt explicitly forbids self-naming. Don't surface
-  personas in UI copy. House style: no em dashes in drafted legal content.
-- Greeting name comes from the live Firebase session — "wrong name"
-  reports mean the browser is signed into a different Google account.
+  Vercel via outputFileTracingExcludes; chat/tts import them lazily.
+  Don't import them top-level in routes. agents/ + firm/ .md files are
+  traced into /api/chat via outputFileTracingIncludes.
+- Internal names stay: localStorage keys "counselos.*", cookie names,
+  matter-vs-case (code vs UI), persona folder names. Don't rename —
+  they'd orphan user data.
+- Azure: GUID-shaped strings are IDs, never secrets. Two Entra app
+  registrations exist; CounselOS (81528174-...) is the live one.
+- All audio playback must call primeAudioPlayback() inside the user
+  gesture (iOS). Dropdowns near the sidebar must portal
+  (stacking-context trap from the load animations).
+- Admin lists live in TWO places: lib/team.ts ADMIN_EMAILS and the
+  Firestore rules access/ block — keep in sync.
+- Greeting shows whoever Firebase says is signed in; "wrong name"
+  reports = wrong Google account in that browser.
