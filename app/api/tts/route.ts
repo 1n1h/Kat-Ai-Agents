@@ -87,9 +87,13 @@ export async function POST(req: NextRequest) {
 async function elevenLabsTTS(text: string): Promise<Response | null> {
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) return null;
+  // Sarah (premade) — available on free-tier API keys, unlike legacy
+  // library voices. Override with ELEVENLABS_VOICE_ID if desired.
+  const voiceId =
+    process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL";
   try {
     const res = await fetch(
-      "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM?output_format=mp3_44100_64",
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_64`,
       {
         method: "POST",
         headers: { "xi-api-key": key, "Content-Type": "application/json" },
