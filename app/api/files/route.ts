@@ -16,31 +16,46 @@ function matterDir(matterId: string): string {
 
 /** GET /api/files?matterId=… — list files in the matter's working directory */
 export async function GET(req: NextRequest) {
-  const matterId = req.nextUrl.searchParams.get("matterId") ?? "general";
-  const dir = matterDir(matterId);
-  const files = readdirSync(dir)
-    .filter((f) => statSync(join(dir, f)).isFile())
-    .map((f) => {
-      const st = statSync(join(dir, f));
-      return { name: f, size: st.size, modified: st.mtimeMs };
-    })
-    .sort((a, b) => b.modified - a.modified);
-  return Response.json({ files });
+  try {
+    const matterId = req.nextUrl.searchParams.get("matterId") ?? "general";
+    const dir = matterDir(matterId);
+    const files = readdirSync(dir)
+      .filter((f) => statSync(join(dir, f)).isFile())
+      .map((f) => {
+        const st = statSync(join(dir, f));
+        return { name: f, size: st.size, modified: st.mtimeMs };
+      })
+      .sort((a, b) => b.modified - a.modified);
+    return Response.json({ files });
+  } catch {
+    // read-only filesystem (cloud deploy) — show no files rather than erroring
+    return Response.json({ files: [] });
+  }
 }
 
 /** POST /api/files — multipart upload into the matter's working directory */
 export async function POST(req: NextRequest) {
-  const form = await req.formData();
-  const matterId = (form.get("matterId") as string) ?? "general";
-  const dir = matterDir(matterId);
+  try {
+    const form = await req.formData();
+    const matterId = (form.get("matterId") as string) ?? "general";
+    const dir = matterDir(matterId);
 
-  const saved: string[] = [];
-  for (const entry of form.getAll("files")) {
-    if (!(entry instanceof File)) continue;
-    const name = safeName(entry.name || "upload");
-    const buf = Buffer.from(await entry.arrayBuffer());
-    writeFileSync(join(dir, name), buf);
-    saved.push(name);
+    const saved: string[] = [];
+    for (const entry of form.getAll("files")) {
+      if (!(entry instanceof File)) continue;
+      const name = safeName(entry.name || "upload");
+      const buf = Buffer.from(await entry.arrayBuffer());
+      writeFileSync(join(dir, name), buf);
+      saved.push(name);
+    }
+    return Response.json({ saved });
+  } catch {
+    return Response.json(
+      {
+        error:
+          "File storage runs on the local CounselOS install for now — the cloud version is a later phase.",
+      },
+      { status: 503 },
+    );
   }
-  return Response.json({ saved });
 }

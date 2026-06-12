@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { mkdirSync } from "node:fs";
 import { basename, join } from "node:path";
-import { query } from "@anthropic-ai/claude-agent-sdk";
 import {
   ORCHESTRATOR_MODEL,
   ORCHESTRATOR_PROMPT,
@@ -68,7 +67,23 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "No messages." }, { status: 400 });
   }
 
-  const cwd = matterDir(matterId);
+  // the agent runtime is excluded from cloud deploys (function size limit);
+  // import it lazily so this route degrades with a clear message there
+  let query: typeof import("@anthropic-ai/claude-agent-sdk").query;
+  let cwd: string;
+  try {
+    ({ query } = await import("@anthropic-ai/claude-agent-sdk"));
+    cwd = matterDir(matterId);
+  } catch {
+    return Response.json(
+      {
+        error:
+          "Chat runs on the local CounselOS install for now — the cloud version is a later phase.",
+      },
+      { status: 503 },
+    );
+  }
+
   const promptText = buildPrompt(messages) + (voice ? VOICE_NOTE : "");
 
   const isAuto = agentId === "auto" || !SPECIALISTS[agentId as never];

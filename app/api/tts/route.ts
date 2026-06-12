@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { KokoroTTS } from "kokoro-js";
+import type { KokoroTTS } from "kokoro-js";
 
 export const runtime = "nodejs";
 export const maxDuration = 600;
@@ -11,9 +11,13 @@ export const maxDuration = 600;
  */
 let ttsPromise: Promise<KokoroTTS> | null = null;
 function getTTS(): Promise<KokoroTTS> {
-  ttsPromise ??= KokoroTTS.from_pretrained(
-    "onnx-community/Kokoro-82M-v1.0-ONNX",
-    { dtype: "q8", device: "cpu" },
+  // dynamic import: the kokoro/onnx stack is excluded from cloud deploys
+  // (250MB function limit) — this route is a local-install feature for now
+  ttsPromise ??= import("kokoro-js").then((m) =>
+    m.KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX", {
+      dtype: "q8",
+      device: "cpu",
+    }),
   );
   return ttsPromise;
 }
