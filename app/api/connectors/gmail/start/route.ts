@@ -8,11 +8,14 @@ export const runtime = "nodejs";
  * a refresh token every grant. Gmail scopes are Google-restricted: while
  * the consent screen is in Testing, only listed test users can connect.
  */
+/* one Google grant covers Gmail + Drive (incl. Docs export) + Calendar */
 const SCOPES = [
   "openid",
   "email",
   "https://www.googleapis.com/auth/gmail.modify",
   "https://www.googleapis.com/auth/gmail.send",
+  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/calendar.readonly",
 ].join(" ");
 
 export async function GET(req: NextRequest) {

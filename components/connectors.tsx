@@ -8,7 +8,6 @@ import {
   SiDropbox,
   SiGmail,
   SiGooglecalendar,
-  SiGoogledocs,
   SiGoogledrive,
 } from "react-icons/si";
 
@@ -37,12 +36,17 @@ export const CONNECTORS: Connector[] = [
   { id: "m365", name: "Microsoft 365", icon: FaMicrosoft, color: "#D83B01", hint: "Word documents and OneDrive files" },
   { id: "mycase", name: "MyCase", icon: Scale, color: "var(--color-accent)", hint: "Matters, contacts, deadlines, billing" },
   { id: "dropbox", name: "Dropbox", icon: SiDropbox, color: "#0061FF", hint: "Pull case files from Dropbox" },
-  // Google family
+  // Google family — one grant covers all three (Docs read via Drive)
   { id: "gmail", name: "Gmail", icon: SiGmail, color: "#EA4335", hint: "Draft and review email in case context" },
-  { id: "gdrive", name: "Google Drive", icon: SiGoogledrive, color: "#4285F4", hint: "Pull case files straight from Drive" },
-  { id: "gdocs", name: "Google Docs", icon: SiGoogledocs, color: "#4285F4", hint: "Open and edit firm documents" },
+  { id: "gdrive", name: "Google Drive", icon: SiGoogledrive, color: "#4285F4", hint: "Case files and Google Docs from Drive" },
   { id: "calendar", name: "Google Calendar", icon: SiGooglecalendar, color: "#34A853", hint: "Deadlines, hearings, statute dates" },
 ];
+
+/** rows that share another connector's OAuth flow */
+const FLOW_ALIAS: Record<string, string> = {
+  gdrive: "gmail",
+  calendar: "gmail",
+};
 
 export function ConnectorsDialog({
   open,
@@ -52,7 +56,13 @@ export function ConnectorsDialog({
   onClose: () => void;
 }) {
   /* which connectors have a live OAuth flow today */
-  const CONNECTABLE = new Set(["dropbox", "outlook", "gmail"]);
+  const CONNECTABLE = new Set([
+    "dropbox",
+    "outlook",
+    "gmail",
+    "gdrive",
+    "calendar",
+  ]);
   const [connected, setConnected] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -125,7 +135,7 @@ export function ConnectorsDialog({
                 </button>
               ) : CONNECTABLE.has(c.id) ? (
                 <a
-                  href={`/api/connectors/${c.id}/start`}
+                  href={`/api/connectors/${FLOW_ALIAS[c.id] ?? c.id}/start`}
                   className="rounded-lg border border-line-strong px-3.5 py-1.5 font-sans text-[12px] font-semibold tracking-wide text-ink uppercase transition-colors hover:border-accent hover:text-accent"
                 >
                   Connect

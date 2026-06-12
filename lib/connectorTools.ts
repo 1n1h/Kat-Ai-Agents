@@ -113,7 +113,8 @@ type ParamType = "string" | "number";
 
 interface ToolSpec {
   name: string;
-  connector: keyof ConnectorTokens;
+  /** which credential gates this tool; "tavily" is env-keyed, not OAuth */
+  connector: keyof ConnectorTokens | "tavily";
   description: string;
   params: Record<
     string,
@@ -491,12 +492,202 @@ export const CONNECTOR_TOOLS: ToolSpec[] = [
       );
     },
   },
+  /* ── Google Drive (and Google Docs via export) ── */
+  {
+    name: "drive_search",
+    connector: "gmail",
+    description:
+      "Search the connected Google Drive by name or content. Returns file " +
+      "ids for drive_read (Google Docs are readable too).",
+    params: {
+      query: { type: "string", description: "Search terms", required: true },
+    },
+    exec: async (input, access) => {
+      const q = str(input.query).replace(/'/g, "\\'");
+      const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(
+          `(fullText contains '${q}' or name contains '${q}') and trashed=false`,
+        )}&pageSize=15&fields=files(id,name,mimeType,modifiedTime,size)`,
+        { headers: { Authorization: `Bearer ${access}` } },
+      );
+      if (!res.ok) {
+        return res.status === 403
+          ? "Drive access not granted — disconnect and reconnect Google in Connectors to add Drive permission."
+          : `Drive search failed (${res.status}).`;
+      }
+      const data = (await res.json()) as {
+        files?: {
+          id: string;
+          name: string;
+          mimeType: string;
+          modifiedTime?: string;
+        }[];
+      };
+      const rows = (data.files ?? []).map(
+        (f) => `[${f.id}] ${f.name} (${f.mimeType}, modified ${f.modifiedTime})`,
+      );
+      return rows.length ? rows.join("\n") : "No matches.";
+    },
+  },
+  {
+    name: "drive_read",
+    connector: "gmail",
+    description:
+      "Read a file from Google Drive by id (from drive_search). Google " +
+      "Docs/Sheets are exported as text/CSV; binary files can't be read.",
+    params: {
+      fileId: { type: "string", description: "Drive file id", required: true },
+    },
+    exec: async (input, access) => {
+      const id = encodeURIComponent(str(input.fileId));
+      const meta = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${id}?fields=name,mimeType`,
+        { headers: { Authorization: `Bearer ${access}` } },
+      );
+      if (!meta.ok) return `Drive read failed (${meta.status}) — check the id.`;
+      const { name, mimeType } = (await meta.json()) as {
+        name: string;
+        mimeType: string;
+      };
+      let url: string;
+      if (mimeType === "application/vnd.google-apps.document") {
+        url = `https://www.googleapis.com/drive/v3/files/${id}/export?mimeType=text/plain`;
+      } else if (mimeType === "application/vnd.google-apps.spreadsheet") {
+        url = `https://www.googleapis.com/drive/v3/files/${id}/export?mimeType=text/csv`;
+      } else if (mimeType.startsWith("application/vnd.google-apps")) {
+        return `"${name}" is a ${mimeType} — not exportable as text.`;
+      } else {
+        url = `https://www.googleapis.com/drive/v3/files/${id}?alt=media`;
+      }
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${access}` },
+      });
+      if (!res.ok) return `Drive download failed (${res.status}).`;
+      const buf = Buffer.from(await res.arrayBuffer());
+      const slice = buf.subarray(0, 200000);
+      let nulls = 0;
+      for (const b of slice.subarray(0, 2000)) if (b === 0) nulls++;
+      if (nulls > 10) {
+        return `"${name}" is a binary file — ask the user to upload it into the case working directory instead.`;
+      }
+      return cap(`File: ${name}\n\n${slice.toString("utf-8")}`);
+    },
+  },
+
+  /* ── Google Calendar ── */
+  {
+    name: "gcal_events",
+    connector: "gmail",
+    description: "List upcoming events on the connected Google Calendar.",
+    params: {
+      days: {
+        type: "number",
+        description: "How many days ahead to look (default 7)",
+      },
+    },
+    exec: async (input, access) => {
+      const days = Math.min(num(input.days, 7), 60);
+      const timeMin = new Date().toISOString();
+      const timeMax = new Date(Date.now() + days * 86400000).toISOString();
+      const res = await fetch(
+        `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(
+          timeMin,
+        )}&timeMax=${encodeURIComponent(
+          timeMax,
+        )}&singleEvents=true&orderBy=startTime&maxResults=30`,
+        { headers: { Authorization: `Bearer ${access}` } },
+      );
+      if (!res.ok) {
+        return res.status === 403
+          ? "Calendar access not granted — disconnect and reconnect Google in Connectors to add Calendar permission."
+          : `Calendar lookup failed (${res.status}).`;
+      }
+      const data = (await res.json()) as {
+        items?: {
+          summary?: string;
+          start?: { dateTime?: string; date?: string };
+          end?: { dateTime?: string; date?: string };
+          location?: string;
+        }[];
+      };
+      const rows = (data.items ?? []).map(
+        (e) =>
+          `${e.start?.dateTime ?? e.start?.date} → ${e.end?.dateTime ?? e.end?.date}  ${e.summary}${e.location ? ` @ ${e.location}` : ""}`,
+      );
+      return rows.length ? rows.join("\n") : `No events in the next ${days} days.`;
+    },
+  },
+
+  /* ── Web search (Tavily; env-keyed, available to everyone) ── */
+  {
+    name: "web_search",
+    connector: "tavily",
+    description:
+      "Search the live web. Use whenever you are unsure of a fact, when " +
+      "information may have changed (law, court rules, deadlines, news, " +
+      "companies, people), or before stating anything time-sensitive. " +
+      "Returns titles, URLs, and content snippets — cite the URLs you rely on.",
+    params: {
+      query: { type: "string", description: "Search query", required: true },
+      count: { type: "number", description: "Max results (default 6)" },
+    },
+    exec: async (input) => {
+      const res = await fetch("https://api.tavily.com/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          api_key: process.env.TAVILY_API_KEY,
+          query: str(input.query),
+          search_depth: "basic",
+          max_results: Math.min(num(input.count, 6), 10),
+        }),
+      });
+      if (!res.ok) return `Web search failed (${res.status}).`;
+      const data = (await res.json()) as {
+        answer?: string;
+        results?: { title?: string; url?: string; content?: string }[];
+      };
+      const rows = (data.results ?? []).map(
+        (r) => `${r.title}\n${r.url}\n${r.content}`,
+      );
+      return cap(
+        (data.answer ? `Synthesized answer: ${data.answer}\n\n` : "") +
+          (rows.length ? rows.join("\n\n") : "No results."),
+        16000,
+      );
+    },
+  },
 ];
 
 /* ── consumers ── */
 
 export function availableTools(tokens: ConnectorTokens): ToolSpec[] {
-  return CONNECTOR_TOOLS.filter((t) => Boolean(tokens[t.connector]));
+  return CONNECTOR_TOOLS.filter((t) =>
+    t.connector === "tavily"
+      ? Boolean(process.env.TAVILY_API_KEY)
+      : Boolean(tokens[t.connector]),
+  );
+}
+
+/**
+ * System-prompt note describing the live tools — with a hard grounding
+ * rule when web search is available.
+ */
+export function toolGuidance(tokens: ConnectorTokens): string {
+  const tools = availableTools(tokens);
+  if (!tools.length) return "";
+  let g = `\n\n[CONNECTED TOOLS: ${tools.map((t) => t.name).join(", ")}. Use them whenever the user's request involves their email, calendar, cloud files, or facts you cannot verify from the conversation.`;
+  if (tools.some((t) => t.name === "web_search")) {
+    g +=
+      " You have live web search. Whenever you are unsure of something, " +
+      "when information may be outdated, or before stating any " +
+      "time-sensitive fact (law, court rules, deadlines, cases, people, " +
+      "companies, news), use web_search first. NEVER fabricate or guess " +
+      "at facts, citations, or current events: verify with web_search, " +
+      "or say plainly that you do not know.";
+  }
+  g += "]";
+  return g;
 }
 
 /** Anthropic Messages API tool definitions for the cloud path. */
@@ -527,9 +718,13 @@ export async function executeConnectorTool(
 ): Promise<string> {
   const tool = CONNECTOR_TOOLS.find((t) => t.name === name);
   if (!tool) return `Unknown tool: ${name}`;
-  const refresh = tokens[tool.connector];
-  if (!refresh) return `${tool.connector} is not connected.`;
   try {
+    if (tool.connector === "tavily") {
+      if (!process.env.TAVILY_API_KEY) return "Web search is not configured.";
+      return await tool.exec(input, "");
+    }
+    const refresh = tokens[tool.connector];
+    if (!refresh) return `${tool.connector} is not connected.`;
     const access =
       tool.connector === "dropbox"
         ? await dropboxAccess(refresh)

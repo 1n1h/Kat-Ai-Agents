@@ -13,6 +13,7 @@ import {
   anthropicToolDefs,
   availableTools,
   executeConnectorTool,
+  toolGuidance,
   type ConnectorTokens,
 } from "@/lib/connectorTools";
 
@@ -154,6 +155,7 @@ async function cloudChat(
 ): Promise<Response> {
   const firmCtx = firmContext(userEmail);
   const connTools = anthropicToolDefs(tokens);
+  const guidance = toolGuidance(tokens);
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json(
       { error: "ANTHROPIC_API_KEY is not configured." },
@@ -182,7 +184,7 @@ async function cloudChat(
               max_tokens: 8000,
               system:
                 spec.prompt + CLOUD_NOTE + identityNote(id) + firmCtx +
-                (voice ? VOICE_NOTE : ""),
+                guidance + (voice ? VOICE_NOTE : ""),
               ...(connTools.length ? { tools: connTools } : {}),
               messages: turns,
             });
@@ -260,7 +262,9 @@ async function cloudChat(
           const resp = await client.messages.create({
             model: ORCHESTRATOR_MODEL,
             max_tokens: 8000,
-            system: ORCH_CLOUD_PROMPT + firmCtx + (voice ? VOICE_NOTE : ""),
+            system:
+              ORCH_CLOUD_PROMPT + firmCtx + guidance +
+              (voice ? VOICE_NOTE : ""),
             tools: [consultTool, ...connTools],
             messages: turns,
           });
@@ -440,7 +444,8 @@ export async function POST(req: NextRequest) {
             permissionMode: "bypassPermissions",
             systemPrompt:
               (isAuto ? ORCHESTRATOR_PROMPT : spec!.prompt) +
-              firmContext(userEmail),
+              firmContext(userEmail) +
+              toolGuidance(tokens),
             model: isAuto
               ? ORCHESTRATOR_MODEL
               : MODEL_IDS[(spec!.model ?? "sonnet") as keyof typeof MODEL_IDS],
