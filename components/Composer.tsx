@@ -237,6 +237,7 @@ export default function Composer({
           <button
             onClick={() => setPlusOpen((o) => !o)}
             disabled={disabled}
+            data-tour="upload"
             title="Add files or connectors"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink disabled:opacity-40"
           >

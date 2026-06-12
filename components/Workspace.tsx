@@ -35,6 +35,7 @@ import ThemeToggle from "./ThemeToggle";
 import SuggestionPills from "./SuggestionPills";
 import VoiceMode from "./VoiceMode";
 import SettingsDialog from "./SettingsDialog";
+import Tour from "./Tour";
 import { ConnectorsDialog } from "./connectors";
 import { getSettings, isLightTheme, setTheme } from "@/lib/settings";
 import { cloudList } from "@/lib/cloudFiles";
@@ -530,6 +531,9 @@ export default function Workspace() {
 
   return (
     <div className="flex h-dvh overflow-hidden bg-paper text-ink">
+      {/* one-time guided walkthrough for first-time users */}
+      <Tour setSidebarOpen={setSidebarOpen} />
+
       {/* ── sidebar (Claude-style; overlay drawer on mobile) ──── */}
       {sidebarOpen && (
         <div
@@ -583,6 +587,7 @@ export default function Workspace() {
               <span
                 role="button"
                 tabIndex={0}
+                data-tour="new-case"
                 className="rounded-md p-1 text-muted hover:text-accent"
                 title="New case"
                 onClick={(e) => {
@@ -661,7 +666,11 @@ export default function Workspace() {
               </>
             )}
 
-            <button onClick={() => setConnectorsOpen(true)} className={navRow}>
+            <button
+              onClick={() => setConnectorsOpen(true)}
+              className={navRow}
+              data-tour="connectors"
+            >
               <span className="flex h-7 w-7 items-center justify-center">
                 <Cable className="h-[18px] w-[18px]" />
               </span>
@@ -670,7 +679,7 @@ export default function Workspace() {
           </nav>
 
           {/* starred + recents */}
-          <div className="rise rise-3 px-3 pt-5">
+          <div className="rise rise-3 px-3 pt-5" data-tour="threads">
             {starredThreads.length > 0 && (
               <>
                 <p className="px-2 pb-1 text-[13px] font-medium text-muted">
@@ -699,6 +708,7 @@ export default function Workspace() {
         <div className="rise rise-4 relative border-t border-line" data-profile-menu>
           <button
             onClick={() => setProfileOpen((o) => !o)}
+            data-tour="profile"
             className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-panel-deep"
           >
             {user?.photoURL ? (
