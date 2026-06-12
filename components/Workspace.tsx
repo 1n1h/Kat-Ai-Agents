@@ -29,6 +29,13 @@ import {
 } from "@/lib/store";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { firebaseAuth, firebaseEnabled, signOut } from "@/lib/firebase";
+import {
+  deleteThreadDoc,
+  migrateLocal,
+  saveMatter,
+  saveThread,
+  watchWorkspace,
+} from "@/lib/firestoreStore";
 import Transcript from "./Transcript";
 import Composer from "./Composer";
 import ThemeToggle from "./ThemeToggle";
@@ -114,6 +121,9 @@ export default function Workspace() {
   /* chosen once per visit so it doesn't flicker between renders */
   const [greetingTpl] = useState(pickGreeting);
   const bottomRef = useRef<HTMLDivElement>(null);
+  /* signed-in uid for write-through persistence (null = local mode) */
+  const uidRef = useRef<string | null>(null);
+  const migratedRef = useRef<string | null>(null);
 
   /* ── signed-in user for the footer ── */
   useEffect(() => {
@@ -121,6 +131,56 @@ export default function Workspace() {
     if (!auth) return;
     return onAuthStateChanged(auth, setUser);
   }, []);
+
+  /* ── cloud sync: Firestore is the source of truth when signed in ── */
+  useEffect(() => {
+    const uid = user?.uid ?? null;
+    uidRef.current = uid;
+    if (!uid || !ready) return;
+    let cancelled = false;
+    const unsub = watchWorkspace(uid, (cloud) => {
+      if (cancelled) return;
+      if (!cloud.matters.length && !cloud.threads.length) {
+        // first cloud session: carry this browser's local history up once
+        if (migratedRef.current !== uid) {
+          migratedRef.current = uid;
+          const local = loadState();
+          if (local.matters.length || local.threads.length) {
+            void migrateLocal(uid, local);
+            return; // snapshot re-emits with the migrated data
+          }
+          const general: Matter = {
+            id: uid.slice(0, 8) + "-general",
+            name: "General",
+            createdAt: Date.now(),
+          };
+          void saveMatter(uid, general);
+          return;
+        }
+        return;
+      }
+      setMatters(cloud.matters);
+      setThreads(cloud.threads);
+      setMatterId((prev) =>
+        cloud.matters.some((m) => m.id === prev)
+          ? prev
+          : (cloud.matters[0]?.id ?? prev),
+      );
+      saveState(cloud); // keep the local cache warm for fast next paint
+    });
+    return () => {
+      cancelled = true;
+      uidRef.current = null;
+      unsub();
+    };
+  }, [user?.uid, ready]);
+
+  const persistThread = (t: Thread) => {
+    if (uidRef.current) void saveThread(uidRef.current, t);
+  };
+  const persistMatter = (m: Matter) => {
+    if (uidRef.current) void saveMatter(uidRef.current, m);
+  };
 
   /* ── hydrate from localStorage ── */
   useEffect(() => {
@@ -214,6 +274,7 @@ export default function Workspace() {
     if (!name) return;
     const m: Matter = { id: uid(), name, createdAt: Date.now() };
     setMatters((prev) => [...prev, m]);
+    persistMatter(m);
     setMatterId(m.id);
     setThreadId(null);
     setCasesOpen(true);
@@ -222,7 +283,14 @@ export default function Workspace() {
   }
 
   function updateThread(id: string, fn: (t: Thread) => Thread) {
-    setThreads((prev) => prev.map((t) => (t.id === id ? fn(t) : t)));
+    setThreads((prev) =>
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        const next = fn(t);
+        persistThread(next);
+        return next;
+      }),
+    );
   }
 
   function toggleStar(t: Thread) {
@@ -247,7 +315,12 @@ export default function Workspace() {
 
   function moveThread(id: string, toMatterId: string) {
     setThreads((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, matterId: toMatterId } : t)),
+      prev.map((t) => {
+        if (t.id !== id) return t;
+        const next = { ...t, matterId: toMatterId };
+        persistThread(next);
+        return next;
+      }),
     );
     if (threadId === id) setThreadId(null);
     setMenuFor(null);
@@ -255,6 +328,7 @@ export default function Workspace() {
 
   function deleteThread(id: string) {
     setThreads((prev) => prev.filter((t) => t.id !== id));
+    if (uidRef.current) void deleteThreadDoc(uidRef.current, id);
     if (threadId === id) setThreadId(null);
     setMenuFor(null);
   }
@@ -284,6 +358,7 @@ export default function Workspace() {
         createdAt: Date.now(),
       };
       setThreads((prev) => [...prev, thread!]);
+      persistThread(thread);
       setThreadId(thread.id);
     }
     const history = [...thread.messages, userMsg];
