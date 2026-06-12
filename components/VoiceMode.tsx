@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, X } from "lucide-react";
 import Spinner from "./Spinner";
 import { getSettings } from "@/lib/settings";
+import {
+  playAudioUrl,
+  primeAudioPlayback,
+  stopAudio as stopPlayback,
+} from "@/lib/audioPlayback";
 
 /**
  * Hands-free conversation:
@@ -44,7 +49,6 @@ export default function VoiceMode({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const closedRef = useRef(false);
   const stateRef = useRef<VoiceState>("idle");
   stateRef.current = state;
@@ -66,8 +70,7 @@ export default function VoiceMode({
   }
 
   function stopAudio() {
-    audioRef.current?.pause();
-    audioRef.current = null;
+    stopPlayback();
   }
 
   function stopRecorder() {
@@ -146,13 +149,10 @@ export default function VoiceMode({
       });
       if (!res.ok) throw new Error("tts failed");
       const url = URL.createObjectURL(await res.blob());
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      audio.onended = () => {
+      await playAudioUrl(url, () => {
         URL.revokeObjectURL(url);
         if (!closedRef.current) listen();
-      };
-      await audio.play();
+      });
     } catch {
       if (!closedRef.current) listen();
     }
@@ -235,6 +235,9 @@ export default function VoiceMode({
   if (!open) return null;
 
   function orbTap() {
+    // Each tap is a user gesture — use it to (re)unlock audio output so the
+    // agent's spoken reply isn't blocked by the browser's autoplay policy.
+    primeAudioPlayback();
     if (state === "speaking") {
       stopAudio();
       listen();

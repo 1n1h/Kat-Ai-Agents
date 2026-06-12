@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, Loader2, Square, Volume2 } from "lucide-react";
 import { getSettings } from "@/lib/settings";
+import { playAudioUrl, primeAudioPlayback, stopAudio } from "@/lib/audioPlayback";
 
 /** Only one turn speaks at a time. */
-let currentAudio: HTMLAudioElement | null = null;
 let currentStop: (() => void) | null = null;
 
 const btn =
@@ -30,10 +30,7 @@ export default function TurnActions({ text }: { text: string }) {
 
   function stop() {
     abortRef.current?.abort();
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
+    stopAudio();
     currentStop = null;
     setSpeech("idle");
   }
@@ -43,6 +40,9 @@ export default function TurnActions({ text }: { text: string }) {
       stop();
       return;
     }
+    // Unlock playback while we still have the tap's activation — the audio
+    // itself only arrives after the fetch below, too late for iOS otherwise.
+    primeAudioPlayback();
     currentStop?.(); // silence any other turn
     currentStop = stop;
     setSpeech("loading");
@@ -58,14 +58,10 @@ export default function TurnActions({ text }: { text: string }) {
       if (!res.ok) throw new Error("TTS unavailable");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      currentAudio = audio;
-      audio.onended = () => {
+      await playAudioUrl(url, () => {
         URL.revokeObjectURL(url);
-        if (currentAudio === audio) currentAudio = null;
         setSpeech("idle");
-      };
-      await audio.play();
+      });
       setSpeech("playing");
     } catch {
       setSpeech("idle");
