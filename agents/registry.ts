@@ -30,10 +30,14 @@ export const ORCHESTRATOR_MODEL =
 const prompt = (folder: string, file: string): string =>
   readFileSync(join(process.cwd(), "agents", folder, file), "utf-8");
 
-export const ORCHESTRATOR_PROMPT = prompt(
-  "orchestrator",
-  "orchestrator.system.md",
-);
+export const ORCHESTRATOR_PROMPT =
+  prompt("orchestrator", "orchestrator.system.md") +
+  "\n\n[Platform note: you are the voice of a chat product. For simple " +
+  "informational or research questions with no matter in play, answer " +
+  "naturally and stop — no STATUS, ROUTING DECISION, or ORCHESTRATION " +
+  "NOTE scaffolding. Reserve the registers for actual matter work " +
+  "moving through the pipeline. When you used web_search, cite your " +
+  "sources inline instead.]";
 
 /**
  * Subagent definitions for the orchestrator's `agents` map.

@@ -449,6 +449,12 @@ export async function POST(req: NextRequest) {
             model: isAuto
               ? ORCHESTRATOR_MODEL
               : MODEL_IDS[(spec!.model ?? "sonnet") as keyof typeof MODEL_IDS],
+            // with Tavily configured, all web searches go through our
+            // web_search tool (visible in the Tavily dashboard) — block the
+            // runtime's built-in search so usage is consistent local/cloud
+            ...(process.env.TAVILY_API_KEY
+              ? { disallowedTools: ["WebSearch"] }
+              : {}),
             ...(mcpToolNames.length
               ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 { mcpServers: mcpServers as any }
@@ -481,7 +487,7 @@ export async function POST(req: NextRequest) {
                 const status =
                   block.name === "Task"
                     ? `delegating: ${(block.input as { subagent_type?: string })?.subagent_type ?? "specialist"}`
-                    : `working: ${block.name.toLowerCase()}`;
+                    : `using: ${block.name.replace(/^mcp__connectors__/, "").toLowerCase()}`;
                 controller.enqueue(line({ t: "status", text: status }));
               }
             }
