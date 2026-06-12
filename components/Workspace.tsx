@@ -11,7 +11,8 @@ import {
   type Msg,
   type Thread,
 } from "@/lib/store";
-import { firebaseEnabled, signOut } from "@/lib/firebase";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import { firebaseAuth, firebaseEnabled, signOut } from "@/lib/firebase";
 import Transcript from "./Transcript";
 import Composer from "./Composer";
 import ThemeToggle from "./ThemeToggle";
@@ -50,7 +51,15 @@ export default function Workspace() {
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
   const [statuses, setStatuses] = useState<string[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  /* ── signed-in user for the footer ── */
+  useEffect(() => {
+    const auth = firebaseAuth();
+    if (!auth) return;
+    return onAuthStateChanged(auth, setUser);
+  }, []);
 
   /* ── hydrate from localStorage ── */
   useEffect(() => {
@@ -351,17 +360,19 @@ export default function Workspace() {
         {/* footer: avatar profile */}
         <div className="rise rise-4 flex items-center gap-3 border-t border-line px-4 py-3">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-wash font-serif text-lg text-accent">
-            C
+            {(user?.displayName ?? user?.email ?? "Counsel")
+              .charAt(0)
+              .toUpperCase()}
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[14px] font-medium text-ink">
-              Counsel
+              {user?.displayName ?? user?.email ?? "Counsel"}
             </span>
             <span
               className="block truncate text-[12.5px] text-muted"
               title={
                 firebaseEnabled
-                  ? "Signed in with Google"
+                  ? (user?.email ?? "Signed in")
                   : "Auth activates once Firebase keys are configured — files stay on this machine"
               }
             >
