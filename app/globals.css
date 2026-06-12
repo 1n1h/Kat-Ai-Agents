@@ -134,6 +134,28 @@ body {
   100%  { inset: 0 55% 55% 0; }
 }
 
+/* ── voice mode orb ──────────────────────────────────────────── */
+@keyframes orbPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--color-accent-wash);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 26px transparent;
+  }
+}
+.orb-listen {
+  animation: orbPulse 2s ease-in-out infinite;
+}
+@keyframes orbTalk {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+.orb-speak {
+  animation: orbTalk 0.55s ease-in-out infinite;
+}
+
 /* ── status caret while an agent works ──────────────────────── */
 @keyframes caret {
   0%, 100% { opacity: 1; }

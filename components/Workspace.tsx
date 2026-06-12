@@ -17,6 +17,7 @@ import Transcript from "./Transcript";
 import Composer from "./Composer";
 import ThemeToggle from "./ThemeToggle";
 import SuggestionPills from "./SuggestionPills";
+import VoiceMode from "./VoiceMode";
 import { ConnectorsDialog } from "./connectors";
 
 interface MatterFile {
@@ -73,6 +74,7 @@ export default function Workspace() {
   const [filesOpen, setFilesOpen] = useState(true);
   const [newCaseOpen, setNewCaseOpen] = useState(false);
   const [newCaseName, setNewCaseName] = useState("");
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -146,8 +148,12 @@ export default function Workspace() {
     setThreads((prev) => prev.map((t) => (t.id === id ? fn(t) : t)));
   }
 
-  async function handleSend(text: string, attached: string[]) {
-    if (streaming || !matterId) return;
+  /** Sends a turn through the agents; returns the reply (voice mode reads it). */
+  async function handleSend(
+    text: string,
+    attached: string[],
+  ): Promise<string> {
+    if (streaming || !matterId) return "";
     setDraft("");
 
     const content = attached.length
@@ -233,6 +239,7 @@ export default function Workspace() {
     setLive("");
     setStatuses([]);
     setStreaming(false);
+    return finalText;
   }
 
   if (!ready) return null;
@@ -247,6 +254,7 @@ export default function Workspace() {
       matterId={matterId}
       onSend={handleSend}
       onOpenConnectors={() => setConnectorsOpen(true)}
+      onOpenVoice={() => setVoiceOpen(true)}
       autoFocus={isEmpty}
     />
   );
@@ -536,6 +544,13 @@ export default function Workspace() {
       <ConnectorsDialog
         open={connectorsOpen}
         onClose={() => setConnectorsOpen(false)}
+      />
+
+      <VoiceMode
+        open={voiceOpen}
+        onClose={() => setVoiceOpen(false)}
+        ask={(text) => handleSend(text, [])}
+        agentName={agentById(agentId).name}
       />
     </div>
   );

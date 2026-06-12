@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Cable, Plus, UploadCloud, X } from "lucide-react";
+import { ArrowUp, AudioLines, Cable, Plus, UploadCloud, X } from "lucide-react";
 import type { AgentId } from "@/lib/agent-meta";
 import AgentSelect from "./AgentSelect";
 
@@ -14,6 +14,7 @@ export default function Composer({
   matterId,
   onSend,
   onOpenConnectors,
+  onOpenVoice,
   autoFocus,
 }: {
   value: string;
@@ -24,6 +25,7 @@ export default function Composer({
   matterId: string;
   onSend: (text: string, attached: string[]) => void;
   onOpenConnectors: () => void;
+  onOpenVoice: () => void;
   autoFocus?: boolean;
 }) {
   const [attached, setAttached] = useState<string[]>([]);
@@ -203,6 +205,14 @@ export default function Composer({
             onChange={onAgentChange}
             disabled={disabled}
           />
+          <button
+            onClick={onOpenVoice}
+            disabled={disabled}
+            title="Voice conversation"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink disabled:opacity-40"
+          >
+            <AudioLines className="h-4.5 w-4.5" />
+          </button>
           <button
             onClick={send}
             disabled={!canSend}
