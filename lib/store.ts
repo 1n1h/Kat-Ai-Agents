@@ -18,6 +18,7 @@ export interface Thread {
   agentId: AgentId;
   messages: Msg[];
   createdAt: number;
+  starred?: boolean;
 }
 
 export interface Matter {

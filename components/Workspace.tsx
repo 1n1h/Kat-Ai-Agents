@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Briefcase, Cable, FolderOpen, LogOut, Plus } from "lucide-react";
+import {
+  Briefcase,
+  Cable,
+  ChevronLeft,
+  EllipsisVertical,
+  FolderOpen,
+  LogOut,
+  Pencil,
+  Plus,
+  Star,
+  Trash2,
+} from "lucide-react";
 import { agentById, type AgentId } from "@/lib/agent-meta";
 import {
   loadState,
@@ -75,6 +86,12 @@ export default function Workspace() {
   const [newCaseOpen, setNewCaseOpen] = useState(false);
   const [newCaseName, setNewCaseName] = useState("");
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+  const [menuMode, setMenuMode] = useState<"main" | "case" | "confirm">(
+    "main",
+  );
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameText, setRenameText] = useState("");
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -122,9 +139,22 @@ export default function Workspace() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [threads, live, statuses]);
 
+  /* close the thread menu on outside click */
+  useEffect(() => {
+    if (!menuFor) return;
+    function onDown(e: MouseEvent) {
+      const el = e.target as HTMLElement;
+      if (!el.closest("[data-thread-menu]")) setMenuFor(null);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [menuFor]);
+
   const matterThreads = threads
     .filter((t) => t.matterId === matterId)
     .sort((a, b) => b.createdAt - a.createdAt);
+  const starredThreads = matterThreads.filter((t) => t.starred);
+  const recentThreads = matterThreads.filter((t) => !t.starred);
   const activeThread = threads.find((t) => t.id === threadId) ?? null;
   const activeMatter = matters.find((m) => m.id === matterId) ?? null;
   const isEmpty = !activeThread?.messages.length && !streaming;
@@ -148,10 +178,45 @@ export default function Workspace() {
     setThreads((prev) => prev.map((t) => (t.id === id ? fn(t) : t)));
   }
 
+  function toggleStar(t: Thread) {
+    updateThread(t.id, (x) => ({ ...x, starred: !x.starred }));
+    setMenuFor(null);
+  }
+
+  function startRename(t: Thread) {
+    setRenameText(t.title);
+    setRenamingId(t.id);
+    setMenuFor(null);
+  }
+
+  function commitRename() {
+    if (!renamingId) return;
+    const name = renameText.trim();
+    if (name) {
+      updateThread(renamingId, (t) => ({ ...t, title: name.slice(0, 80) }));
+    }
+    setRenamingId(null);
+  }
+
+  function moveThread(id: string, toMatterId: string) {
+    setThreads((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, matterId: toMatterId } : t)),
+    );
+    if (threadId === id) setThreadId(null);
+    setMenuFor(null);
+  }
+
+  function deleteThread(id: string) {
+    setThreads((prev) => prev.filter((t) => t.id !== id));
+    if (threadId === id) setThreadId(null);
+    setMenuFor(null);
+  }
+
   /** Sends a turn through the agents; returns the reply (voice mode reads it). */
   async function handleSend(
     text: string,
     attached: string[],
+    opts?: { voice?: boolean },
   ): Promise<string> {
     if (streaming || !matterId) return "";
     setDraft("");
@@ -190,6 +255,7 @@ export default function Workspace() {
           messages: history.map(({ role, content }) => ({ role, content })),
           agentId,
           matterId,
+          voice: opts?.voice ?? false,
         }),
       });
 
@@ -243,6 +309,138 @@ export default function Workspace() {
   }
 
   if (!ready) return null;
+
+  const menuItem =
+    "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13.5px] text-ink transition-colors hover:bg-panel";
+
+  const renderThreadRow = (t: Thread) => (
+    <li key={t.id} className="group relative">
+      {renamingId === t.id ? (
+        <input
+          autoFocus
+          value={renameText}
+          onChange={(e) => setRenameText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commitRename();
+            if (e.key === "Escape") setRenamingId(null);
+          }}
+          onBlur={commitRename}
+          className="w-full rounded-lg border border-accent bg-input px-2 py-1.5 text-[14px] text-ink outline-none"
+        />
+      ) : (
+        <>
+          <button
+            onClick={() => {
+              setThreadId(t.id);
+              setAgentId(t.agentId);
+            }}
+            className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14px] transition-colors ${
+              t.id === threadId
+                ? "bg-panel-deep font-medium text-ink"
+                : "text-ink-soft hover:bg-panel-deep hover:text-ink"
+            }`}
+          >
+            {t.starred && (
+              <Star className="mr-1.5 inline h-3 w-3 fill-accent text-accent" />
+            )}
+            {t.title || "Untitled"}
+          </button>
+          <button
+            data-thread-menu
+            onClick={() => {
+              setMenuFor(menuFor === t.id ? null : t.id);
+              setMenuMode("main");
+            }}
+            aria-label="Thread options"
+            className={`absolute top-1/2 right-1 -translate-y-1/2 rounded-md p-1 text-muted transition-opacity hover:bg-panel-deep hover:text-ink ${
+              menuFor === t.id
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100"
+            }`}
+          >
+            <EllipsisVertical className="h-4 w-4" />
+          </button>
+
+          {menuFor === t.id && (
+            <div
+              data-thread-menu
+              className="pop absolute top-8 right-0 z-40 w-56 rounded-xl border border-line-strong bg-panel-deep p-1.5 shadow-2xl"
+            >
+              {menuMode === "main" && (
+                <>
+                  <button className={menuItem} onClick={() => toggleStar(t)}>
+                    <Star
+                      className={`h-4 w-4 ${t.starred ? "fill-accent text-accent" : "text-muted"}`}
+                    />
+                    {t.starred ? "Unstar" : "Star"}
+                  </button>
+                  <button className={menuItem} onClick={() => startRename(t)}>
+                    <Pencil className="h-4 w-4 text-muted" />
+                    Rename
+                  </button>
+                  <button
+                    className={menuItem}
+                    onClick={() => setMenuMode("case")}
+                  >
+                    <Briefcase className="h-4 w-4 text-muted" />
+                    Add to Case
+                  </button>
+                  <hr className="my-1 border-line" />
+                  <button
+                    className={`${menuItem} text-accent hover:text-accent`}
+                    onClick={() => setMenuMode("confirm")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                </>
+              )}
+
+              {menuMode === "case" && (
+                <>
+                  <button
+                    className={`${menuItem} text-muted`}
+                    onClick={() => setMenuMode("main")}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Move to…
+                  </button>
+                  <hr className="my-1 border-line" />
+                  {matters
+                    .filter((m) => m.id !== t.matterId)
+                    .map((m) => (
+                      <button
+                        key={m.id}
+                        className={menuItem}
+                        onClick={() => moveThread(t.id, m.id)}
+                      >
+                        <Briefcase className="h-4 w-4 text-muted" />
+                        <span className="truncate">{m.name}</span>
+                      </button>
+                    ))}
+                  {matters.length < 2 && (
+                    <p className="px-2.5 py-2 text-[12.5px] text-faint italic">
+                      No other cases yet.
+                    </p>
+                  )}
+                </>
+              )}
+
+              {menuMode === "confirm" && (
+                <button
+                  className={`${menuItem} text-accent hover:text-accent`}
+                  onClick={() => deleteThread(t.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete permanently?
+                </button>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </li>
+  );
 
   const composer = (
     <Composer
@@ -366,29 +564,23 @@ export default function Workspace() {
             </button>
           </nav>
 
-          {/* recents */}
+          {/* starred + recents */}
           <div className="rise rise-3 px-3 pt-5">
+            {starredThreads.length > 0 && (
+              <>
+                <p className="px-2 pb-1 text-[13px] font-medium text-muted">
+                  Starred
+                </p>
+                <ul className="space-y-0.5 pb-3">
+                  {starredThreads.map(renderThreadRow)}
+                </ul>
+              </>
+            )}
             <p className="px-2 pb-1 text-[13px] font-medium text-muted">
               Recents
             </p>
             <ul className="space-y-0.5">
-              {matterThreads.map((t) => (
-                <li key={t.id}>
-                  <button
-                    onClick={() => {
-                      setThreadId(t.id);
-                      setAgentId(t.agentId);
-                    }}
-                    className={`w-full truncate rounded-lg px-2 py-1.5 text-left text-[14px] transition-colors ${
-                      t.id === threadId
-                        ? "bg-panel-deep font-medium text-ink"
-                        : "text-ink-soft hover:bg-panel-deep hover:text-ink"
-                    }`}
-                  >
-                    {t.title || "Untitled"}
-                  </button>
-                </li>
-              ))}
+              {recentThreads.map(renderThreadRow)}
               {!matterThreads.length && (
                 <li className="px-2 py-1.5 text-[13px] text-faint italic">
                   No threads yet in this case.
@@ -549,7 +741,7 @@ export default function Workspace() {
       <VoiceMode
         open={voiceOpen}
         onClose={() => setVoiceOpen(false)}
-        ask={(text) => handleSend(text, [])}
+        ask={(text) => handleSend(text, [], { voice: true })}
         agentName={agentById(agentId).name}
       />
     </div>

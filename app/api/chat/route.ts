@@ -22,7 +22,15 @@ interface ChatRequest {
   messages: ChatMessage[];
   agentId: AgentId;
   matterId: string;
+  /** voice mode: replies are spoken aloud, so keep them short */
+  voice?: boolean;
 }
+
+const VOICE_NOTE =
+  "\n\n[Voice mode: the user is speaking aloud and will hear this reply as " +
+  "speech. Answer in at most three short sentences of plain prose — no " +
+  "markdown, no lists, no headings. Offer to go deeper instead of " +
+  "elaborating unprompted.]";
 
 const sanitize = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
 
@@ -54,13 +62,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { messages, agentId, matterId } = (await req.json()) as ChatRequest;
+  const { messages, agentId, matterId, voice } =
+    (await req.json()) as ChatRequest;
   if (!messages?.length) {
     return Response.json({ error: "No messages." }, { status: 400 });
   }
 
   const cwd = matterDir(matterId);
-  const promptText = buildPrompt(messages);
+  const promptText = buildPrompt(messages) + (voice ? VOICE_NOTE : "");
 
   const isAuto = agentId === "auto" || !SPECIALISTS[agentId as never];
   const spec = isAuto ? null : SPECIALISTS[agentId as Exclude<AgentId, "auto">];

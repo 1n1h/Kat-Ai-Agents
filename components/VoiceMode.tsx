@@ -4,46 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, X } from "lucide-react";
 import Spinner from "./Spinner";
 
-/* Minimal Web Speech API surface (Chrome/Edge ship it as webkit-prefixed). */
-interface SRAlternative {
-  transcript: string;
-}
-interface SRResult {
-  isFinal: boolean;
-  0: SRAlternative;
-}
-interface SREvent {
-  resultIndex: number;
-  results: { length: number; [i: number]: SRResult };
-}
-interface SpeechRec {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  onresult: ((e: SREvent) => void) | null;
-  onend: (() => void) | null;
-  onerror: ((e: { error: string }) => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-}
-
-function makeRecognizer(): SpeechRec | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRec;
-    webkitSpeechRecognition?: new () => SpeechRec;
-  };
-  const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-  if (!Ctor) return null;
-  const rec = new Ctor();
-  rec.lang = "en-US";
-  rec.continuous = false; // auto-stop on silence = natural turn-taking
-  rec.interimResults = true;
-  return rec;
-}
+/**
+ * Hands-free conversation:
+ *   record (VAD trims silence) → ElevenLabs Scribe transcribes the turn →
+ *   agent replies (voice-concise) → Kokoro speaks → listening resumes.
+ * Speaking up while the agent talks interrupts it (barge-in). Only actual
+ * speech turns are sent to Scribe, so transcription billing stays minimal.
+ */
 
 type VoiceState = "idle" | "listening" | "thinking" | "speaking";
+
+/* RMS thresholds (0..1). Barge-in is higher: echo cancellation plus margin. */
+const SPEECH_START = 0.025;
+const SILENCE_END_MS = 1100;
+const BARGE_RMS = 0.06;
+const BARGE_MS = 300;
+const EMPTY_RESTART_MS = 15000; // re-arm recorder so silent blobs never grow
 
 export default function VoiceMode({
   open,
@@ -53,44 +29,102 @@ export default function VoiceMode({
 }: {
   open: boolean;
   onClose: () => void;
-  /** sends the spoken text through the normal chat pipeline, returns the reply */
   ask: (text: string) => Promise<string>;
   agentName: string;
 }) {
   const [state, setState] = useState<VoiceState>("idle");
-  const [interim, setInterim] = useState("");
   const [lastHeard, setLastHeard] = useState("");
   const [error, setError] = useState("");
+  const [heardYet, setHeardYet] = useState(false);
 
-  const recRef = useRef<SpeechRec | null>(null);
-  const finalRef = useRef("");
+  const streamRef = useRef<MediaStream | null>(null);
+  const ctxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const closedRef = useRef(false);
   const stateRef = useRef<VoiceState>("idle");
   stateRef.current = state;
+
+  /* per-turn VAD bookkeeping */
+  const vad = useRef({ heard: false, lastVoice: 0, turnStart: 0, bargeAt: 0 });
+
+  function rms(): number {
+    const an = analyserRef.current;
+    if (!an) return 0;
+    const buf = new Uint8Array(an.fftSize);
+    an.getByteTimeDomainData(buf);
+    let sum = 0;
+    for (const v of buf) {
+      const d = (v - 128) / 128;
+      sum += d * d;
+    }
+    return Math.sqrt(sum / buf.length);
+  }
 
   function stopAudio() {
     audioRef.current?.pause();
     audioRef.current = null;
   }
 
+  function stopRecorder() {
+    const r = recorderRef.current;
+    if (r && r.state !== "inactive") r.stop();
+  }
+
   function listen() {
-    if (closedRef.current) return;
-    const rec = recRef.current;
-    if (!rec) return;
-    finalRef.current = "";
-    setInterim("");
+    if (closedRef.current || !streamRef.current) return;
+    chunksRef.current = [];
+    vad.current = {
+      heard: false,
+      lastVoice: 0,
+      turnStart: performance.now(),
+      bargeAt: 0,
+    };
+    setHeardYet(false);
+    const rec = new MediaRecorder(streamRef.current);
+    recorderRef.current = rec;
+    rec.ondataavailable = (e) => {
+      if (e.data.size) chunksRef.current.push(e.data);
+    };
+    rec.onstop = () => {
+      if (closedRef.current || stateRef.current !== "listening") return;
+      if (vad.current.heard) {
+        void transcribe(new Blob(chunksRef.current, { type: rec.mimeType }));
+      } else {
+        listen(); // silence only — drop the blob, re-arm
+      }
+    };
+    rec.start();
     setState("listening");
+  }
+
+  async function transcribe(blob: Blob) {
+    setState("thinking");
     try {
-      rec.start();
-    } catch {
-      /* start() throws if already running — safe to ignore */
+      const form = new FormData();
+      form.set("audio", new File([blob], "turn.webm", { type: blob.type }));
+      const res = await fetch("/api/stt", { method: "POST", body: form });
+      const data = (await res.json()) as { text?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Transcription failed.");
+      const text = (data.text ?? "").trim();
+      if (closedRef.current) return;
+      if (!text) {
+        listen();
+        return;
+      }
+      setLastHeard(text);
+      await converse(text);
+    } catch (err) {
+      if (closedRef.current) return;
+      setError(err instanceof Error ? err.message : "Transcription failed.");
+      setState("idle");
     }
   }
 
   async function converse(text: string) {
-    setLastHeard(text);
-    setState("thinking");
     let reply = "";
     try {
       reply = await ask(text);
@@ -123,58 +157,76 @@ export default function VoiceMode({
     }
   }
 
-  /* lifecycle: wire the recognizer while the overlay is open */
+  /* the VAD heartbeat — runs the whole time the overlay is open */
+  function tick() {
+    if (closedRef.current) return;
+    const level = rms();
+    const now = performance.now();
+    const v = vad.current;
+
+    if (stateRef.current === "listening") {
+      if (level > SPEECH_START) {
+        if (!v.heard) setHeardYet(true);
+        v.heard = true;
+        v.lastVoice = now;
+      }
+      if (v.heard && now - v.lastVoice > SILENCE_END_MS) {
+        stopRecorder(); // onstop → transcribe
+      } else if (!v.heard && now - v.turnStart > EMPTY_RESTART_MS) {
+        stopRecorder(); // onstop → silent → re-arm
+      }
+    } else if (stateRef.current === "speaking") {
+      if (level > BARGE_RMS) {
+        if (!v.bargeAt) v.bargeAt = now;
+        if (now - v.bargeAt > BARGE_MS) {
+          stopAudio(); // user talked over the agent — yield the floor
+          listen();
+        }
+      } else {
+        v.bargeAt = 0;
+      }
+    }
+  }
+
   useEffect(() => {
     if (!open) return;
     closedRef.current = false;
     setError("");
     setLastHeard("");
 
-    const rec = makeRecognizer();
-    if (!rec) {
-      setError(
-        "Voice input needs the Web Speech API — use Chrome or Edge for now.",
-      );
-      return;
-    }
-    recRef.current = rec;
-
-    rec.onresult = (e) => {
-      let interimText = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const r = e.results[i];
-        if (r.isFinal) finalRef.current += r[0].transcript;
-        else interimText += r[0].transcript;
-      }
-      setInterim(interimText || finalRef.current);
-    };
-    rec.onend = () => {
-      if (closedRef.current || stateRef.current !== "listening") return;
-      const text = finalRef.current.trim();
-      if (text) void converse(text);
-      else listen(); // heard nothing — keep listening
-    };
-    rec.onerror = (e) => {
-      if (e.error === "not-allowed") {
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true },
+        });
+        if (closedRef.current) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = stream;
+        const ctx = new AudioContext();
+        ctxRef.current = ctx;
+        const src = ctx.createMediaStreamSource(stream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 1024;
+        src.connect(analyser);
+        analyserRef.current = analyser;
+        timerRef.current = setInterval(tick, 60);
+        listen();
+      } catch {
         setError("Microphone access was blocked — allow it and try again.");
-        setState("idle");
       }
-      // "no-speech" and friends fall through to onend, which restarts
-    };
-
-    listen();
+    })();
 
     return () => {
       closedRef.current = true;
-      rec.onend = null;
-      rec.onresult = null;
-      try {
-        rec.abort();
-      } catch {
-        /* already stopped */
-      }
-      recRef.current = null;
+      if (timerRef.current) clearInterval(timerRef.current);
+      stopRecorder();
       stopAudio();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      void ctxRef.current?.close().catch(() => undefined);
+      ctxRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -184,27 +236,27 @@ export default function VoiceMode({
   function orbTap() {
     if (state === "speaking") {
       stopAudio();
-      listen(); // interrupt the agent, take the floor
+      listen();
     } else if (state === "listening") {
-      try {
-        recRef.current?.abort();
-      } catch {
-        /* noop */
-      }
+      vad.current.heard = false; // discard whatever was buffered
+      stopRecorder();
       setState("idle");
-      setInterim("");
     } else if (state === "idle") {
+      setError("");
       listen();
     }
   }
 
-  const caption =
-    state === "listening"
-      ? interim || "Listening…"
+  const caption = error
+    ? error
+    : state === "listening"
+      ? heardYet
+        ? "Listening — pause when you're done."
+        : "Listening…"
       : state === "thinking"
-        ? lastHeard
+        ? lastHeard || "One moment…"
         : state === "speaking"
-          ? "Tap to interrupt"
+          ? "Speak up or tap to interrupt"
           : "Tap the circle to speak";
 
   return (
@@ -242,13 +294,13 @@ export default function VoiceMode({
       </button>
 
       <p className="mt-10 max-w-md px-6 text-center font-serif text-xl leading-relaxed text-ink-soft">
-        {error || caption}
+        {caption}
       </p>
 
       <p className="mt-3 font-mono text-[11px] tracking-wider text-faint">
         {state === "thinking"
           ? "on the record…"
-          : "pause naturally and the agent will answer"}
+          : "voice replies stay brief to keep costs down"}
       </p>
     </div>
   );
