@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { AGENTS, agentById, type AgentId } from "@/lib/agent-meta";
 
 /**
  * Claude-style model selector, repurposed for specialists. Lives inside the
- * composer's bottom row and opens upward; capped to the viewport and
- * scrollable so it never clips off-screen.
+ * composer's bottom row and opens upward. The panel is rendered with fixed
+ * positioning and clamped to the viewport so it never clips off-screen — the
+ * trigger sits mid-row on mobile, so a plain right-aligned panel would spill
+ * past the left edge on narrow phones.
  */
 export default function AgentSelect({
   value,
@@ -20,7 +22,42 @@ export default function AgentSelect({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [pos, setPos] = useState<{
+    left: number;
+    bottom: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
   const selected = agentById(value);
+
+  const place = useCallback(() => {
+    const btn = btnRef.current;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const margin = 12; // keep this clear of either screen edge
+    const gap = 8; // breathing room above the trigger
+    const width = Math.min(352 /* 22rem */, window.innerWidth - margin * 2);
+    // Right-align to the trigger, then clamp inside the viewport.
+    const left = Math.min(
+      Math.max(margin, rect.right - width),
+      window.innerWidth - width - margin,
+    );
+    const bottom = window.innerHeight - rect.top + gap;
+    const maxHeight = Math.min(416 /* 26rem */, rect.top - gap - margin);
+    setPos({ left, bottom, width, maxHeight });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [open, place]);
 
   useEffect(() => {
     function onDown(e: MouseEvent) {
@@ -35,6 +72,7 @@ export default function AgentSelect({
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={btnRef}
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
         className="flex h-9 items-center gap-1.5 rounded-lg px-3 text-[14px] font-medium text-ink-soft transition-colors hover:bg-panel-deep hover:text-ink disabled:opacity-40"
@@ -45,8 +83,16 @@ export default function AgentSelect({
         />
       </button>
 
-      {open && (
-        <div className="pop absolute right-0 bottom-full z-30 mb-2 max-h-[min(26rem,calc(100vh-9rem))] w-[min(22rem,calc(100vw-2.5rem))] overflow-y-auto rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl">
+      {open && pos && (
+        <div
+          className="pop fixed z-30 overflow-y-auto rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl"
+          style={{
+            left: pos.left,
+            bottom: pos.bottom,
+            width: pos.width,
+            maxHeight: pos.maxHeight,
+          }}
+        >
           <p className="px-3 pt-2 pb-1 font-mono text-[11px] tracking-[0.2em] text-faint uppercase">
             Specialists
           </p>
