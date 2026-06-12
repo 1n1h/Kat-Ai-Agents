@@ -40,10 +40,10 @@ export default function LandingPage() {
       className="h-dvh overflow-y-auto overflow-x-hidden bg-paper text-ink"
     >
       <LandingHeader onSignIn={openSignIn} onRequestAccess={openWaitlist} />
-      <TrustBar />
 
       <main>
         <Hero onRequestAccess={openWaitlist} onSignIn={openSignIn} />
+        <TrustBar />
 
         {/* the centerpiece */}
         <section className="px-6 py-20 sm:py-28">
