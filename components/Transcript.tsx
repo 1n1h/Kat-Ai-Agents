@@ -13,19 +13,19 @@ function Turn({ msg, index }: { msg: Msg; index: number }) {
   const label = isUser ? "You" : agentById(msg.agentId ?? "auto").name;
   return (
     <div className="grid grid-cols-[3.5rem_1fr] gap-x-4 border-b border-line py-6">
-      <span className="pt-1 text-right font-mono text-[11px] text-faint select-none">
+      <span className="pt-1 text-right font-mono text-[12px] text-faint select-none">
         {bates(index)}
       </span>
       <div>
         <p
-          className={`mb-2 font-sans text-[11px] font-semibold tracking-[0.18em] uppercase ${
+          className={`mb-2 font-sans text-[12px] font-semibold tracking-[0.18em] uppercase ${
             isUser ? "text-muted" : "text-accent"
           }`}
         >
           {label}
         </p>
         {isUser ? (
-          <p className="whitespace-pre-wrap text-[0.95rem] leading-relaxed text-ink-soft">
+          <p className="whitespace-pre-wrap text-[1.05rem] leading-relaxed text-ink-soft">
             {msg.content}
           </p>
         ) : (
@@ -73,11 +73,11 @@ export default function Transcript({
           <span />
           <div className="space-y-1">
             {statuses.slice(-3).map((s, i) => (
-              <p key={i} className="font-mono text-[11px] text-muted">
+              <p key={i} className="font-mono text-[12px] text-muted">
                 <span className="text-accent">→</span> {s}
               </p>
             ))}
-            <p className="caret font-mono text-[11px] text-faint">
+            <p className="caret font-mono text-[12px] text-faint">
               {live ? "writing" : "on the record"}
             </p>
           </div>

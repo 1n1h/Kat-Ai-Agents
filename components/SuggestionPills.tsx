@@ -1,21 +1,18 @@
 "use client";
 
 import {
-  CalendarDays,
   CheckCheck,
-  FolderArchive,
   LineChart,
   ListOrdered,
-  Mail,
   PenLine,
   ScrollText,
-  type LucideIcon,
 } from "lucide-react";
+import { SiGmail, SiGooglecalendar, SiGoogledrive } from "react-icons/si";
 import type { AgentId } from "@/lib/agent-meta";
 
 interface ActionPill {
   label: string;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   agent: AgentId;
   prompt: string;
 }
@@ -56,14 +53,14 @@ const ACTIONS: ActionPill[] = [
   },
 ];
 
-const CONNECTOR_PILLS: { label: string; icon: LucideIcon }[] = [
-  { label: "From Gmail", icon: Mail },
-  { label: "From Calendar", icon: CalendarDays },
-  { label: "From NetDocuments", icon: FolderArchive },
+const CONNECTOR_PILLS = [
+  { label: "From Gmail", icon: SiGmail, color: "#EA4335" },
+  { label: "From Drive", icon: SiGoogledrive, color: "#4285F4" },
+  { label: "From Calendar", icon: SiGooglecalendar, color: "#34A853" },
 ];
 
 const pillClass =
-  "flex items-center gap-1.5 rounded-lg border border-line bg-input px-3 py-1.5 text-[12.5px] text-ink-soft transition-colors hover:border-line-strong hover:bg-panel-deep hover:text-ink";
+  "flex items-center gap-2 rounded-lg border border-line bg-input px-3.5 py-2 text-[14px] text-ink-soft transition-colors hover:border-line-strong hover:bg-panel-deep hover:text-ink";
 
 export default function SuggestionPills({
   onAction,
@@ -80,13 +77,13 @@ export default function SuggestionPills({
           className={pillClass}
           onClick={() => onAction(a.agent, a.prompt)}
         >
-          <a.icon className="h-3.5 w-3.5 text-accent" />
+          <a.icon className="h-4 w-4 text-accent" />
           {a.label}
         </button>
       ))}
       {CONNECTOR_PILLS.map((c) => (
         <button key={c.label} className={pillClass} onClick={onConnector}>
-          <c.icon className="h-3.5 w-3.5 text-muted" />
+          <c.icon className="h-4 w-4" style={{ color: c.color }} />
           {c.label}
         </button>
       ))}

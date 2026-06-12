@@ -112,7 +112,7 @@ export default function Composer({
           {attached.map((name) => (
             <span
               key={name}
-              className="flex items-center gap-1.5 rounded-lg border border-line bg-panel px-2 py-1 font-mono text-[11px] text-ink-soft"
+              className="flex items-center gap-1.5 rounded-lg border border-line bg-panel px-2 py-1 font-mono text-[12px] text-ink-soft"
             >
               {name}
               <button
@@ -138,7 +138,7 @@ export default function Composer({
         disabled={disabled}
         rows={1}
         placeholder="State your question for the record…"
-        className="block max-h-56 w-full resize-none bg-transparent px-4 pt-4 pb-2 text-[0.95rem] leading-relaxed text-ink outline-none placeholder:text-faint"
+        className="block max-h-56 w-full resize-none bg-transparent px-4 pt-4 pb-2 text-base leading-relaxed text-ink outline-none placeholder:text-faint"
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
@@ -164,7 +164,7 @@ export default function Composer({
           {plusOpen && (
             <div className="pop absolute bottom-full left-0 z-30 mb-2 w-60 rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl">
               <button
-                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-[13px] text-ink transition-colors hover:bg-panel-deep"
+                className="flex w-full items-center gap-2.5 rounded-lg p-3 text-left text-[14px] text-ink transition-colors hover:bg-panel-deep"
                 onClick={() => {
                   setPlusOpen(false);
                   fileInput.current?.click();
@@ -174,7 +174,7 @@ export default function Composer({
                 Upload from computer
               </button>
               <button
-                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-[13px] text-ink transition-colors hover:bg-panel-deep"
+                className="flex w-full items-center gap-2.5 rounded-lg p-3 text-left text-[14px] text-ink transition-colors hover:bg-panel-deep"
                 onClick={() => {
                   setPlusOpen(false);
                   onOpenConnectors();

@@ -208,7 +208,7 @@ export default function Workspace() {
       <aside className="flex w-72 shrink-0 flex-col border-r border-line bg-panel">
         <div className="rise rise-1 border-b border-line px-5 py-5">
           <h1 className="font-serif text-2xl">CounselOS</h1>
-          <p className="mt-1 font-mono text-[10px] tracking-[0.22em] text-accent">
+          <p className="mt-1 font-mono text-[11px] tracking-[0.22em] text-accent">
             PRIVILEGED &amp; CONFIDENTIAL
           </p>
         </div>
@@ -216,7 +216,7 @@ export default function Workspace() {
         {/* matters */}
         <div className="rise rise-2 border-b border-line px-5 py-4">
           <div className="flex items-center justify-between">
-            <p className="font-sans text-[10px] font-semibold tracking-[0.2em] text-muted uppercase">
+            <p className="font-sans text-[11px] font-semibold tracking-[0.2em] text-muted uppercase">
               Matters
             </p>
             <button
@@ -235,7 +235,7 @@ export default function Workspace() {
                     setMatterId(m.id);
                     setThreadId(null);
                   }}
-                  className={`w-full truncate px-2 py-1.5 text-left text-[13px] transition-colors ${
+                  className={`w-full truncate px-2 py-1.5 text-left text-[14px] transition-colors ${
                     m.id === matterId
                       ? "border-l-2 border-accent bg-paper font-medium text-ink"
                       : "border-l-2 border-transparent text-muted hover:text-ink"
@@ -251,7 +251,7 @@ export default function Workspace() {
         {/* threads */}
         <div className="rise rise-3 flex-1 overflow-y-auto px-5 py-4">
           <div className="flex items-center justify-between">
-            <p className="font-sans text-[10px] font-semibold tracking-[0.2em] text-muted uppercase">
+            <p className="font-sans text-[11px] font-semibold tracking-[0.2em] text-muted uppercase">
               Threads
             </p>
             <button
@@ -270,7 +270,7 @@ export default function Workspace() {
                     setThreadId(t.id);
                     setAgentId(t.agentId);
                   }}
-                  className={`w-full truncate px-2 py-1.5 text-left text-[13px] transition-colors ${
+                  className={`w-full truncate px-2 py-1.5 text-left text-[14px] transition-colors ${
                     t.id === threadId
                       ? "border-l-2 border-accent bg-paper font-medium text-ink"
                       : "border-l-2 border-transparent text-muted hover:text-ink"
@@ -281,7 +281,7 @@ export default function Workspace() {
               </li>
             ))}
             {!matterThreads.length && (
-              <li className="px-2 py-1.5 text-[12px] text-faint italic">
+              <li className="px-2 py-1.5 text-[13px] text-faint italic">
                 No threads yet on this matter.
               </li>
             )}
@@ -290,14 +290,14 @@ export default function Workspace() {
           {/* matter files */}
           {files.length > 0 && (
             <div className="mt-6">
-              <p className="font-sans text-[10px] font-semibold tracking-[0.2em] text-muted uppercase">
+              <p className="font-sans text-[11px] font-semibold tracking-[0.2em] text-muted uppercase">
                 Matter files
               </p>
               <ul className="mt-2 space-y-1">
                 {files.map((f) => (
                   <li
                     key={f.name}
-                    className="truncate font-mono text-[11px] text-ink-soft"
+                    className="truncate font-mono text-[12px] text-ink-soft"
                     title={f.name}
                   >
                     {f.name}
@@ -312,13 +312,13 @@ export default function Workspace() {
           {firebaseEnabled ? (
             <button
               onClick={() => signOut()}
-              className="font-mono text-[10px] tracking-[0.18em] text-muted uppercase hover:text-accent"
+              className="font-mono text-[11px] tracking-[0.18em] text-muted uppercase hover:text-accent"
             >
               Sign out
             </button>
           ) : (
             <p
-              className="font-mono text-[10px] tracking-[0.18em] text-muted uppercase"
+              className="font-mono text-[11px] tracking-[0.18em] text-muted uppercase"
               title="Auth activates once Firebase keys are configured"
             >
               ● Local mode — files stay on this machine
@@ -330,7 +330,7 @@ export default function Workspace() {
       {/* ── main ──────────────────────────────────────────────── */}
       <main className="grain flex min-w-0 flex-1 flex-col">
         <header className="rise rise-2 flex items-center justify-between border-b border-line px-6 py-3">
-          <p className="truncate font-mono text-[10px] tracking-[0.22em] text-faint uppercase">
+          <p className="truncate font-mono text-[11px] tracking-[0.22em] text-faint uppercase">
             {activeMatter?.name ?? "—"}
             {activeThread ? ` / ${activeThread.title}` : " / new thread"}
             <span className="text-line-strong"> · </span>
@@ -375,7 +375,7 @@ export default function Workspace() {
             <div className="px-6 pb-4">
               <div className="mx-auto max-w-3xl">
                 {composer}
-                <p className="mt-2 text-center font-mono text-[10px] tracking-wider text-faint">
+                <p className="mt-2 text-center font-mono text-[11px] tracking-wider text-faint">
                   AI work product — review before filing or sending.
                 </p>
               </div>

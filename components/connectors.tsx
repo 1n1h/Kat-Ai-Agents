@@ -1,35 +1,43 @@
 "use client";
 
+import type { ComponentType, CSSProperties } from "react";
+import { X } from "lucide-react";
+import { FaMicrosoft, FaRegFolderOpen } from "react-icons/fa";
 import {
-  CalendarDays,
-  FileText,
-  FolderArchive,
-  Globe,
-  Mail,
-  MessagesSquare,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+  SiGmail,
+  SiGooglecalendar,
+  SiGoogledocs,
+  SiGoogledrive,
+  SiSlack,
+} from "react-icons/si";
 
 /**
- * Client connectors from the project doc: Email, Google Docs, Slack,
- * Calendar, NetDocuments, SharePoint. UI is wired now; the actual OAuth /
- * API configuration arrives in a later phase.
+ * Client connectors from the project doc (plus Google Drive). Real brand
+ * marks where the brand has one. UI is wired now; OAuth / API configuration
+ * arrives in a later phase.
  */
+type IconComponent = ComponentType<{
+  className?: string;
+  style?: CSSProperties;
+}>;
+
 export interface Connector {
   id: string;
   name: string;
-  icon: LucideIcon;
+  icon: IconComponent;
+  /** brand color, used for the glyph in both themes */
+  color: string;
   hint: string;
 }
 
 export const CONNECTORS: Connector[] = [
-  { id: "gmail", name: "Gmail", icon: Mail, hint: "Draft and review email in matter context" },
-  { id: "gdocs", name: "Google Docs", icon: FileText, hint: "Open and edit firm documents" },
-  { id: "calendar", name: "Calendar", icon: CalendarDays, hint: "Deadlines, hearings, statute dates" },
-  { id: "slack", name: "Slack", icon: MessagesSquare, hint: "Bring team threads into a matter" },
-  { id: "netdocuments", name: "NetDocuments", icon: FolderArchive, hint: "Search the firm's document repository" },
-  { id: "sharepoint", name: "SharePoint", icon: Globe, hint: "Access firm sites and libraries" },
+  { id: "gmail", name: "Gmail", icon: SiGmail, color: "#EA4335", hint: "Draft and review email in matter context" },
+  { id: "gdrive", name: "Google Drive", icon: SiGoogledrive, color: "#4285F4", hint: "Pull case files straight from Drive" },
+  { id: "gdocs", name: "Google Docs", icon: SiGoogledocs, color: "#4285F4", hint: "Open and edit firm documents" },
+  { id: "calendar", name: "Google Calendar", icon: SiGooglecalendar, color: "#34A853", hint: "Deadlines, hearings, statute dates" },
+  { id: "slack", name: "Slack", icon: SiSlack, color: "#E01E5A", hint: "Bring team threads into a matter" },
+  { id: "netdocuments", name: "NetDocuments", icon: FaRegFolderOpen, color: "#D97757", hint: "Search the firm's document repository" },
+  { id: "sharepoint", name: "SharePoint", icon: FaMicrosoft, color: "#0078D4", hint: "Access firm sites and libraries" },
 ];
 
 export function ConnectorsDialog({
@@ -47,42 +55,42 @@ export function ConnectorsDialog({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="pop w-full max-w-md rounded-2xl border border-line-strong bg-panel p-6 shadow-2xl">
+      <div className="pop flex max-h-[85vh] w-full max-w-md flex-col rounded-2xl border border-line-strong bg-panel p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="font-serif text-xl text-ink">Connectors</h2>
-            <p className="mt-1 text-[13px] text-muted">
+            <h2 className="font-serif text-2xl text-ink">Connectors</h2>
+            <p className="mt-1 text-[14px] text-muted">
               Bring the firm&apos;s systems into the workspace.
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
             aria-label="Close"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4.5 w-4.5" />
           </button>
         </div>
 
-        <ul className="mt-5 space-y-1">
+        <ul className="mt-5 space-y-1 overflow-y-auto">
           {CONNECTORS.map((c) => (
             <li
               key={c.id}
-              className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-panel-deep"
+              className="flex items-center gap-3.5 rounded-xl p-3 transition-colors hover:bg-panel-deep"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-paper">
-                <c.icon className="h-4 w-4 text-ink-soft" />
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-paper">
+                <c.icon className="h-5 w-5" style={{ color: c.color }} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[13.5px] font-medium text-ink">
+                <span className="block text-[15px] font-medium text-ink">
                   {c.name}
                 </span>
-                <span className="block truncate text-[12px] text-muted">
+                <span className="block truncate text-[13px] text-muted">
                   {c.hint}
                 </span>
               </span>
               <span
-                className="cursor-not-allowed rounded-lg border border-line px-3 py-1 font-sans text-[11px] font-semibold tracking-wide text-faint uppercase"
+                className="cursor-not-allowed rounded-lg border border-line px-3.5 py-1.5 font-sans text-[12px] font-semibold tracking-wide text-faint uppercase"
                 title="Configuration arrives in a later phase"
               >
                 Connect
@@ -91,7 +99,7 @@ export function ConnectorsDialog({
           ))}
         </ul>
 
-        <p className="mt-4 text-center font-mono text-[10px] tracking-wider text-faint">
+        <p className="mt-4 text-center font-mono text-[11px] tracking-wider text-faint">
           Configuration coming in a later phase — the UI is wired and ready.
         </p>
       </div>
