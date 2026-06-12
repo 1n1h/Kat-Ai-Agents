@@ -24,12 +24,36 @@ interface MatterFile {
   size: number;
 }
 
-function greeting(): string {
+/** A few voices per time of day so the hero never feels canned. */
+const GREETINGS: Record<"late" | "morning" | "afternoon" | "evening", string[]> = {
+  late: [
+    "Working late, {name}.",
+    "The quiet hours, {name}.",
+    "Burning the midnight oil, {name}?",
+  ],
+  morning: [
+    "Good morning, {name}.",
+    "Morning, {name}. The record awaits.",
+    "Early and ready, {name}.",
+  ],
+  afternoon: [
+    "Good afternoon, {name}.",
+    "Afternoon, {name}.",
+    "Back on the record, {name}.",
+  ],
+  evening: [
+    "Good evening, {name}.",
+    "Evening, {name}.",
+    "Still on the clock, {name}?",
+  ],
+};
+
+function pickGreeting(): string {
   const h = new Date().getHours();
-  if (h < 5) return "Working late, Counsel.";
-  if (h < 12) return "Good morning, Counsel.";
-  if (h < 18) return "Good afternoon, Counsel.";
-  return "Good evening, Counsel.";
+  const bucket =
+    h < 5 ? "late" : h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  const list = GREETINGS[bucket];
+  return list[Math.floor(Math.random() * list.length)];
 }
 
 const navRow =
@@ -52,6 +76,8 @@ export default function Workspace() {
   const [live, setLive] = useState("");
   const [statuses, setStatuses] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  /* chosen once per visit so it doesn't flicker between renders */
+  const [greetingTpl] = useState(pickGreeting);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   /* ── signed-in user for the footer ── */
@@ -98,6 +124,9 @@ export default function Workspace() {
   const activeThread = threads.find((t) => t.id === threadId) ?? null;
   const activeMatter = matters.find((m) => m.id === matterId) ?? null;
   const isEmpty = !activeThread?.messages.length && !streaming;
+
+  const fullName = user?.displayName?.trim() || user?.email || "Counsel";
+  const firstName = fullName.split(/[\s@]+/)[0];
 
   function addCase() {
     const name = window.prompt("Case name (e.g. Smith v. Allied, M&A — Birch)");
@@ -359,14 +388,23 @@ export default function Workspace() {
 
         {/* footer: avatar profile */}
         <div className="rise rise-4 flex items-center gap-3 border-t border-line px-4 py-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-wash font-serif text-lg text-accent">
-            {(user?.displayName ?? user?.email ?? "Counsel")
-              .charAt(0)
-              .toUpperCase()}
-          </span>
+          {user?.photoURL ? (
+            // Google profile photo; no-referrer avoids Google's hotlink 403
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={user.photoURL}
+              alt={fullName}
+              referrerPolicy="no-referrer"
+              className="h-9 w-9 shrink-0 rounded-full border border-line object-cover"
+            />
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-wash font-serif text-lg text-accent">
+              {fullName.charAt(0).toUpperCase()}
+            </span>
+          )}
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[14px] font-medium text-ink">
-              {user?.displayName ?? user?.email ?? "Counsel"}
+              {fullName}
             </span>
             <span
               className="block truncate text-[12.5px] text-muted"
@@ -409,7 +447,7 @@ export default function Workspace() {
             <div className="w-full max-w-2xl">
               <h2 className="rise rise-2 mb-8 text-center font-serif text-4xl text-ink">
                 <span className="mr-3 text-accent">✳</span>
-                {greeting()}
+                {greetingTpl.replace("{name}", firstName)}
               </h2>
               <div className="rise rise-3">{composer}</div>
               <div className="rise rise-4 mt-4">
