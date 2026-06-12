@@ -74,10 +74,7 @@ export default function AgentSelect({
       const t = e.target as Node;
       // The panel is portaled out of this component's subtree, so check both
       // the trigger and the panel before deciding the tap was "outside".
-      if (
-        !btnRef.current?.contains(t) &&
-        !panelRef.current?.contains(t)
-      ) {
+      if (!btnRef.current?.contains(t) && !panelRef.current?.contains(t)) {
         setOpen(false);
       }
     }
