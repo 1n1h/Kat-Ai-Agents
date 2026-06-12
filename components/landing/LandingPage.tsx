@@ -3,11 +3,13 @@
 import { useState } from "react";
 import AuthDialog from "@/components/AuthDialog";
 import LandingHeader from "./LandingHeader";
+import TrustBar from "./TrustBar";
 import Hero from "./Hero";
 import OrchestrationDiagram from "./OrchestrationDiagram";
 import AgentCards from "./AgentCards";
 import Capabilities from "./Capabilities";
 import TrustSection from "./TrustSection";
+import Testimonials from "./Testimonials";
 import CTASection from "./CTASection";
 import Footer from "./Footer";
 import WaitlistDialog from "./WaitlistDialog";
@@ -38,6 +40,7 @@ export default function LandingPage() {
       className="h-dvh overflow-y-auto overflow-x-hidden bg-paper text-ink"
     >
       <LandingHeader onSignIn={openSignIn} onRequestAccess={openWaitlist} />
+      <TrustBar />
 
       <main>
         <Hero onRequestAccess={openWaitlist} onSignIn={openSignIn} />
@@ -70,6 +73,7 @@ export default function LandingPage() {
         <AgentCards />
         <Capabilities />
         <TrustSection />
+        <Testimonials />
         <CTASection onRequestAccess={openWaitlist} onSignIn={openSignIn} />
       </main>
 
