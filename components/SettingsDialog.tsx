@@ -11,6 +11,13 @@ import {
   type AppSettings,
 } from "@/lib/settings";
 import { firebaseEnabled, signOut } from "@/lib/firebase";
+import {
+  grantAccess,
+  isAdmin,
+  listGrants,
+  revokeAccess,
+  type AccessGrant,
+} from "@/lib/team";
 
 const sectionTitle =
   "font-sans text-[11px] font-semibold tracking-[0.2em] text-muted uppercase";
@@ -27,14 +34,39 @@ export default function SettingsDialog({
   const [settings, setLocal] = useState<AppSettings>(getSettings);
   const [light, setLight] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [grants, setGrants] = useState<AccessGrant[]>([]);
+  const [grantEmail, setGrantEmail] = useState("");
+  const [grantBusy, setGrantBusy] = useState(false);
+  const admin = isAdmin(userEmail);
 
   useEffect(() => {
     if (open) {
       setLocal(getSettings());
       setLight(isLightTheme());
       setConfirmClear(false);
+      if (isAdmin(userEmail)) {
+        void listGrants().then(setGrants);
+      }
     }
-  }, [open]);
+  }, [open, userEmail]);
+
+  async function addGrant() {
+    const email = grantEmail.trim().toLowerCase();
+    if (!email.includes("@") || grantBusy) return;
+    setGrantBusy(true);
+    try {
+      await grantAccess(email, userEmail ?? "admin");
+      setGrants(await listGrants());
+      setGrantEmail("");
+    } finally {
+      setGrantBusy(false);
+    }
+  }
+
+  async function removeGrant(email: string) {
+    await revokeAccess(email);
+    setGrants(await listGrants());
+  }
 
   if (!open) return null;
 
@@ -163,6 +195,56 @@ export default function SettingsDialog({
               : "Clear all conversations"}
           </button>
         </section>
+
+        {/* team (admins only) */}
+        {admin && (
+          <section>
+            <p className={sectionTitle}>Team access</p>
+            <p className="mt-2 text-[12.5px] text-muted">
+              Grant a teammate access by email. When they first sign in,
+              they&apos;ll set up their employee profile.
+            </p>
+            <div className="mt-2.5 flex gap-2">
+              <input
+                type="email"
+                value={grantEmail}
+                onChange={(e) => setGrantEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void addGrant();
+                }}
+                placeholder="name@sheeheandassociates.com"
+                className="min-w-0 flex-1 rounded-xl border border-line bg-input px-3.5 py-2 text-[14px] text-ink outline-none placeholder:text-faint focus:border-accent"
+              />
+              <button
+                onClick={() => void addGrant()}
+                disabled={grantBusy || !grantEmail.includes("@")}
+                className="shrink-0 rounded-xl bg-accent px-4 py-2 text-[13.5px] font-semibold text-paper transition-colors hover:bg-accent-soft disabled:opacity-40"
+              >
+                Grant
+              </button>
+            </div>
+            {grants.length > 0 && (
+              <ul className="mt-3 space-y-1">
+                {grants.map((g) => (
+                  <li
+                    key={g.email}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2"
+                  >
+                    <span className="truncate text-[13.5px] text-ink-soft">
+                      {g.email}
+                    </span>
+                    <button
+                      onClick={() => void removeGrant(g.email)}
+                      className="shrink-0 text-[12px] text-muted transition-colors hover:text-accent"
+                    >
+                      Revoke
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
         {/* account */}
         <section>

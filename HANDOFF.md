@@ -50,10 +50,23 @@ matching employee profile by signed-in email — see `lib/firmContext.ts`).
 Firm stack: **Microsoft 365 / Outlook, MyCase, Dropbox** (+ Google kept).
 
 Firm-pivot TODO:
-- **Employee onboarding flow** (per Kat): a Settings option to grant
-  admin access by email; when that user signs up, walk them through
-  selecting their role + email and generate an employee profile
-  (currently profiles are hand-written .md in firm/employees/).
+- **Employee onboarding flow: BUILT (2026-06-12).** Admins (lib/team.ts
+  ADMIN_EMAILS: Kat + Travis) grant access by email in Settings → Team
+  access; granted users get a one-time wizard on sign-in (role,
+  supports, focus) → users/{uid}/profile/self → injected as agent
+  context with each chat. ⚠ REQUIRES a Firestore rules addition Kat
+  must publish (inside the documents match block):
+
+      match /access/{email} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null
+                     && request.auth.token.email in [
+                       'katherine@amploconsulting.com',
+                       'travis@curvaapp.com'
+                     ];
+      }
+
+  Keep that admin list in sync with lib/team.ts ADMIN_EMAILS.
 - **Pending roster data**: Phil's email (psheehe@ unverified), Johanna's
   preferred email (jsheehe@ published; Kat confirming), Brooksly's email
   and last name. Katherine Rodriguez = legalassistant@sheeheandassociates.com.

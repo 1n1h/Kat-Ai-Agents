@@ -36,6 +36,13 @@ import {
   saveThread,
   watchWorkspace,
 } from "@/lib/firestoreStore";
+import {
+  getMyProfile,
+  hasAccessGrant,
+  profileContext,
+  type EmployeeProfile,
+} from "@/lib/team";
+import Onboarding from "./Onboarding";
 import Transcript from "./Transcript";
 import Composer from "./Composer";
 import ThemeToggle from "./ThemeToggle";
@@ -124,6 +131,32 @@ export default function Workspace() {
   /* signed-in uid for write-through persistence (null = local mode) */
   const uidRef = useRef<string | null>(null);
   const migratedRef = useRef<string | null>(null);
+  const [myProfile, setMyProfile] = useState<EmployeeProfile | null>(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+
+  /* ── onboarding: access-granted users without a profile set one up ── */
+  useEffect(() => {
+    const u = user;
+    if (!u?.uid || !u.email) {
+      setMyProfile(null);
+      setNeedsOnboarding(false);
+      return;
+    }
+    let alive = true;
+    void (async () => {
+      const p = await getMyProfile(u.uid);
+      if (!alive) return;
+      if (p) {
+        setMyProfile(p);
+        setNeedsOnboarding(false);
+        return;
+      }
+      setNeedsOnboarding(await hasAccessGrant(u.email!));
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [user]);
 
   /* ── signed-in user for the footer ── */
   useEffect(() => {
@@ -381,6 +414,7 @@ export default function Workspace() {
           matterId,
           voice: opts?.voice ?? false,
           userEmail: user?.email ?? null,
+          userProfile: myProfile ? profileContext(myProfile) : null,
         }),
       });
 
@@ -1011,6 +1045,18 @@ export default function Workspace() {
         onClose={() => setSettingsOpen(false)}
         userEmail={user?.email}
       />
+
+      {needsOnboarding && user?.uid && user.email && (
+        <Onboarding
+          uid={user.uid}
+          email={user.email}
+          defaultName={user.displayName ?? ""}
+          onDone={(p) => {
+            setMyProfile(p);
+            setNeedsOnboarding(false);
+          }}
+        />
+      )}
     </div>
   );
 }

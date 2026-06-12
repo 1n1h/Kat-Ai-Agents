@@ -33,6 +33,8 @@ interface ChatRequest {
   voice?: boolean;
   /** signed-in email — matches an employee profile for context injection */
   userEmail?: string | null;
+  /** self-onboarded profile summary (from users/{uid}/profile/self) */
+  userProfile?: string | null;
 }
 
 const VOICE_NOTE =
@@ -176,8 +178,9 @@ async function cloudChat(
   voice?: boolean,
   userEmail?: string | null,
   tokens: ConnectorTokens = {},
+  extraCtx = "",
 ): Promise<Response> {
-  const firmCtx = firmContext(userEmail);
+  const firmCtx = firmContext(userEmail) + extraCtx;
   const connTools = anthropicToolDefs(tokens);
   const guidance = toolGuidance(tokens);
   // primary web search: Anthropic-hosted (server-side execution);
@@ -389,8 +392,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { messages, agentId, matterId, voice, userEmail } =
+  const { messages, agentId, matterId, voice, userEmail, userProfile } =
     (await req.json()) as ChatRequest;
+  const profileCtx = userProfile
+    ? `\n\n[CURRENT USER — self-onboarded employee profile. Address them by name and tailor work to their role.]\n${userProfile.slice(0, 1500)}`
+    : "";
   if (!messages?.length) {
     return Response.json({ error: "No messages." }, { status: 400 });
   }
@@ -414,7 +420,7 @@ export async function POST(req: NextRequest) {
   };
 
   if (!query || !cwd) {
-    return cloudChat(messages, agentId, voice, userEmail, tokens);
+    return cloudChat(messages, agentId, voice, userEmail, tokens, profileCtx);
   }
 
   const promptText = buildPrompt(messages) + (voice ? VOICE_NOTE : "");
@@ -478,6 +484,7 @@ export async function POST(req: NextRequest) {
             systemPrompt:
               (isAuto ? ORCHESTRATOR_PROMPT : spec!.prompt) +
               firmContext(userEmail) +
+              profileCtx +
               toolGuidance(tokens),
             model: isAuto
               ? ORCHESTRATOR_MODEL
