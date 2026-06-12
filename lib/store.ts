@@ -9,6 +9,8 @@ export interface Msg {
   role: "user" | "assistant";
   content: string;
   agentId?: AgentId;
+  /** files the agent wrote during this turn (downloadable in the UI) */
+  files?: string[];
 }
 
 export interface Thread {

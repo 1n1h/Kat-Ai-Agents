@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import {
   ORCHESTRATOR_MODEL,
@@ -98,6 +98,14 @@ export async function POST(req: NextRequest) {
               if (block.type === "text" && block.text.trim()) {
                 controller.enqueue(line({ t: "text", text: block.text }));
               } else if (block.type === "tool_use") {
+                // surface files the agents create/modify so the UI can
+                // offer downloads under the response
+                if (block.name === "Write" || block.name === "Edit") {
+                  const p = (block.input as { file_path?: string })?.file_path;
+                  if (p) {
+                    controller.enqueue(line({ t: "file", name: basename(p) }));
+                  }
+                }
                 const status =
                   block.name === "Task"
                     ? `delegating: ${(block.input as { subagent_type?: string })?.subagent_type ?? "specialist"}`

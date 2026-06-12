@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     "kokoro-js",
     "@huggingface/transformers",
     "onnxruntime-node",
+    "pdfkit",
+    "exceljs",
   ],
 };
 

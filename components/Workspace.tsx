@@ -274,6 +274,7 @@ export default function Workspace() {
     setStatuses([]);
 
     const blocks: string[] = [];
+    const filesMade = new Set<string>();
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -302,12 +303,18 @@ export default function Workspace() {
           for (const raw of lines) {
             if (!raw.trim()) continue;
             try {
-              const ev = JSON.parse(raw) as { t: string; text?: string };
+              const ev = JSON.parse(raw) as {
+                t: string;
+                text?: string;
+                name?: string;
+              };
               if (ev.t === "text" && ev.text) {
                 blocks.push(ev.text);
                 setLive(blocks.join("\n\n"));
               } else if (ev.t === "status" && ev.text) {
                 setStatuses((prev) => [...prev, ev.text!]);
+              } else if (ev.t === "file" && ev.name) {
+                filesMade.add(ev.name);
               } else if (ev.t === "error" && ev.text) {
                 blocks.push(`*${ev.text}*`);
                 setLive(blocks.join("\n\n"));
@@ -327,7 +334,15 @@ export default function Workspace() {
     const finalText = blocks.join("\n\n") || "*No response produced.*";
     updateThread(thread.id, (t) => ({
       ...t,
-      messages: [...history, { role: "assistant", content: finalText, agentId }],
+      messages: [
+        ...history,
+        {
+          role: "assistant",
+          content: finalText,
+          agentId,
+          ...(filesMade.size ? { files: [...filesMade] } : {}),
+        },
+      ],
     }));
     setLive("");
     setStatuses([]);
@@ -597,12 +612,15 @@ export default function Workspace() {
                 {filesOpen && (
                   <ul className="space-y-0.5 pb-1 pl-10">
                     {files.map((f) => (
-                      <li
-                        key={f.name}
-                        className="truncate px-2 py-1 font-mono text-[12px] text-muted"
-                        title={f.name}
-                      >
-                        {f.name}
+                      <li key={f.name}>
+                        <a
+                          href={`/api/files/download?matterId=${encodeURIComponent(matterId)}&name=${encodeURIComponent(f.name)}`}
+                          download
+                          className="block truncate rounded px-2 py-1 font-mono text-[12px] text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+                          title={`Download ${f.name}`}
+                        >
+                          {f.name}
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -791,6 +809,7 @@ export default function Workspace() {
                 statuses={statuses}
                 streaming={streaming}
                 agentId={agentId}
+                matterId={matterId}
                 bottomRef={bottomRef}
               />
             </section>

@@ -69,7 +69,14 @@ export const SPECIALISTS: Record<
       "cited findings supplied by upstream analysts. Write access. Carries " +
       "[VERIFY] and gaps forward unresolved; never fabricates authority. " +
       "Delegate after analysis findings exist; route output to citation-check.",
-    prompt: prompt("drafter", "drafter.system.md"),
+    prompt:
+      prompt("drafter", "drafter.system.md") +
+      "\n\n[Platform note: deliverables are files. Write every finished " +
+      "document into the working directory — Markdown (.md) for letters, " +
+      "briefs, and legal documents; CSV (.csv) for any tabular data. The " +
+      "interface shows the user a download button for each file you write, " +
+      "with one-click conversion to PDF and Word from .md, and Excel from " +
+      ".csv. State the filename when you finish.]",
     tools: ["Read", "Write", "Edit"],
     model: "sonnet",
   },
