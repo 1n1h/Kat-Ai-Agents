@@ -25,6 +25,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
+      data-tour="theme"
       title={light ? "Switch to dark mode" : "Switch to light mode"}
       className="flex h-8 w-8 items-center justify-center rounded-lg border border-line text-muted transition-colors hover:border-line-strong hover:text-ink"
     >

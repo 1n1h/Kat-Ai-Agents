@@ -41,7 +41,8 @@
   --color-ink: #1f1e1d;
   --color-ink-soft: #4a463f;
   --color-muted: #7a7468;
-  --color-faint: #a8a195;
+  /* darkened from #a8a195 so faint text is legible on the vanilla cards */
+  --color-faint: #8a8270;
   --color-line: #e4e0d5;
   --color-line-strong: #d3cec0;
   --color-accent: #3a7d54;
@@ -51,8 +52,6 @@
   --color-ok: #5a7a52;
   --grain-dot: rgba(31, 30, 29, 0.025);
   --color-code: #2e7048;
-  /* faint was too pale to read on the vanilla cards — darken for legibility */
-  --color-faint: #8a8270;
   color-scheme: light;
 }
 
