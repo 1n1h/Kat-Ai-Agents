@@ -60,7 +60,7 @@ const CONNECTOR_PILLS = [
 ];
 
 const pillClass =
-  "flex items-center gap-2 rounded-lg border border-line bg-input px-3.5 py-2 text-[14px] text-ink-soft transition-colors hover:border-line-strong hover:bg-panel-deep hover:text-ink";
+  "flex items-center gap-1.5 rounded-lg border border-line bg-input px-3 py-1.5 text-[13px] text-ink-soft transition-colors hover:border-line-strong hover:bg-panel-deep hover:text-ink";
 
 export default function SuggestionPills({
   onAction,
@@ -77,13 +77,13 @@ export default function SuggestionPills({
           className={pillClass}
           onClick={() => onAction(a.agent, a.prompt)}
         >
-          <a.icon className="h-4 w-4 text-accent" />
+          <a.icon className="h-3.5 w-3.5 text-accent" />
           {a.label}
         </button>
       ))}
       {CONNECTOR_PILLS.map((c) => (
         <button key={c.label} className={pillClass} onClick={onConnector}>
-          <c.icon className="h-4 w-4" style={{ color: c.color }} />
+          <c.icon className="h-3.5 w-3.5" style={{ color: c.color }} />
           {c.label}
         </button>
       ))}
