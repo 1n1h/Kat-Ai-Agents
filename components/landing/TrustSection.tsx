@@ -51,22 +51,21 @@ export default function TrustSection() {
             return (
               <div
                 key={p.title}
-                className={revealClass(
-                  shown,
-                  "flex gap-4 rounded-2xl border border-line bg-panel p-6",
-                )}
+                className={revealClass(shown)}
                 style={{ transitionDelay: shown ? `${i * 80}ms` : undefined }}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div>
-                  <h3 className="font-sans text-[16px] font-semibold text-ink">
-                    {p.title}
-                  </h3>
-                  <p className="mt-1.5 text-[14px] leading-relaxed text-ink-soft">
-                    {p.body}
-                  </p>
+                <div className="card-hover flex h-full gap-4 rounded-2xl border border-line-strong bg-panel p-6">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-sans text-[16px] font-semibold text-ink">
+                      {p.title}
+                    </h3>
+                    <p className="mt-1.5 text-[14px] leading-relaxed text-ink-soft">
+                      {p.body}
+                    </p>
+                  </div>
                 </div>
               </div>
             );

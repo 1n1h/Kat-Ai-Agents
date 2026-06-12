@@ -73,21 +73,20 @@ export default function Capabilities() {
             return (
               <div
                 key={c.title}
-                className={revealClass(
-                  shown,
-                  "rounded-2xl border border-line bg-panel p-6",
-                )}
+                className={revealClass(shown)}
                 style={{ transitionDelay: shown ? `${i * 70}ms` : undefined }}
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30">
-                  <Icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-4 font-sans text-[16px] font-semibold text-ink">
-                  {c.title}
-                </h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">
-                  {c.body}
-                </p>
+                <div className="card-hover h-full rounded-2xl border border-line-strong bg-panel p-6">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="mt-4 font-sans text-[16px] font-semibold text-ink">
+                    {c.title}
+                  </h3>
+                  <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">
+                    {c.body}
+                  </p>
+                </div>
               </div>
             );
           })}
