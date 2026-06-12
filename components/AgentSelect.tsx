@@ -88,6 +88,7 @@ export default function AgentSelect({
         ref={btnRef}
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
+        data-tour="agent"
         className="flex h-9 items-center gap-1.5 rounded-lg px-3 text-[14px] font-medium text-ink-soft transition-colors hover:bg-panel-deep hover:text-ink disabled:opacity-40"
       >
         <span className="max-w-[180px] truncate">{selected.name}</span>
