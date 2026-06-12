@@ -570,17 +570,18 @@ export default function Workspace() {
   if (!ready) return null;
 
   const menuItem =
-    "flex w-full items-center gap-2 rounded-md px-2 py-[5px] text-left text-[13px] leading-5 text-ink transition-colors hover:bg-panel";
+    "flex w-full items-center gap-2 rounded-md py-[5px] pr-3 pl-2 text-left text-[13px] leading-5 whitespace-nowrap text-ink transition-colors hover:bg-panel";
 
   /* fixed-position panel anchored to the trigger, clamped to the viewport */
   const menuStyle = menuPos
     ? {
-        left: Math.max(8, Math.min(menuPos.x - 152, window.innerWidth - 160)),
+        left: Math.max(8, Math.min(menuPos.x - 132, window.innerWidth - 140)),
         top: Math.min(menuPos.y + 4, window.innerHeight - 210),
       }
     : undefined;
+  /* width hugs the longest row instead of a fixed box */
   const menuPanel =
-    "pop fixed z-[80] w-[9.5rem] rounded-lg border border-line-strong bg-panel-deep p-1 shadow-xl";
+    "pop fixed z-[80] w-fit min-w-[6.5rem] max-w-[11rem] rounded-lg border border-line-strong bg-panel-deep p-1 shadow-xl";
 
   const renderThreadRow = (t: Thread) => (
     <li key={t.id} className="group relative">
