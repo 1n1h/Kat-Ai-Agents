@@ -97,7 +97,7 @@ function pickGreeting(): string {
 }
 
 const navRow =
-  "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 font-ui text-[15.5px] font-medium text-ink transition-colors hover:bg-panel-deep hover:text-ink";
+  "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 font-ui text-[20.5px] font-medium text-ink transition-colors hover:bg-panel-deep hover:text-ink";
 
 export default function Workspace() {
   const [ready, setReady] = useState(false);
@@ -605,7 +605,7 @@ export default function Workspace() {
               setAgentId(t.agentId);
               closeSidebarOnMobile();
             }}
-            className={`w-full truncate rounded-lg px-2 py-2 pr-8 text-left text-[15px] transition-colors ${
+            className={`w-full truncate rounded-lg px-2 py-2 pr-8 text-left text-[20px] transition-colors ${
               t.id === threadId
                 ? "bg-panel-deep font-semibold text-ink"
                 : "font-medium text-ink hover:bg-panel-deep"
@@ -895,7 +895,7 @@ export default function Workspace() {
                             setThreadId(null);
                             closeSidebarOnMobile();
                           }}
-                          className={`w-full truncate rounded-lg px-2 py-2 pr-8 text-left text-[15px] transition-colors ${
+                          className={`w-full truncate rounded-lg px-2 py-2 pr-8 text-left text-[20px] transition-colors ${
                             m.id === matterId
                               ? "bg-panel-deep font-semibold text-ink"
                               : "font-medium text-ink hover:bg-panel-deep"
@@ -985,7 +985,7 @@ export default function Workspace() {
           <div className="rise rise-3 px-3 pt-5" data-tour="threads">
             {starredThreads.length > 0 && (
               <>
-                <p className="px-2 pb-1 text-[13.5px] font-semibold text-ink-soft">
+                <p className="px-2 pb-1 text-[18.5px] font-semibold text-ink-soft">
                   Starred
                 </p>
                 <ul className="space-y-0.5 pb-3">
@@ -993,13 +993,13 @@ export default function Workspace() {
                 </ul>
               </>
             )}
-            <p className="px-2 pb-1 text-[13.5px] font-semibold text-ink-soft">
+            <p className="px-2 pb-1 text-[18.5px] font-semibold text-ink-soft">
               Recents
             </p>
             <ul className="space-y-0.5">
               {recentThreads.map(renderThreadRow)}
               {!matterThreads.length && (
-                <li className="px-2 py-1.5 text-[13px] text-faint italic">
+                <li className="px-2 py-1.5 text-[18px] text-faint italic">
                   No threads yet in this case.
                 </li>
               )}
