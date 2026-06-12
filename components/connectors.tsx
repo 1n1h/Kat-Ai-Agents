@@ -52,7 +52,7 @@ export function ConnectorsDialog({
   onClose: () => void;
 }) {
   /* which connectors have a live OAuth flow today */
-  const CONNECTABLE = new Set(["dropbox"]);
+  const CONNECTABLE = new Set(["dropbox", "outlook"]);
   const [connected, setConnected] = useState<Record<string, boolean>>({});
 
   useEffect(() => {

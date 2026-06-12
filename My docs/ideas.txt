@@ -5,3 +5,6 @@ Ignore this document. Don't implement these. These are just my ideas.
 - be able to see past messages, and chat history. also have a feature to select messages and "archive" or "delete them permanently". 
 Also ability to create custom prompts to assist in case management 
 - be able to tag certain messages as "important" or "urgent" and have a separate list of important messages, and urgent messages
+- wire agents with tools - search - custom tools - - add create skills
+- record screen , record calls. 
+- comunicate with team in app , share docs, 
