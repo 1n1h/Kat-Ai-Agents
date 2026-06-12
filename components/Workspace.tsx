@@ -97,7 +97,7 @@ function pickGreeting(): string {
 }
 
 const navRow =
-  "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 font-sans text-[14px] text-ink-soft transition-colors hover:bg-panel-deep hover:text-ink";
+  "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 font-sans text-[15px] font-medium text-ink transition-colors hover:bg-panel-deep hover:text-ink";
 
 export default function Workspace() {
   const [ready, setReady] = useState(false);
@@ -605,7 +605,7 @@ export default function Workspace() {
               setAgentId(t.agentId);
               closeSidebarOnMobile();
             }}
-            className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14px] transition-colors ${
+            className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14.5px] transition-colors ${
               t.id === threadId
                 ? "bg-panel-deep font-medium text-ink"
                 : "text-ink-soft hover:bg-panel-deep hover:text-ink"
@@ -895,10 +895,10 @@ export default function Workspace() {
                             setThreadId(null);
                             closeSidebarOnMobile();
                           }}
-                          className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14px] transition-colors ${
+                          className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14.5px] transition-colors ${
                             m.id === matterId
                               ? "bg-panel-deep font-medium text-ink"
-                              : "text-muted hover:bg-panel-deep hover:text-ink"
+                              : "text-ink-soft hover:bg-panel-deep hover:text-ink"
                           }`}
                         >
                           {m.starred && (
@@ -985,7 +985,7 @@ export default function Workspace() {
           <div className="rise rise-3 px-3 pt-5" data-tour="threads">
             {starredThreads.length > 0 && (
               <>
-                <p className="px-2 pb-1 text-[13px] font-medium text-muted">
+                <p className="px-2 pb-1 text-[13px] font-semibold text-ink-soft">
                   Starred
                 </p>
                 <ul className="space-y-0.5 pb-3">
@@ -993,7 +993,7 @@ export default function Workspace() {
                 </ul>
               </>
             )}
-            <p className="px-2 pb-1 text-[13px] font-medium text-muted">
+            <p className="px-2 pb-1 text-[13px] font-semibold text-ink-soft">
               Recents
             </p>
             <ul className="space-y-0.5">
