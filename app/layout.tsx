@@ -33,7 +33,20 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "CounselOS — AI workspace for attorneys",
   description:
-    "Specialist legal AI agents: litigation analysis, contract review, drafting, and citation check — orchestrated, cited, and verified.",
+    "A team of legal specialists — litigation analysis, contract review, drafting, and citation check — orchestrated under one system that delegates, sequences, and verifies. Every finding cited; every draft audited.",
+  openGraph: {
+    title: "CounselOS — AI workspace for attorneys",
+    description:
+      "Specialist legal AI agents, orchestrated, cited, and verified. You speak to the orchestrator; it runs the rest.",
+    siteName: "CounselOS",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CounselOS — AI workspace for attorneys",
+    description:
+      "Specialist legal AI agents, orchestrated, cited, and verified.",
+  },
 };
 
 export default function RootLayout({
