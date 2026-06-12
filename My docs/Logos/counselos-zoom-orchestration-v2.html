@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CounselOS — Inside the orchestration layer</title>
+<style>
+  :root{
+    --bg:#1d1e19;            /* main app bg */
+    --side:#171813;          /* sidebar */
+    --deep:#121310;          /* backend layer */
+    --surface:#2b2c25;       /* light card surface (chips/cards) */
+    --surface-2:#32332b;     /* lighter hover/active surface */
+    --border:#3a3b32;
+    --border-lt:#4a4b40;
+    --text:#eceadf;
+    --muted:#8b8e82;
+    --green:#7fd99a; --green-dim:#3a5a45; --green-glow:rgba(127,217,154,.25);
+    --amber:#e6b35a; --red:#e0705f;
+    --paper:#edeade; --ink:#2b2b26;
+    --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --serif:Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#141511;font-family:var(--sans);color:var(--text);
+       display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px 12px}
+  .wrap{width:100%;max-width:1060px}
+  .frame{position:relative;border:1px solid var(--border);border-radius:18px;overflow:hidden;
+         background:var(--bg);height:640px}
+
+  .ticker{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:30}
+  .ticker-box{font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+              color:var(--muted);border:1px solid var(--border);border-radius:8px;
+              padding:7px 15px;background:rgba(18,19,16,.78);backdrop-filter:blur(4px);white-space:nowrap}
+  .ticker-box .cursor{display:inline-block;width:6px;height:11px;background:var(--green);
+              vertical-align:-1px;margin-left:6px;animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+
+  /* ================= SCENE 1 · THE REAL UI ================= */
+  .ui-scene{position:absolute;inset:0;display:flex;z-index:10;background:var(--bg)}
+  /* sidebar */
+  .sidebar{width:196px;flex-shrink:0;background:var(--side);border-right:1px solid #26271f;
+       padding:18px 14px;display:flex;flex-direction:column;font-size:12.5px}
+  .logo{font-family:var(--serif);font-size:19px;letter-spacing:.01em;margin-bottom:22px}
+  .logo b{font-weight:600;color:var(--text)}
+  .logo span{color:var(--green);font-weight:600}
+  .side-item{display:flex;align-items:center;gap:10px;color:#c9c8bb;padding:8px 8px;border-radius:8px}
+  .side-item svg{width:15px;height:15px;stroke:#9a9d90;fill:none;stroke-width:1.7;
+       stroke-linecap:round;stroke-linejoin:round}
+  .side-sub{margin-left:14px;color:#9a9d90;padding:7px 10px;border-radius:8px;font-size:12px}
+  .side-sub.active{background:#26271f;color:var(--text)}
+  .side-label{font-size:10.5px;color:#6e7166;margin:16px 8px 6px}
+  .side-empty{font-size:11px;color:#5f6258;font-style:italic;margin:2px 8px}
+  .side-foot{margin-top:auto;display:flex;align-items:center;gap:10px;padding-top:14px;
+       border-top:1px solid #23241d}
+  .avatar{width:30px;height:30px;border-radius:50%;background:#d96a3b;display:flex;align-items:center;
+       justify-content:center;font-weight:700;font-size:13px;color:#fff}
+  .side-foot .un{font-size:12px;font-weight:600}
+  .side-foot .st{font-size:10.5px;color:var(--muted)}
+
+  /* main area */
+  .main{position:relative;flex:1;display:flex;flex-direction:column;
+       background-image:radial-gradient(rgba(255,255,255,.028) 1px, transparent 1px);
+       background-size:26px 26px}
+  .crumb{font-family:var(--mono);font-size:9.5px;letter-spacing:.3em;color:#6e7166;
+       text-transform:uppercase;padding:18px 24px}
+  .crumb b{color:#9a9d90;font-weight:400}
+
+  .home{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+       justify-content:center;padding:0 36px}
+  .greet{font-family:var(--serif);font-size:34px;color:var(--text);margin-bottom:30px}
+  .composer{width:min(620px,100%);background:#26271f;border:1px solid var(--border);
+       border-radius:16px;padding:16px 16px 12px;box-shadow:0 10px 34px rgba(0,0,0,.3)}
+  .composer .field{min-height:46px;font-size:13px;color:#d8d6c9;line-height:1.55;padding:2px 4px}
+  .attach{display:flex;align-items:center;gap:10px;background:#2e2f27;border:1px solid var(--border-lt);
+       border-radius:10px;padding:9px 12px;margin-bottom:10px;max-width:300px;opacity:0;
+       transform:translateY(6px) scale(.96)}
+  .fico{width:32px;height:36px;border-radius:6px;background:var(--paper);color:#b3402e;
+       font-family:var(--mono);font-size:9px;font-weight:700;display:flex;align-items:flex-end;
+       justify-content:center;padding-bottom:4px;flex-shrink:0;
+       box-shadow:inset 0 -10px 14px -12px rgba(0,0,0,.5)}
+  .fmeta{flex:1;min-width:0}
+  .fname{font-size:12px;color:#e3e1d4;font-weight:500;white-space:nowrap;overflow:hidden;
+       text-overflow:ellipsis}
+  .fsub{display:flex;align-items:center;gap:8px;margin-top:4px}
+  .fsub #fsize{font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+  .fbar{flex:1;height:3px;border-radius:3px;background:#3c3e34;overflow:hidden;display:block}
+  .fbar i{display:block;height:100%;width:0%;background:var(--green);border-radius:3px}
+  .fdone{font-size:10px;color:var(--green);opacity:0;font-weight:700}
+  .composer .caret{display:inline-block;width:7px;height:14px;background:var(--green);vertical-align:-2px}
+  .composer .row{display:flex;align-items:center;gap:14px;margin-top:8px}
+  .composer .plus{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;
+       justify-content:center;color:#8b8e82;font-size:17px}
+  .composer .grow{flex:1}
+  .composer .model{font-size:12px;color:#b9b8ab;display:flex;align-items:center;gap:5px}
+  .composer .model svg{width:11px;height:11px;stroke:#8b8e82;fill:none;stroke-width:2}
+  .cicon{width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+  .cicon svg{width:15px;height:15px;stroke:#9a9d90;fill:none;stroke-width:1.8;
+       stroke-linecap:round;stroke-linejoin:round}
+  .send-up{width:28px;height:28px;border-radius:8px;background:#33342b;display:flex;
+       align-items:center;justify-content:center}
+  .send-up svg{width:14px;height:14px;stroke:#cfceC2;fill:none;stroke-width:2;
+       stroke-linecap:round;stroke-linejoin:round}
+
+  .chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:18px;max-width:680px}
+  .chip{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid #383930;
+       border-radius:9px;padding:8px 13px;font-size:12px;color:#c9c8bb}
+  .chip .em{font-size:11px}
+  .chip .gm{color:#ea4335;font-weight:700;font-family:var(--sans)}
+  .chip .dr{color:#4f8df5;font-weight:700}
+  .chip .cal{color:#34a853;font-weight:700}
+  .chip svg{width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:1.8;
+       stroke-linecap:round;stroke-linejoin:round}
+
+  /* thread state (after zoom-out) */
+  .thread{position:absolute;inset:0;padding:54px 38px 70px;display:none;flex-direction:column;gap:14px;
+       overflow:hidden}
+  .msg{max-width:74%;padding:12px 15px;border-radius:13px;font-size:12.5px;line-height:1.6}
+  .msg.user{background:#27342a;border:1px solid var(--green-dim);align-self:flex-end;
+       color:#dfe8df;opacity:0;transform:translateY(8px)}
+  .msg.reply{background:var(--surface);border:1px solid var(--border);align-self:flex-start;
+       opacity:0;transform:translateY(8px)}
+  .msg.reply .rh{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--muted);
+       text-transform:uppercase;margin-bottom:8px}
+  .msg.reply .rl{font-size:12.5px;color:#d8d6cb;margin:4px 0;opacity:0;transform:translateY(5px)}
+  .msg.reply .rl span{font-family:var(--mono);font-size:9.5px;color:var(--muted);margin-right:8px}
+  .chip-verified{display:inline-flex;align-items:center;gap:6px;margin-top:10px;opacity:0;
+       font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--green);
+       border:1px solid var(--green-dim);border-radius:6px;padding:4px 9px;background:#1d2a20}
+  .msg-attach{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;
+       color:#bcd4c0;background:rgba(0,0,0,.18);border:1px solid var(--green-dim);
+       border-radius:8px;padding:6px 10px;margin-bottom:8px;width:fit-content}
+  .mfico{display:inline-flex;align-items:center;justify-content:center;width:20px;height:23px;
+       border-radius:4px;background:var(--paper);color:#b3402e;font-size:7px;font-weight:700}
+
+  /* ================= SCENE 2 · BACKEND ================= */
+  .backend{position:absolute;inset:0;z-index:5;opacity:0;
+       background:
+         radial-gradient(90% 70% at 50% 0%, rgba(127,217,154,.05), transparent 60%),
+         repeating-linear-gradient(0deg, transparent 0 39px, rgba(255,255,255,.022) 39px 40px),
+         repeating-linear-gradient(90deg, transparent 0 39px, rgba(255,255,255,.022) 39px 40px),
+         var(--deep)}
+  .rail{position:absolute;top:0;left:0;height:100%;display:flex;will-change:transform}
+  .station{position:relative;width:480px;flex-shrink:0;height:100%;padding-top:118px}
+  .railline{position:absolute;top:150px;left:0;width:100%;height:2px;background:#32342b}
+  .raillit{position:absolute;top:150px;left:0;width:100%;height:2px;background:var(--green);
+       transform:scaleX(0);transform-origin:left;box-shadow:0 0 8px var(--green-glow)}
+  .node{position:absolute;top:150px;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;
+       border-radius:18px;background:var(--paper);border:1px solid #d9d5c4;
+       display:flex;align-items:center;justify-content:center;z-index:2;
+       box-shadow:0 10px 26px rgba(0,0,0,.5)}
+  .node svg{width:26px;height:26px;stroke:#2e8a55;fill:none;stroke-width:1.7;
+       stroke-linecap:round;stroke-linejoin:round}
+  .station.lit .node{border-color:var(--green);
+       box-shadow:0 0 0 2px rgba(127,217,154,.35),0 0 38px var(--green-glow)}
+  .agent-name{position:absolute;top:196px;left:50%;transform:translateX(-50%);text-align:center;width:100%}
+  .agent-name .n{font-weight:600;font-size:15px;color:var(--text)}
+  .agent-name .r{font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--muted);
+       text-transform:uppercase;margin-top:4px}
+
+  .spot{position:absolute;top:248px;left:50%;transform:translateX(-50%) translateY(14px);width:374px;
+       background:var(--paper);border:1px solid #d9d5c4;border-radius:12px;
+       padding:15px 17px;opacity:0;box-shadow:0 22px 54px rgba(0,0,0,.6)}
+  .spot .what{font-size:12px;color:#33332c;line-height:1.5;margin-bottom:11px;font-weight:500}
+  .step{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;
+       font-weight:500;color:#3f3e33;padding:5px 0;opacity:0;transform:translateX(-6px)}
+  .step .tick{width:16px;height:16px;border-radius:50%;border:1.5px solid #b5b19c;flex-shrink:0;
+       display:flex;align-items:center;justify-content:center;background:#fff}
+  .step .tick svg{width:9px;height:9px;stroke:#fff;stroke-width:3.6;fill:none;
+       stroke-linecap:round;stroke-linejoin:round}
+  .step .tick svg path{stroke-dasharray:14;stroke-dashoffset:14}
+  .step.failstep .tick{border-color:#d9a294}
+  .step.failstep{color:#9c3a28;font-weight:600}
+  .out{margin-top:12px;display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;
+       letter-spacing:.06em;color:#1d5c37;border:1px solid #9cc7a8;border-left:3px solid #2e8a55;
+       border-radius:7px;padding:7px 11px;background:#dcedde;opacity:0;transform:translateY(6px)}
+  .out.warn{color:#7a5410;border-color:#d9c08a;border-left-color:#b97f1d;background:#f3e3bd}
+  .plan .step .num{font-size:10px;color:#8a8672;width:16px;text-align:center;flex-shrink:0;font-weight:600}
+
+  .packet{position:absolute;top:150px;left:0;width:44px;height:32px;z-index:3;opacity:0;
+       transform:translate(-50%,-50%)}
+  .packet .paper{width:100%;height:100%;background:var(--paper);border:1px solid #d9d5c4;
+       border-radius:6px;box-shadow:0 0 20px var(--green-glow),0 5px 12px rgba(0,0,0,.5);
+       display:flex;flex-direction:column;gap:3px;justify-content:center;padding:0 8px}
+  .packet .paper i{display:block;height:2px;border-radius:2px;background:#b3afa0}
+  .packet .paper i:nth-child(2){width:70%}
+
+  .replay{position:absolute;right:14px;bottom:13px;font-family:var(--mono);font-size:10px;z-index:40;
+        letter-spacing:.2em;color:var(--muted);background:rgba(18,19,16,.6);border:1px solid var(--border);
+        border-radius:8px;padding:7px 13px;cursor:pointer;text-transform:uppercase}
+  .replay:hover{color:var(--green);border-color:var(--green-dim)}
+
+  @media (max-width:760px){
+    .sidebar{display:none}
+    .frame{height:600px}
+    .station{width:330px}
+    .spot{width:294px}
+    .greet{font-size:24px}
+    .chips{gap:6px}
+    .chip{font-size:10.5px;padding:6px 9px}
+    .ticker-box{font-size:8.5px;letter-spacing:.14em;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+  }
+  @media (prefers-reduced-motion:reduce){ .ticker-box .cursor{animation:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="frame" id="frame">
+
+    <!-- ============ BACKEND ============ -->
+    <div class="backend" id="backend">
+      <div class="rail" id="rail">
+
+        <div class="station" id="st0">
+          <div class="railline"></div><div class="raillit"></div>
+          <div class="node"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M12 12H6v4M12 12h6v4"/></svg></div>
+          <div class="agent-name"><div class="n">Orchestrator</div><div class="r">Plans · Routes · Verifies</div></div>
+          <div class="spot">
+            <div class="what">Reads the request, breaks it into a plan, and routes each piece to the right specialist.</div>
+            <div class="plan">
+              <div class="step"><span class="num">1</span>assess litigation posture</div>
+              <div class="step"><span class="num">2</span>review every clause</div>
+              <div class="step"><span class="num">3</span>draft the response</div>
+              <div class="step"><span class="num">4</span>audit every citation</div>
+              <div class="step"><span class="num">5</span>recommend strategy</div>
+            </div>
+            <div class="out">PLAN COMPILED · 5 TASKS ROUTED</div>
+          </div>
+        </div>
+
+        <div class="station" id="st1">
+          <div class="railline"></div><div class="raillit"></div>
+          <div class="node"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></svg></div>
+          <div class="agent-name"><div class="n">Litigation Analysis</div><div class="r">Specialist</div></div>
+          <div class="spot">
+            <div class="what">Maps the dispute — claims, defenses, and exposure — before anyone writes a word.</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>reads pleadings &amp; case facts</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>maps claims against defenses</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>scores exposure &amp; leverage</div>
+            <div class="out">EXPOSURE: MODERATE · LEVERAGE FOUND</div>
+          </div>
+        </div>
+
+        <div class="station" id="st2">
+          <div class="railline"></div><div class="raillit"></div>
+          <div class="node"><svg viewBox="0 0 24 24"><path d="M7 3h10a1 1 0 0 1 1 1v16l-3-2-3 2-3-2-3 2V4a1 1 0 0 1 1-1z"/><path d="M9 8h6M9 12h6"/></svg></div>
+          <div class="agent-name"><div class="n">Contract Review</div><div class="r">Specialist</div></div>
+          <div class="spot">
+            <div class="what">Hunts risk clause-by-clause and compares every term against precedent.</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>parses 47 clauses</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>compares against precedent terms</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>flags deviations by severity</div>
+            <div class="out warn">⚠ 3 RISK CLAUSES FLAGGED</div>
+          </div>
+        </div>
+
+        <div class="station" id="st3">
+          <div class="railline"></div><div class="raillit"></div>
+          <div class="node"><svg viewBox="0 0 24 24"><path d="M17 3l4 4L8 20l-5 1 1-5L17 3z"/></svg></div>
+          <div class="agent-name"><div class="n">Drafting</div><div class="r">Specialist</div></div>
+          <div class="spot">
+            <div class="what">Writes the response in your firm's voice, built on what Review and Analysis found.</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>loads firm style &amp; precedents</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>drafts objections &amp; revisions</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>inserts supporting authority</div>
+            <div class="out">RESPONSE DRAFTED · 2 PAGES</div>
+          </div>
+        </div>
+
+        <div class="station" id="st4">
+          <div class="railline"></div><div class="raillit"></div>
+          <div class="node"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="agent-name"><div class="n">Citation Check</div><div class="r">Specialist</div></div>
+          <div class="spot">
+            <div class="what">Verifies every authority against real case law. Nothing fabricated gets through.</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>extracts 12 citations from draft</div>
+            <div class="step failstep" id="failstep"><span class="tick"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span>1 case not found — hallucination caught</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>replaced with verified authority</div>
+            <div class="out">12/12 CITATIONS VERIFIED</div>
+          </div>
+        </div>
+
+        <div class="station" id="st5">
+          <div class="railline"></div><div class="raillit"></div>
+          <div class="node"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5l-1.5 4-4 1.5 1.5-4 4-1.5z"/></svg></div>
+          <div class="agent-name"><div class="n">Practice Strategy</div><div class="r">Specialist</div></div>
+          <div class="spot">
+            <div class="what">Turns everything upstream into a recommendation you can act on.</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>weighs exposure vs. leverage</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>ranks paths: counter · settle · litigate</div>
+            <div class="step"><span class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l5 5L20 7"/></svg></span>writes the recommendation</div>
+            <div class="out">RECOMMEND: COUNTER · REVISED §8.2, §11.4, §14.1</div>
+          </div>
+        </div>
+
+        <div class="packet" id="packet"><div class="paper"><i></i><i></i><i></i></div></div>
+      </div>
+    </div>
+
+    <!-- ============ THE REAL UI ============ -->
+    <div class="ui-scene" id="uiScene">
+      <div class="sidebar">
+        <div class="logo"><b>Counsel</b><span>OS</span></div>
+        <div class="side-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>New thread</div>
+        <div class="side-item"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Cases</div>
+        <div class="side-sub">General</div>
+        <div class="side-sub active">Sam v T</div>
+        <div class="side-item" style="margin-top:6px"><svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12M9 12h6"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="18" r="2"/></svg>Connectors</div>
+        <div class="side-label">Recents</div>
+        <div class="side-empty">No threads yet in this case.</div>
+        <div class="side-foot">
+          <div class="avatar">O</div>
+          <div><div class="un">Oirazan Marganon</div><div class="st">Signed in</div></div>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="crumb">SAM V T / NEW THREAD &nbsp;·&nbsp; <b>ORCHESTRATED</b></div>
+
+        <!-- home state -->
+        <div class="home" id="homeState">
+          <div class="greet">Working late, Oirazan.</div>
+          <div class="composer" id="composer">
+            <div class="attach" id="attach">
+              <div class="fico">PDF</div>
+              <div class="fmeta">
+                <div class="fname">Settlement_Agreement.pdf</div>
+                <div class="fsub"><span id="fsize">2.4 MB</span><span class="fbar"><i id="fbarFill"></i></span><span class="fdone" id="fdone">✓</span></div>
+              </div>
+            </div>
+            <div class="field"><span id="typed"></span><span class="caret" id="caret"></span></div>
+            <div class="row">
+              <div class="plus" id="plusBtn">+</div>
+              <div class="grow"></div>
+              <div class="model">Orchestrated <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+              <div class="cicon"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+              <div class="cicon"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></div>
+              <div class="send-up" id="send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+            </div>
+          </div>
+          <div class="chips">
+            <div class="chip"><svg viewBox="0 0 24 24"><path d="M14 4l6 6-9 9H5v-6l9-9z"/></svg>Demand letter</div>
+            <div class="chip"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7l7-4 7 4M3 13l2-6 2 6a3 3 0 0 1-4 0zM17 13l2-6 2 6a3 3 0 0 1-4 0z"/></svg>Spot missing clauses</div>
+            <div class="chip"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Find contradictions</div>
+            <div class="chip"><span class="em gm">M</span>From Gmail</div>
+            <div class="chip"><span class="em dr">▲</span>From Drive</div>
+            <div class="chip"><span class="em cal">▦</span>From Calendar</div>
+          </div>
+        </div>
+
+        <!-- thread state -->
+        <div class="thread" id="threadState">
+          <div class="msg user" id="userMsg">
+            <div class="msg-attach"><span class="mfico">PDF</span>Settlement_Agreement.pdf</div>
+            Review this settlement agreement — flag risks, draft a response, verify every citation.
+          </div>
+          <div class="msg reply" id="reply">
+            <div class="rh">CounselOS · Orchestrated</div>
+            <div class="rl"><span>01</span>3 risk clauses flagged — severity ranked (§8.2, §11.4, §14.1)</div>
+            <div class="rl"><span>02</span>Draft response ready, firm style applied</div>
+            <div class="rl"><span>03</span>Strategy: counter with revised terms — full memo attached</div>
+            <div class="chip-verified" id="chipV">✓ EVERY CITATION VERIFIED · 12/12</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticker"><div class="ticker-box"><span id="tickerText">COUNSELOS</span><span class="cursor"></span></div></div>
+    <button class="replay" id="replay">↻ Replay</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const tickerText = $('#tickerText');
+const setT = t => () => { tickerText.textContent = t; };
+
+const PROMPT = "Review this settlement agreement — flag risks, draft a response, verify every citation.";
+
+function typeText(tl, el, text, dur){
+  const o = {n:0};
+  tl.to(o,{n:text.length,duration:dur,ease:'none',
+    onUpdate:()=>{ el.textContent = text.slice(0, Math.round(o.n)); }});
+}
+
+function spotlight(tl, st, ticker, holdAfter = .35){
+  const spot = st.querySelector('.spot');
+  const steps = st.querySelectorAll('.step');
+  if (ticker) tl.call(setT(ticker));
+  tl.add(()=>st.classList.add('lit'))
+    .to(spot,{opacity:1,y:0,duration:.45,ease:'power2.out'});
+  steps.forEach(s=>{
+    tl.to(s,{opacity:1,x:0,duration:.28},'+=.12');
+    const tickBox = s.querySelector('.tick');
+    const tick = s.querySelector('.tick svg path');
+    if (tick){
+      const fail = s.classList.contains('failstep');
+      const col = fail ? '#c14b38' : '#2e8a55';
+      tl.to(tickBox,{backgroundColor:col,borderColor:col,duration:.18},'-=.05')
+        .to(tick,{strokeDashoffset:0,duration:.22},'<+.05');
+    }
+    if (s.id === 'failstep') tl.fromTo(s,{x:0},{x:3,duration:.05,repeat:5,yoyo:true});
+  });
+  tl.to(st.querySelector('.out'),{opacity:1,y:0,duration:.35},'+=.1')
+    .to({},{duration:holdAfter})
+    .add(()=>st.classList.remove('lit'));
+}
+
+function travel(tl, i){
+  const stations = $$('.station');
+  const w = stations[0].offsetWidth;
+  const vw = $('#frame').offsetWidth;
+  const to = (i+1)*w + w/2;
+  tl.to('#rail',{x: -(to - vw/2), duration:.9, ease:'power1.inOut'});
+  tl.to('#packet',{x: to, duration:.9, ease:'power1.inOut'},'<');
+  tl.to(stations[i].querySelector('.raillit'),{scaleX:1,duration:.9,ease:'none'},'<');
+}
+
+let tl;
+function play(){
+  if (tl) tl.kill();
+
+  /* ---- reset ---- */
+  gsap.set('#uiScene',{opacity:1,scale:1,filter:'blur(0px)',transformOrigin:'58% 56%'});
+  gsap.set('#backend',{opacity:0,scale:.8,transformOrigin:'50% 45%'});
+  $('#homeState').style.display='flex';
+  $('#threadState').style.display='none';
+  gsap.set('#userMsg',{opacity:0,y:8});
+  gsap.set('#reply',{opacity:0,y:8});
+  gsap.set('.reply .rl, .msg.reply .rl',{opacity:0,y:5});
+  gsap.set('#chipV',{opacity:0});
+  gsap.set('#caret',{opacity:1});
+  gsap.set('#send',{scale:1});
+  gsap.set('#attach',{opacity:0,y:6,scale:.96});
+  gsap.set('#fbarFill',{width:'0%'});
+  gsap.set('#fdone',{opacity:0,scale:1});
+  gsap.set('#plusBtn',{scale:1});
+  $('#typed').textContent='';
+  gsap.set('.spot',{opacity:0,y:14});
+  gsap.set('.step',{opacity:0,x:-6});
+  gsap.set('.step .tick svg path',{strokeDashoffset:14});
+  gsap.set('.step .tick',{clearProps:'backgroundColor,borderColor'});
+  gsap.set('.out',{opacity:0,y:6});
+  gsap.set('.raillit',{scaleX:0});
+  $$('.station').forEach(s=>s.classList.remove('lit'));
+
+  const vw = $('#frame').offsetWidth;
+  const w  = $('#st0').offsetWidth;
+  gsap.set('#rail',{x: -(w/2 - vw/2)});
+  gsap.set('#packet',{x: w/2, opacity:0});
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  tl = gsap.timeline({delay:.5, repeat:-1, repeatDelay:3.2});
+
+  /* ===== SCENE 1 · the UI ===== */
+  tl.call(setT('COUNSELOS'));
+  /* upload the agreement first */
+  tl.call(setT('ATTACHING DOCUMENT'),null,'+=.4')
+    .to('#plusBtn',{scale:.78,duration:.1,yoyo:true,repeat:1,transformOrigin:'50% 50%'})
+    .to('#attach',{opacity:1,y:0,scale:1,duration:.4,ease:'back.out(1.6)'},'+=.15')
+    .to('#fbarFill',{width:'100%',duration:.8,ease:'power1.inOut'})
+    .to('#fdone',{opacity:1,duration:.25})
+    .fromTo('#fdone',{scale:1.6},{scale:1,duration:.25,ease:'back.out(2)'},'<');
+  /* then the request */
+  tl.call(setT('COUNSELOS'),null,'+=.3');
+  typeText(tl, $('#typed'), PROMPT, 2.3);
+  tl.to('#send',{scale:.85,duration:.1,yoyo:true,repeat:1})
+    .set('#caret',{opacity:0});
+
+  /* ===== ZOOM IN ===== */
+  tl.call(setT('ENTERING THE ORCHESTRATION LAYER'),null,'+=.4')
+    .to('#uiScene',{scale:7,opacity:0,filter:'blur(10px)',duration:1.1,ease:'power2.in'})
+    .to('#backend',{opacity:1,scale:1,duration:1.0,ease:'power2.out'},'-=.55')
+    .to('#packet',{opacity:1,duration:.3});
+
+  /* ===== AGENT TOUR ===== */
+  spotlight(tl, $('#st0'), 'ORCHESTRATOR · COMPILING PLAN');
+  travel(tl,0);
+  spotlight(tl, $('#st1'), 'AGENT 1/5 · LITIGATION ANALYSIS');
+  travel(tl,1);
+  spotlight(tl, $('#st2'), 'AGENT 2/5 · CONTRACT REVIEW');
+  travel(tl,2);
+  spotlight(tl, $('#st3'), 'AGENT 3/5 · DRAFTING');
+  travel(tl,3);
+  spotlight(tl, $('#st4'), 'AGENT 4/5 · AUDITING EVERY CITATION');
+  travel(tl,4);
+  spotlight(tl, $('#st5'), 'AGENT 5/5 · PRACTICE STRATEGY');
+
+  /* ===== ZOOM OUT → thread ===== */
+  tl.call(setT('RETURNING TO YOU'),null,'+=.2')
+    .to('#packet',{opacity:0,duration:.3})
+    .add(()=>{ $('#homeState').style.display='none'; $('#threadState').style.display='flex'; })
+    .to('#backend',{opacity:0,scale:1.25,duration:.9,ease:'power2.in'})
+    .to('#uiScene',{scale:1,opacity:1,filter:'blur(0px)',duration:1.0,ease:'power2.out'},'-=.45');
+
+  /* ===== THE REPLY ===== */
+  tl.call(setT('DELIVERED · CITED · VERIFIED'))
+    .to('#userMsg',{opacity:1,y:0,duration:.4,ease:'power2.out'})
+    .to('#reply',{opacity:1,y:0,duration:.45,ease:'power2.out'},'+=.25')
+    .to('.msg.reply .rl',{opacity:1,y:0,stagger:.25,duration:.35})
+    .to('#chipV',{opacity:1,duration:.4})
+    .fromTo('#chipV',{scale:1.25},{scale:1,duration:.3,ease:'back.out(2)'},'<');
+
+  if (reduce){
+    tl.pause();
+    $('#homeState').style.display='none';
+    $('#threadState').style.display='flex';
+    gsap.set('#uiScene',{opacity:1,scale:1});
+    gsap.set(['#userMsg','#reply','.msg.reply .rl'],{opacity:1,y:0});
+    gsap.set('#chipV',{opacity:1});
+    tickerText.textContent='DELIVERED · CITED · VERIFIED';
+  }
+}
+
+window.addEventListener('load', play);
+let rs; window.addEventListener('resize',()=>{ clearTimeout(rs); rs=setTimeout(play,250); });
+$('#replay').addEventListener('click', play);
+</script>
+</body>
+</html>

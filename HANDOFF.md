@@ -63,10 +63,22 @@ Firm-pivot TODO:
 - **Desktop application** (Kat): plan a packaged desktop build —
   evaluate Tauri vs Electron wrapping the Next app; the local-install
   agent runtime fits a desktop bundle naturally.
-- **Connectors to build**: Outlook/M365 (Entra app registration → Graph
-  API), Dropbox (App Console app), MyCase (needs MyCase developer/API
-  credentials — request from MyCase; firm admin authorizes via OAuth at
-  connect time), then Google.
+- **Connectors to build** (status as of 2026-06-12 evening):
+  - **Dropbox: OAuth flow LIVE** — app created, DROPBOX_APP_KEY/SECRET in
+    env, /api/connectors/dropbox/{start,callback} + status/disconnect
+    built, Connect button real in the dialog. Refresh token lives in an
+    httpOnly cookie (`dbx_refresh`). **Next: agent tools** (list/search/
+    read Dropbox files in chat — mint access tokens from the refresh
+    cookie server-side). Add the same env vars + the production redirect
+    URI on Vercel before testing there.
+  - **Outlook/M365: blocked on a tenant** — Kat's personal MS account has
+    no directory; she's signing up for Azure free (or firm tenant later).
+    Then: Entra app registration → MS_CLIENT_ID/SECRET → Graph flow.
+  - **MyCase: in progress** — developers.mycase.com logs in with the
+    firm's MyCase credentials (Kat has Phil's); register an app there
+    for client ID/secret. Redirect URI pattern:
+    /api/connectors/mycase/callback.
+  - Then Google family.
 
 ## Next session — TODO (rough priority)
 

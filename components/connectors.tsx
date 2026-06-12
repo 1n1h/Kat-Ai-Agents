@@ -1,7 +1,7 @@
 "use client";
 
-import type { ComponentType, CSSProperties } from "react";
-import { Scale, X } from "lucide-react";
+import { useEffect, useState, type ComponentType, type CSSProperties } from "react";
+import { Check, Scale, X } from "lucide-react";
 import { FaMicrosoft } from "react-icons/fa";
 import { PiMicrosoftOutlookLogoFill } from "react-icons/pi";
 import {
@@ -51,6 +51,27 @@ export function ConnectorsDialog({
   open: boolean;
   onClose: () => void;
 }) {
+  /* which connectors have a live OAuth flow today */
+  const CONNECTABLE = new Set(["dropbox"]);
+  const [connected, setConnected] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!open) return;
+    fetch("/api/connectors/status")
+      .then((r) => r.json())
+      .then(setConnected)
+      .catch(() => setConnected({}));
+  }, [open]);
+
+  async function disconnect(id: string) {
+    await fetch("/api/connectors/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setConnected((c) => ({ ...c, [id]: false }));
+  }
+
   if (!open) return null;
   return (
     <div
@@ -93,18 +114,36 @@ export function ConnectorsDialog({
                   {c.hint}
                 </span>
               </span>
-              <span
-                className="cursor-not-allowed rounded-lg border border-line px-3.5 py-1.5 font-sans text-[12px] font-semibold tracking-wide text-faint uppercase"
-                title="Configuration arrives in a later phase"
-              >
-                Connect
-              </span>
+              {connected[c.id] ? (
+                <button
+                  onClick={() => void disconnect(c.id)}
+                  title="Connected — click to disconnect"
+                  className="flex items-center gap-1.5 rounded-lg border border-accent bg-accent-wash px-3.5 py-1.5 font-sans text-[12px] font-semibold tracking-wide text-accent uppercase transition-colors hover:border-line hover:bg-transparent hover:text-muted"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  Connected
+                </button>
+              ) : CONNECTABLE.has(c.id) ? (
+                <a
+                  href={`/api/connectors/${c.id}/start`}
+                  className="rounded-lg border border-line-strong px-3.5 py-1.5 font-sans text-[12px] font-semibold tracking-wide text-ink uppercase transition-colors hover:border-accent hover:text-accent"
+                >
+                  Connect
+                </a>
+              ) : (
+                <span
+                  className="cursor-not-allowed rounded-lg border border-line px-3.5 py-1.5 font-sans text-[12px] font-semibold tracking-wide text-faint uppercase"
+                  title="This connector's setup is in progress"
+                >
+                  Soon
+                </span>
+              )}
             </li>
           ))}
         </ul>
 
         <p className="mt-4 text-center font-mono text-[11px] tracking-wider text-faint">
-          Configuration coming in a later phase — the UI is wired and ready.
+          Connections are per-browser and revocable here or in the provider.
         </p>
       </div>
     </div>
