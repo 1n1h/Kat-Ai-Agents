@@ -14,9 +14,9 @@
   --color-faint: #6e6a61;
   --color-line: #393834;
   --color-line-strong: #4a4843;
-  --color-accent: #d97757;
-  --color-accent-soft: #e08b6d;
-  --color-accent-wash: #3b2d25;
+  --color-accent: #5fae7f;
+  --color-accent-soft: #79c096;
+  --color-accent-wash: #26392e;
   --color-input: #30302e;
   --color-ok: #7a9a6f;
 
@@ -30,7 +30,7 @@
 
 :root {
   --grain-dot: rgba(255, 255, 255, 0.02);
-  --color-code: #eb8e7a; /* salmon inline-code, per reference */
+  --color-code: #8cc9a0; /* green inline-code chips */
   color-scheme: dark;
 }
 
@@ -44,13 +44,13 @@
   --color-faint: #a8a195;
   --color-line: #e4e0d5;
   --color-line-strong: #d3cec0;
-  --color-accent: #c6593c;
-  --color-accent-soft: #d97757;
-  --color-accent-wash: #f6e8e2;
+  --color-accent: #3a7d54;
+  --color-accent-soft: #4f9a6c;
+  --color-accent-wash: #e2efe5;
   --color-input: rgba(255, 255, 255, 0.6);
   --color-ok: #5a7a52;
   --grain-dot: rgba(31, 30, 29, 0.025);
-  --color-code: #b4502f;
+  --color-code: #2e7048;
   color-scheme: light;
 }
 

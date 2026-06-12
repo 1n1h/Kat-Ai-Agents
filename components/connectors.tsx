@@ -36,7 +36,7 @@ export const CONNECTORS: Connector[] = [
   { id: "gdocs", name: "Google Docs", icon: SiGoogledocs, color: "#4285F4", hint: "Open and edit firm documents" },
   { id: "calendar", name: "Google Calendar", icon: SiGooglecalendar, color: "#34A853", hint: "Deadlines, hearings, statute dates" },
   { id: "slack", name: "Slack", icon: SiSlack, color: "#E01E5A", hint: "Bring team threads into a case" },
-  { id: "netdocuments", name: "NetDocuments", icon: FaRegFolderOpen, color: "#D97757", hint: "Search the firm's document repository" },
+  { id: "netdocuments", name: "NetDocuments", icon: FaRegFolderOpen, color: "var(--color-accent)", hint: "Search the firm's document repository" },
   { id: "sharepoint", name: "SharePoint", icon: FaMicrosoft, color: "#0078D4", hint: "Access firm sites and libraries" },
 ];
 

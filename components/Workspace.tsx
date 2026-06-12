@@ -718,7 +718,6 @@ export default function Workspace() {
           <section className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-6 pb-16">
             <div className="w-full max-w-2xl">
               <h2 className="rise rise-2 mb-8 text-center font-serif text-4xl text-ink">
-                <span className="mr-3 text-accent">✳</span>
                 {greetingTpl.replace("{name}", firstName)}
               </h2>
               <div className="rise rise-3">{composer}</div>
