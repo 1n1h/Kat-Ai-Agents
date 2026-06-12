@@ -8,6 +8,7 @@ import {
   SPECIALISTS,
 } from "@/agents/registry";
 import type { AgentId } from "@/lib/agent-meta";
+import { firmContext } from "@/lib/firmContext";
 
 export const runtime = "nodejs";
 export const maxDuration = 600;
@@ -23,6 +24,8 @@ interface ChatRequest {
   matterId: string;
   /** voice mode: replies are spoken aloud, so keep them short */
   voice?: boolean;
+  /** signed-in email — matches an employee profile for context injection */
+  userEmail?: string | null;
 }
 
 const VOICE_NOTE =
@@ -140,7 +143,9 @@ async function cloudChat(
   messages: ChatMessage[],
   agentId: AgentId,
   voice?: boolean,
+  userEmail?: string | null,
 ): Promise<Response> {
+  const firmCtx = firmContext(userEmail);
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json(
       { error: "ANTHROPIC_API_KEY is not configured." },
@@ -163,7 +168,7 @@ async function cloudChat(
             model: modelFor(id),
             max_tokens: 8000,
             system:
-              spec.prompt + CLOUD_NOTE + identityNote(id) +
+              spec.prompt + CLOUD_NOTE + identityNote(id) + firmCtx +
               (voice ? VOICE_NOTE : ""),
             messages: convo,
           });
@@ -210,7 +215,7 @@ async function cloudChat(
           const resp = await client.messages.create({
             model: ORCHESTRATOR_MODEL,
             max_tokens: 8000,
-            system: ORCH_CLOUD_PROMPT + (voice ? VOICE_NOTE : ""),
+            system: ORCH_CLOUD_PROMPT + firmCtx + (voice ? VOICE_NOTE : ""),
             tools: [consultTool],
             messages: turns,
           });
@@ -285,7 +290,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { messages, agentId, matterId, voice } =
+  const { messages, agentId, matterId, voice, userEmail } =
     (await req.json()) as ChatRequest;
   if (!messages?.length) {
     return Response.json({ error: "No messages." }, { status: 400 });
@@ -303,7 +308,7 @@ export async function POST(req: NextRequest) {
     query = null;
   }
   if (!query || !cwd) {
-    return cloudChat(messages, agentId, voice);
+    return cloudChat(messages, agentId, voice, userEmail);
   }
 
   const promptText = buildPrompt(messages) + (voice ? VOICE_NOTE : "");
@@ -319,7 +324,9 @@ export async function POST(req: NextRequest) {
           options: {
             cwd,
             permissionMode: "bypassPermissions",
-            systemPrompt: isAuto ? ORCHESTRATOR_PROMPT : spec!.prompt,
+            systemPrompt:
+              (isAuto ? ORCHESTRATOR_PROMPT : spec!.prompt) +
+              firmContext(userEmail),
             model: isAuto
               ? ORCHESTRATOR_MODEL
               : MODEL_IDS[(spec!.model ?? "sonnet") as keyof typeof MODEL_IDS],

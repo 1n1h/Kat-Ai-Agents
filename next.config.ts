@@ -25,9 +25,9 @@ const nextConfig: NextConfig = {
       "node_modules/@anthropic-ai/claude-agent-sdk/**",
     ],
   },
-  // the chat route reads the agent system prompts off disk at runtime
+  // the chat route reads agent system prompts and firm profiles off disk
   outputFileTracingIncludes: {
-    "/api/chat": ["agents/**/*.md"],
+    "/api/chat": ["agents/**/*.md", "firm/**/*.md"],
   },
 };
 

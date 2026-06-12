@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { SiGmail, SiGooglecalendar, SiGoogledrive } from "react-icons/si";
+import { Scale } from "lucide-react";
+import { PiMicrosoftOutlookLogoFill } from "react-icons/pi";
+import { SiDropbox } from "react-icons/si";
 import { pickSuggestions } from "@/lib/suggestions";
 import type { AgentId } from "@/lib/agent-meta";
 
+/* the firm's actual stack: Outlook / MyCase / Dropbox */
 const CONNECTOR_PILLS = [
-  { label: "From Gmail", icon: SiGmail, color: "#EA4335" },
-  { label: "From Drive", icon: SiGoogledrive, color: "#4285F4" },
-  { label: "From Calendar", icon: SiGooglecalendar, color: "#34A853" },
+  { label: "From Outlook", icon: PiMicrosoftOutlookLogoFill, color: "#0F6CBD" },
+  { label: "From MyCase", icon: Scale, color: "var(--color-accent)" },
+  { label: "From Dropbox", icon: SiDropbox, color: "#0061FF" },
 ];
 
 const pillClass =

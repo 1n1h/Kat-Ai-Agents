@@ -41,6 +41,33 @@ branch, validate with `npm run build`, PR into main)._
   Sign-in lives on the landing. View it while signed in with
   `?preview=landing`. Animation deps: gsap, driver.js.
 
+## PIVOT (2026-06-12): single-firm deployment — Sheehe & Associates, P.A.
+
+This web app now serves one firm: https://sheeheandassociates.com (FL
+commercial/insurance litigation boutique; see `firm/company-profile.md`).
+Firm context is injected into every chat (company profile for everyone;
+matching employee profile by signed-in email — see `lib/firmContext.ts`).
+Firm stack: **Microsoft 365 / Outlook, MyCase, Dropbox** (+ Google kept).
+
+Firm-pivot TODO:
+- **Employee onboarding flow** (per Kat): a Settings option to grant
+  admin access by email; when that user signs up, walk them through
+  selecting their role + email and generate an employee profile
+  (currently profiles are hand-written .md in firm/employees/).
+- **Pending roster data**: Phil's email (psheehe@ unverified), Johanna's
+  preferred email (jsheehe@ published; Kat confirming), Brooksly's email
+  and last name. Katherine Rodriguez = legalassistant@sheeheandassociates.com.
+- **Rebrand to Sheehe & Associates** (Kat approved): wordmark, palette,
+  landing copy. Their site: navy/professional; tagline "Experience.
+  Knowledge. Strategy."
+- **Desktop application** (Kat): plan a packaged desktop build —
+  evaluate Tauri vs Electron wrapping the Next app; the local-install
+  agent runtime fits a desktop bundle naturally.
+- **Connectors to build**: Outlook/M365 (Entra app registration → Graph
+  API), Dropbox (App Console app), MyCase (needs MyCase developer/API
+  credentials — request from MyCase; firm admin authorizes via OAuth at
+  connect time), then Google.
+
 ## Next session — TODO (rough priority)
 
 1. **Wire the waitlist dialog** — it's UI-only today (submits nowhere).

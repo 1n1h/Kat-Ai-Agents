@@ -8,6 +8,8 @@ emails:
 
 # Johanna Elizabeth Sheehe — Attorney
 
+Phil's daughter and coworker; second attorney of the two-lawyer firm.
+
 Litigator with big-firm and federal clerkship pedigree. Clerked for
 **Hon. James B. Zagel (N.D. Ill.)** and **Hon. Joel M. Flaum (7th Cir.)**;
 previously an associate at a large international firm in Los Angeles

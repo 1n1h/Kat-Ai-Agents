@@ -305,6 +305,7 @@ export default function Workspace() {
           agentId,
           matterId,
           voice: opts?.voice ?? false,
+          userEmail: user?.email ?? null,
         }),
       });
 

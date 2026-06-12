@@ -16,8 +16,13 @@
 - **Phone:** 305-379-3515 · **Fax:** 305-379-5404
 - **Founded/led by:** Phillip J. Sheehe; attorneys with 60+ years of
   combined experience
-- **Team:** 3 attorneys — Phillip J. Sheehe (Founding Partner),
-  Johanna Elizabeth Sheehe (Attorney), Karen D. Fultz-Robinson (Of Counsel)
+- **Team:**
+  - Phillip J. Sheehe — Founding Partner
+  - Johanna Elizabeth Sheehe — Attorney (Phil's daughter and coworker)
+  - Katherine Rodriguez — Legal Assistant to Phil
+  - Brooksly — Legal Assistant to Johanna
+  - (Karen D. Fultz-Robinson, formerly Of Counsel, is no longer with
+    the firm — do not reference her as current staff)
 
 ## Scope of practice
 
@@ -83,8 +88,8 @@
 
 ## Open items to confirm with the firm
 
-- Attorney email addresses (only jsheehe@sheeheandassociates.com is
-  published; see employee profiles)
-- Support staff (paralegals/assistants) who need logins
+- Phil's email address (psheehe@ is a guess — confirm)
+- Johanna's preferred login email (jsheehe@ is published; Kat to confirm)
+- Brooksly's email address and last name
 - Tampa office address (referenced but not published)
-- MyCase admin access for API setup
+- MyCase admin authorization when the connector ships
