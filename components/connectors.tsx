@@ -2,13 +2,24 @@
 
 import type { ComponentType, CSSProperties } from "react";
 import { X } from "lucide-react";
-import { FaMicrosoft, FaRegFolderOpen } from "react-icons/fa";
 import {
+  FaCloud,
+  FaEnvelope,
+  FaMicrosoft,
+  FaRegFilePdf,
+  FaRegFolderOpen,
+} from "react-icons/fa";
+import {
+  SiDropbox,
   SiGmail,
   SiGooglecalendar,
   SiGoogledocs,
   SiGoogledrive,
+  SiGooglemeet,
+  SiNotion,
+  SiSalesforce,
   SiSlack,
+  SiZoom,
 } from "react-icons/si";
 
 /**
@@ -35,9 +46,19 @@ export const CONNECTORS: Connector[] = [
   { id: "gdrive", name: "Google Drive", icon: SiGoogledrive, color: "#4285F4", hint: "Pull case files straight from Drive" },
   { id: "gdocs", name: "Google Docs", icon: SiGoogledocs, color: "#4285F4", hint: "Open and edit firm documents" },
   { id: "calendar", name: "Google Calendar", icon: SiGooglecalendar, color: "#34A853", hint: "Deadlines, hearings, statute dates" },
-  { id: "slack", name: "Slack", icon: SiSlack, color: "#E01E5A", hint: "Bring team threads into a case" },
-  { id: "netdocuments", name: "NetDocuments", icon: FaRegFolderOpen, color: "var(--color-accent)", hint: "Search the firm's document repository" },
+  { id: "gmeet", name: "Google Meet", icon: SiGooglemeet, color: "#00897B", hint: "Pull notes and action items from calls" },
+  { id: "outlook", name: "Outlook", icon: FaEnvelope, color: "#0078D4", hint: "Mail and calendar in case context" },
+  { id: "onedrive", name: "OneDrive", icon: FaCloud, color: "#0078D4", hint: "Reach files stored in OneDrive" },
+  { id: "teams", name: "Microsoft Teams", icon: FaMicrosoft, color: "#6264A7", hint: "Bring team threads into a case" },
   { id: "sharepoint", name: "SharePoint", icon: FaMicrosoft, color: "#0078D4", hint: "Access firm sites and libraries" },
+  { id: "slack", name: "Slack", icon: SiSlack, color: "#E01E5A", hint: "Bring team threads into a case" },
+  { id: "dropbox", name: "Dropbox", icon: SiDropbox, color: "#0061FF", hint: "Pull case files from Dropbox" },
+  { id: "box", name: "Box", icon: FaRegFolderOpen, color: "#0061D5", hint: "Reach documents stored in Box" },
+  { id: "netdocuments", name: "NetDocuments", icon: FaRegFolderOpen, color: "var(--color-accent)", hint: "Search the firm's document repository" },
+  { id: "salesforce", name: "Salesforce", icon: SiSalesforce, color: "#00A1E0", hint: "Sync matters with client records" },
+  { id: "zoom", name: "Zoom", icon: SiZoom, color: "#0B5CFF", hint: "Bring deposition and meeting context in" },
+  { id: "acrobat", name: "Adobe Acrobat", icon: FaRegFilePdf, color: "#EC1C24", hint: "Read and prepare PDFs for signature" },
+  { id: "notion", name: "Notion", icon: SiNotion, color: "var(--color-ink)", hint: "Pull matter notes and playbooks" },
 ];
 
 export function ConnectorsDialog({

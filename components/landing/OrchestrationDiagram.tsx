@@ -98,7 +98,9 @@ function NodeCard({
     >
       <span
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
-          active ? "bg-accent text-paper" : "bg-panel-deep text-accent"
+          active
+            ? "bg-accent text-paper"
+            : "bg-accent/10 text-accent ring-1 ring-inset ring-accent/30"
         }`}
       >
         <Icon className="h-[18px] w-[18px]" />
@@ -111,7 +113,7 @@ function NodeCard({
         >
           {meta.name}
         </span>
-        <span className="block truncate font-mono text-[9.5px] tracking-[0.15em] text-faint uppercase">
+        <span className="block truncate font-mono text-[9.5px] tracking-[0.15em] text-muted uppercase">
           {isHub ? "orchestrator" : "specialist"}
         </span>
       </span>

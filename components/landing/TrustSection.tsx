@@ -57,7 +57,7 @@ export default function TrustSection() {
                 )}
                 style={{ transitionDelay: shown ? `${i * 80}ms` : undefined }}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-wash text-accent">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30">
                   <Icon className="h-5 w-5" />
                 </span>
                 <div>

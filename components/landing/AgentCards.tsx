@@ -85,7 +85,7 @@ export default function AgentCards() {
                 style={{ transitionDelay: shown ? `${120 + i * 80}ms` : undefined }}
               >
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-panel-deep text-accent transition-colors group-hover:bg-accent group-hover:text-paper">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30 transition-colors group-hover:bg-accent group-hover:text-paper group-hover:ring-transparent">
                     <Icon className="h-[22px] w-[22px]" />
                   </span>
                   <div>

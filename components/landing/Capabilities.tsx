@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { CONNECTORS } from "@/components/connectors";
+import Marquee from "./Marquee";
 import { useReveal, revealClass } from "./useReveal";
 
 interface Capability {
@@ -78,7 +79,7 @@ export default function Capabilities() {
                 )}
                 style={{ transitionDelay: shown ? `${i * 70}ms` : undefined }}
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent-wash text-accent">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-inset ring-accent/30">
                   <Icon className="h-5 w-5" />
                 </span>
                 <h3 className="mt-4 font-sans text-[16px] font-semibold text-ink">
@@ -92,24 +93,26 @@ export default function Capabilities() {
           })}
         </div>
 
-        {/* connector marks */}
+        {/* connector marks — a scrolling strip of the tools it connects to */}
         <div
-          className={revealClass(
-            shown,
-            "mt-10 flex flex-wrap items-center justify-center gap-3",
-          )}
+          className={revealClass(shown, "mt-12")}
           style={{ transitionDelay: shown ? "200ms" : undefined }}
         >
-          {CONNECTORS.map((c) => (
-            <span
-              key={c.id}
-              title={c.hint}
-              className="flex items-center gap-2 rounded-full border border-line bg-panel px-3.5 py-2"
-            >
-              <c.icon className="h-4 w-4" style={{ color: c.color }} />
-              <span className="text-[13px] text-ink-soft">{c.name}</span>
-            </span>
-          ))}
+          <p className="mb-4 text-center font-mono text-[10.5px] tracking-[0.24em] text-muted uppercase">
+            Connects with the tools your firm already runs on
+          </p>
+          <Marquee durationSec={38} reverse>
+            {CONNECTORS.map((c) => (
+              <span
+                key={c.id}
+                title={c.hint}
+                className="flex items-center gap-2 whitespace-nowrap rounded-full border border-line bg-panel px-4 py-2.5"
+              >
+                <c.icon className="h-4 w-4 shrink-0" style={{ color: c.color }} />
+                <span className="text-[13.5px] text-ink-soft">{c.name}</span>
+              </span>
+            ))}
+          </Marquee>
         </div>
       </div>
     </section>
