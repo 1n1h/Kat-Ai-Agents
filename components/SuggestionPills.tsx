@@ -30,7 +30,7 @@ const ACTIONS: ActionPill[] = [
     icon: ListOrdered,
     agent: "litigation-analysis",
     prompt:
-      "Build a timeline from the documents in this matter: key events, actors, and contradictions, every entry cited to its source.",
+      "Build a timeline from the documents in this case: key events, actors, and contradictions, every entry cited to its source.",
   },
   {
     label: "Draft",

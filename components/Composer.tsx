@@ -102,7 +102,7 @@ export default function Composer({
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-accent-wash/80">
           <p className="flex items-center gap-2 font-mono text-[12px] tracking-wide text-accent">
             <UploadCloud className="h-4 w-4" />
-            Drop documents into this matter
+            Drop documents into this case
           </p>
         </div>
       )}

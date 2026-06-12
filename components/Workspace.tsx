@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Briefcase, Cable, FolderOpen, LogOut, Plus } from "lucide-react";
 import { agentById, type AgentId } from "@/lib/agent-meta";
 import {
   loadState,
@@ -30,6 +31,9 @@ function greeting(): string {
   return "Good evening, Counsel.";
 }
 
+const navRow =
+  "flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-[15px] text-ink-soft transition-colors hover:bg-panel-deep hover:text-ink";
+
 export default function Workspace() {
   const [ready, setReady] = useState(false);
   const [matters, setMatters] = useState<Matter[]>([]);
@@ -40,6 +44,8 @@ export default function Workspace() {
   const [files, setFiles] = useState<MatterFile[]>([]);
   const [draft, setDraft] = useState("");
   const [connectorsOpen, setConnectorsOpen] = useState(false);
+  const [casesOpen, setCasesOpen] = useState(true);
+  const [filesOpen, setFilesOpen] = useState(true);
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -64,7 +70,7 @@ export default function Workspace() {
     if (ready) saveState({ matters, threads });
   }, [ready, matters, threads]);
 
-  /* ── matter files ── */
+  /* ── case files ── */
   useEffect(() => {
     if (!matterId) return;
     fetch(`/api/files?matterId=${encodeURIComponent(matterId)}`)
@@ -84,13 +90,14 @@ export default function Workspace() {
   const activeMatter = matters.find((m) => m.id === matterId) ?? null;
   const isEmpty = !activeThread?.messages.length && !streaming;
 
-  function addMatter() {
-    const name = window.prompt("Matter name (e.g. Smith v. Allied, M&A — Birch)");
+  function addCase() {
+    const name = window.prompt("Case name (e.g. Smith v. Allied, M&A — Birch)");
     if (!name?.trim()) return;
     const m: Matter = { id: uid(), name: name.trim(), createdAt: Date.now() };
     setMatters((prev) => [...prev, m]);
     setMatterId(m.id);
     setThreadId(null);
+    setCasesOpen(true);
   }
 
   function updateThread(id: string, fn: (t: Thread) => Thread) {
@@ -204,125 +211,171 @@ export default function Workspace() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-paper text-ink">
-      {/* ── sidebar ───────────────────────────────────────────── */}
+      {/* ── sidebar (Claude-style) ────────────────────────────── */}
       <aside className="flex w-72 shrink-0 flex-col border-r border-line bg-panel">
-        <div className="rise rise-1 border-b border-line px-5 py-5">
-          <h1 className="font-serif text-2xl">CounselOS</h1>
-          <p className="mt-1 font-mono text-[11px] tracking-[0.22em] text-accent">
-            PRIVILEGED &amp; CONFIDENTIAL
-          </p>
+        <div className="rise rise-1 px-5 pt-5 pb-3">
+          <h1 className="font-serif text-2xl tracking-tight">CounselOS</h1>
         </div>
 
-        {/* matters */}
-        <div className="rise rise-2 border-b border-line px-5 py-4">
-          <div className="flex items-center justify-between">
-            <p className="font-sans text-[11px] font-semibold tracking-[0.2em] text-muted uppercase">
-              Matters
-            </p>
-            <button
-              onClick={addMatter}
-              className="font-mono text-sm text-muted hover:text-accent"
-              title="New matter"
-            >
-              +
+        <div className="flex-1 overflow-y-auto pb-4">
+          {/* primary nav */}
+          <nav className="rise rise-2 space-y-0.5 px-3 pt-2">
+            <button onClick={() => setThreadId(null)} className={navRow}>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-panel-deep text-ink-soft">
+                <Plus className="h-4 w-4" />
+              </span>
+              <span className="font-medium text-ink">New thread</span>
             </button>
-          </div>
-          <ul className="mt-2 space-y-0.5">
-            {matters.map((m) => (
-              <li key={m.id}>
-                <button
-                  onClick={() => {
-                    setMatterId(m.id);
-                    setThreadId(null);
-                  }}
-                  className={`w-full truncate px-2 py-1.5 text-left text-[14px] transition-colors ${
-                    m.id === matterId
-                      ? "border-l-2 border-accent bg-paper font-medium text-ink"
-                      : "border-l-2 border-transparent text-muted hover:text-ink"
-                  }`}
-                >
-                  {m.name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
 
-        {/* threads */}
-        <div className="rise rise-3 flex-1 overflow-y-auto px-5 py-4">
-          <div className="flex items-center justify-between">
-            <p className="font-sans text-[11px] font-semibold tracking-[0.2em] text-muted uppercase">
-              Threads
-            </p>
             <button
-              onClick={() => setThreadId(null)}
-              className="font-mono text-sm text-muted hover:text-accent"
-              title="New thread"
+              onClick={() => setCasesOpen((o) => !o)}
+              className={navRow}
+              title="Show or hide cases"
             >
-              +
+              <span className="flex h-7 w-7 items-center justify-center">
+                <Briefcase className="h-[18px] w-[18px]" />
+              </span>
+              <span className="flex-1 text-left">Cases</span>
+              <span
+                role="button"
+                tabIndex={0}
+                className="rounded-md p-1 text-muted hover:text-accent"
+                title="New case"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addCase();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.stopPropagation();
+                    addCase();
+                  }
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </span>
             </button>
-          </div>
-          <ul className="mt-2 space-y-0.5">
-            {matterThreads.map((t) => (
-              <li key={t.id}>
-                <button
-                  onClick={() => {
-                    setThreadId(t.id);
-                    setAgentId(t.agentId);
-                  }}
-                  className={`w-full truncate px-2 py-1.5 text-left text-[14px] transition-colors ${
-                    t.id === threadId
-                      ? "border-l-2 border-accent bg-paper font-medium text-ink"
-                      : "border-l-2 border-transparent text-muted hover:text-ink"
-                  }`}
-                >
-                  {t.title || "Untitled"}
-                </button>
-              </li>
-            ))}
-            {!matterThreads.length && (
-              <li className="px-2 py-1.5 text-[13px] text-faint italic">
-                No threads yet on this matter.
-              </li>
-            )}
-          </ul>
-
-          {/* matter files */}
-          {files.length > 0 && (
-            <div className="mt-6">
-              <p className="font-sans text-[11px] font-semibold tracking-[0.2em] text-muted uppercase">
-                Matter files
-              </p>
-              <ul className="mt-2 space-y-1">
-                {files.map((f) => (
-                  <li
-                    key={f.name}
-                    className="truncate font-mono text-[12px] text-ink-soft"
-                    title={f.name}
-                  >
-                    {f.name}
+            {casesOpen && (
+              <ul className="space-y-0.5 pb-1 pl-10">
+                {matters.map((m) => (
+                  <li key={m.id}>
+                    <button
+                      onClick={() => {
+                        setMatterId(m.id);
+                        setThreadId(null);
+                      }}
+                      className={`w-full truncate rounded-lg px-2 py-1.5 text-left text-[14px] transition-colors ${
+                        m.id === matterId
+                          ? "bg-panel-deep font-medium text-ink"
+                          : "text-muted hover:bg-panel-deep hover:text-ink"
+                      }`}
+                    >
+                      {m.name}
+                    </button>
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
+
+            {files.length > 0 && (
+              <>
+                <button
+                  onClick={() => setFilesOpen((o) => !o)}
+                  className={navRow}
+                  title="Files in this case's working directory"
+                >
+                  <span className="flex h-7 w-7 items-center justify-center">
+                    <FolderOpen className="h-[18px] w-[18px]" />
+                  </span>
+                  <span className="flex-1 text-left">Files</span>
+                  <span className="pr-1 font-mono text-[12px] text-faint">
+                    {files.length}
+                  </span>
+                </button>
+                {filesOpen && (
+                  <ul className="space-y-0.5 pb-1 pl-10">
+                    {files.map((f) => (
+                      <li
+                        key={f.name}
+                        className="truncate px-2 py-1 font-mono text-[12px] text-muted"
+                        title={f.name}
+                      >
+                        {f.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+
+            <button onClick={() => setConnectorsOpen(true)} className={navRow}>
+              <span className="flex h-7 w-7 items-center justify-center">
+                <Cable className="h-[18px] w-[18px]" />
+              </span>
+              Connectors
+            </button>
+          </nav>
+
+          {/* recents */}
+          <div className="rise rise-3 px-3 pt-5">
+            <p className="px-2 pb-1 text-[13px] font-medium text-muted">
+              Recents
+            </p>
+            <ul className="space-y-0.5">
+              {matterThreads.map((t) => (
+                <li key={t.id}>
+                  <button
+                    onClick={() => {
+                      setThreadId(t.id);
+                      setAgentId(t.agentId);
+                    }}
+                    className={`w-full truncate rounded-lg px-2 py-1.5 text-left text-[14px] transition-colors ${
+                      t.id === threadId
+                        ? "bg-panel-deep font-medium text-ink"
+                        : "text-ink-soft hover:bg-panel-deep hover:text-ink"
+                    }`}
+                  >
+                    {t.title || "Untitled"}
+                  </button>
+                </li>
+              ))}
+              {!matterThreads.length && (
+                <li className="px-2 py-1.5 text-[13px] text-faint italic">
+                  No threads yet in this case.
+                </li>
+              )}
+            </ul>
+          </div>
         </div>
 
-        <div className="rise rise-4 border-t border-line px-5 py-3">
-          {firebaseEnabled ? (
+        {/* footer: avatar profile */}
+        <div className="rise rise-4 flex items-center gap-3 border-t border-line px-4 py-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-wash font-serif text-lg text-accent">
+            C
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[14px] font-medium text-ink">
+              Counsel
+            </span>
+            <span
+              className="block truncate text-[12.5px] text-muted"
+              title={
+                firebaseEnabled
+                  ? "Signed in with Google"
+                  : "Auth activates once Firebase keys are configured — files stay on this machine"
+              }
+            >
+              {firebaseEnabled ? "Signed in" : "Local mode"}
+            </span>
+          </span>
+          {firebaseEnabled && (
             <button
               onClick={() => signOut()}
-              className="font-mono text-[11px] tracking-[0.18em] text-muted uppercase hover:text-accent"
+              title="Sign out"
+              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
             >
-              Sign out
+              <LogOut className="h-4 w-4" />
             </button>
-          ) : (
-            <p
-              className="font-mono text-[11px] tracking-[0.18em] text-muted uppercase"
-              title="Auth activates once Firebase keys are configured"
-            >
-              ● Local mode — files stay on this machine
-            </p>
           )}
         </div>
       </aside>

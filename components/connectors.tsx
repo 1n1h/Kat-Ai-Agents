@@ -31,11 +31,11 @@ export interface Connector {
 }
 
 export const CONNECTORS: Connector[] = [
-  { id: "gmail", name: "Gmail", icon: SiGmail, color: "#EA4335", hint: "Draft and review email in matter context" },
+  { id: "gmail", name: "Gmail", icon: SiGmail, color: "#EA4335", hint: "Draft and review email in case context" },
   { id: "gdrive", name: "Google Drive", icon: SiGoogledrive, color: "#4285F4", hint: "Pull case files straight from Drive" },
   { id: "gdocs", name: "Google Docs", icon: SiGoogledocs, color: "#4285F4", hint: "Open and edit firm documents" },
   { id: "calendar", name: "Google Calendar", icon: SiGooglecalendar, color: "#34A853", hint: "Deadlines, hearings, statute dates" },
-  { id: "slack", name: "Slack", icon: SiSlack, color: "#E01E5A", hint: "Bring team threads into a matter" },
+  { id: "slack", name: "Slack", icon: SiSlack, color: "#E01E5A", hint: "Bring team threads into a case" },
   { id: "netdocuments", name: "NetDocuments", icon: FaRegFolderOpen, color: "#D97757", hint: "Search the firm's document repository" },
   { id: "sharepoint", name: "SharePoint", icon: FaMicrosoft, color: "#0078D4", hint: "Access firm sites and libraries" },
 ];
