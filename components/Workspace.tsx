@@ -481,7 +481,9 @@ export default function Workspace() {
       {/* ── sidebar (Claude-style) ────────────────────────────── */}
       <aside className="flex w-64 shrink-0 flex-col border-r border-line bg-panel font-sans">
         <div className="rise rise-1 px-5 pt-5 pb-3">
-          <h1 className="font-serif text-2xl tracking-tight">CounselOS</h1>
+          <h1 className="font-serif text-2xl tracking-tight">
+            Counsel<span className="text-accent">OS</span>
+          </h1>
         </div>
 
         <div className="flex-1 overflow-y-auto pb-4">

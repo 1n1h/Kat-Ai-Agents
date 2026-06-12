@@ -86,7 +86,9 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
         <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-accent-wash shadow-lg">
           <span className="font-serif text-2xl text-accent">✳</span>
         </div>
-        <h1 className="font-serif text-3xl text-ink">CounselOS</h1>
+        <h1 className="font-serif text-3xl text-ink">
+          Counsel<span className="text-accent">OS</span>
+        </h1>
         <p className="mt-2 mb-6 font-mono text-[10.5px] tracking-[0.25em] text-accent">
           PRIVILEGED &amp; CONFIDENTIAL
         </p>
