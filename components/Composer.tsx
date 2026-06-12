@@ -1,22 +1,61 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUp, Cable, Plus, UploadCloud, X } from "lucide-react";
+import type { AgentId } from "@/lib/agent-meta";
+import AgentSelect from "./AgentSelect";
 
 export default function Composer({
+  value,
+  onChange,
+  agentId,
+  onAgentChange,
   disabled,
   matterId,
   onSend,
+  onOpenConnectors,
+  autoFocus,
 }: {
+  value: string;
+  onChange: (v: string) => void;
+  agentId: AgentId;
+  onAgentChange: (id: AgentId) => void;
   disabled: boolean;
   matterId: string;
   onSend: (text: string, attached: string[]) => void;
+  onOpenConnectors: () => void;
+  autoFocus?: boolean;
 }) {
-  const [text, setText] = useState("");
   const [attached, setAttached] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const area = useRef<HTMLTextAreaElement>(null);
+  const plusRef = useRef<HTMLDivElement>(null);
+
+  /* close the + menu on outside click */
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (plusRef.current && !plusRef.current.contains(e.target as Node)) {
+        setPlusOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  /* keep height in sync with controlled value (incl. pill prefills) */
+  useEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 220)}px`;
+    if (value && autoFocus) {
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    }
+  }, [value, autoFocus]);
 
   async function upload(files: FileList | File[]) {
     const list = Array.from(files);
@@ -35,106 +74,148 @@ export default function Composer({
   }
 
   function send() {
-    const t = text.trim();
-    if (!t || disabled) return;
+    const t = value.trim();
+    if (!t || disabled || uploading) return;
     onSend(t, attached);
-    setText("");
     setAttached([]);
-    if (area.current) area.current.style.height = "auto";
   }
 
-  return (
-    <div className="border-t border-line bg-paper">
-      <div
-        className={`mx-auto max-w-3xl px-6 py-4 ${dragOver ? "bg-accent-wash" : ""}`}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          void upload(e.dataTransfer.files);
-        }}
-      >
-        {(attached.length > 0 || uploading) && (
-          <div className="mb-2 flex flex-wrap gap-2">
-            {attached.map((name) => (
-              <span
-                key={name}
-                className="border border-line-strong bg-panel px-2 py-0.5 font-mono text-[11px] text-ink-soft"
-              >
-                {name}
-                <button
-                  className="ml-2 text-faint hover:text-accent"
-                  onClick={() =>
-                    setAttached((p) => p.filter((n) => n !== name))
-                  }
-                  aria-label={`Remove ${name}`}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-            {uploading && (
-              <span className="caret font-mono text-[11px] text-muted">
-                uploading
-              </span>
-            )}
-          </div>
-        )}
+  const canSend = Boolean(value.trim()) && !disabled && !uploading;
 
-        <div className="flex items-end gap-3 border border-line-strong bg-white/60 px-4 py-3 focus-within:border-accent">
+  return (
+    <div
+      className={`relative rounded-2xl border bg-input shadow-lg transition-colors ${
+        dragOver ? "border-accent" : "border-line-strong"
+      }`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        void upload(e.dataTransfer.files);
+      }}
+    >
+      {dragOver && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-accent-wash/80">
+          <p className="flex items-center gap-2 font-mono text-[12px] tracking-wide text-accent">
+            <UploadCloud className="h-4 w-4" />
+            Drop documents into this matter
+          </p>
+        </div>
+      )}
+
+      {(attached.length > 0 || uploading) && (
+        <div className="flex flex-wrap gap-2 border-b border-line px-4 pt-3 pb-2.5">
+          {attached.map((name) => (
+            <span
+              key={name}
+              className="flex items-center gap-1.5 rounded-lg border border-line bg-panel px-2 py-1 font-mono text-[11px] text-ink-soft"
+            >
+              {name}
+              <button
+                className="text-faint hover:text-accent"
+                onClick={() => setAttached((p) => p.filter((n) => n !== name))}
+                aria-label={`Remove ${name}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+          {uploading && (
+            <span className="caret font-mono text-[11px] text-muted">
+              uploading
+            </span>
+          )}
+        </div>
+      )}
+
+      <textarea
+        ref={area}
+        value={value}
+        disabled={disabled}
+        rows={1}
+        placeholder="State your question for the record…"
+        className="block max-h-56 w-full resize-none bg-transparent px-4 pt-4 pb-2 text-[0.95rem] leading-relaxed text-ink outline-none placeholder:text-faint"
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            send();
+          }
+        }}
+      />
+
+      <div className="flex items-center justify-between px-2.5 pb-2.5">
+        {/* + menu: upload / connectors */}
+        <div className="relative" ref={plusRef}>
           <button
-            onClick={() => fileInput.current?.click()}
+            onClick={() => setPlusOpen((o) => !o)}
             disabled={disabled}
-            title="Attach documents to this matter"
-            className="pb-0.5 font-mono text-sm text-muted transition-colors hover:text-accent disabled:opacity-40"
+            title="Add files or connectors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink disabled:opacity-40"
           >
-            +
+            <Plus
+              className={`h-4.5 w-4.5 transition-transform ${plusOpen ? "rotate-45" : ""}`}
+            />
           </button>
-          <input
-            ref={fileInput}
-            type="file"
-            multiple
-            hidden
-            onChange={(e) => {
-              if (e.target.files) void upload(e.target.files);
-              e.target.value = "";
-            }}
-          />
-          <textarea
-            ref={area}
-            value={text}
+          {plusOpen && (
+            <div className="pop absolute bottom-full left-0 z-30 mb-2 w-60 rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl">
+              <button
+                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-[13px] text-ink transition-colors hover:bg-panel-deep"
+                onClick={() => {
+                  setPlusOpen(false);
+                  fileInput.current?.click();
+                }}
+              >
+                <UploadCloud className="h-4 w-4 text-muted" />
+                Upload from computer
+              </button>
+              <button
+                className="flex w-full items-center gap-2.5 rounded-lg p-2.5 text-left text-[13px] text-ink transition-colors hover:bg-panel-deep"
+                onClick={() => {
+                  setPlusOpen(false);
+                  onOpenConnectors();
+                }}
+              >
+                <Cable className="h-4 w-4 text-muted" />
+                Connectors…
+              </button>
+            </div>
+          )}
+        </div>
+        <input
+          ref={fileInput}
+          type="file"
+          multiple
+          hidden
+          onChange={(e) => {
+            if (e.target.files) void upload(e.target.files);
+            e.target.value = "";
+          }}
+        />
+
+        <div className="flex items-center gap-1.5">
+          <AgentSelect
+            value={agentId}
+            onChange={onAgentChange}
             disabled={disabled}
-            rows={1}
-            placeholder="State your question for the record, or drop documents here…"
-            className="max-h-48 flex-1 resize-none bg-transparent text-[0.95rem] leading-relaxed text-ink outline-none placeholder:text-faint"
-            onChange={(e) => {
-              setText(e.target.value);
-              e.target.style.height = "auto";
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                send();
-              }
-            }}
           />
           <button
             onClick={send}
-            disabled={disabled || !text.trim()}
-            className="bg-ink px-4 py-1.5 font-sans text-[11px] font-semibold tracking-[0.18em] text-paper uppercase transition-colors hover:bg-accent disabled:opacity-30"
+            disabled={!canSend}
+            title="Send"
+            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+              canSend
+                ? "bg-accent text-paper hover:bg-accent-soft"
+                : "bg-panel-deep text-faint"
+            }`}
           >
-            Submit
+            <ArrowUp className="h-4.5 w-4.5" />
           </button>
         </div>
-        <p className="mt-2 text-center font-mono text-[10px] tracking-wider text-faint">
-          AI work product — review before filing or sending. Files stay in this
-          matter&apos;s working directory.
-        </p>
       </div>
     </div>
   );

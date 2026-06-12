@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AGENTS, agentById, type AgentId } from "@/lib/agent-meta";
+import { agentById, type AgentId } from "@/lib/agent-meta";
 import {
   loadState,
   saveState,
@@ -13,10 +13,21 @@ import {
 import { firebaseEnabled, signOut } from "@/lib/firebase";
 import Transcript from "./Transcript";
 import Composer from "./Composer";
+import ThemeToggle from "./ThemeToggle";
+import SuggestionPills from "./SuggestionPills";
+import { ConnectorsDialog } from "./connectors";
 
 interface MatterFile {
   name: string;
   size: number;
+}
+
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 5) return "Working late, Counsel.";
+  if (h < 12) return "Good morning, Counsel.";
+  if (h < 18) return "Good afternoon, Counsel.";
+  return "Good evening, Counsel.";
 }
 
 export default function Workspace() {
@@ -27,6 +38,8 @@ export default function Workspace() {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [agentId, setAgentId] = useState<AgentId>("auto");
   const [files, setFiles] = useState<MatterFile[]>([]);
+  const [draft, setDraft] = useState("");
+  const [connectorsOpen, setConnectorsOpen] = useState(false);
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -69,7 +82,7 @@ export default function Workspace() {
     .sort((a, b) => b.createdAt - a.createdAt);
   const activeThread = threads.find((t) => t.id === threadId) ?? null;
   const activeMatter = matters.find((m) => m.id === matterId) ?? null;
-  const activeAgent = agentById(agentId);
+  const isEmpty = !activeThread?.messages.length && !streaming;
 
   function addMatter() {
     const name = window.prompt("Matter name (e.g. Smith v. Allied, M&A — Birch)");
@@ -86,6 +99,7 @@ export default function Workspace() {
 
   async function handleSend(text: string, attached: string[]) {
     if (streaming || !matterId) return;
+    setDraft("");
 
     const content = attached.length
       ? `${text}\n\n[Documents added to this matter's working directory: ${attached.join(", ")}]`
@@ -173,6 +187,20 @@ export default function Workspace() {
   }
 
   if (!ready) return null;
+
+  const composer = (
+    <Composer
+      value={draft}
+      onChange={setDraft}
+      agentId={agentId}
+      onAgentChange={setAgentId}
+      disabled={streaming || !matterId}
+      matterId={matterId}
+      onSend={handleSend}
+      onOpenConnectors={() => setConnectorsOpen(true)}
+      autoFocus={isEmpty}
+    />
+  );
 
   return (
     <div className="flex h-screen overflow-hidden bg-paper text-ink">
@@ -301,53 +329,65 @@ export default function Workspace() {
 
       {/* ── main ──────────────────────────────────────────────── */}
       <main className="grain flex min-w-0 flex-1 flex-col">
-        {/* top bar: matter + agent switcher */}
-        <header className="rise rise-2 border-b border-line bg-paper/90 px-6 pt-4 backdrop-blur">
-          <div className="mx-auto max-w-3xl">
-            <p className="font-mono text-[10px] tracking-[0.22em] text-faint uppercase">
-              {activeMatter?.name ?? "—"}
-              {activeThread ? ` / ${activeThread.title}` : " / new thread"}
-            </p>
-            <nav className="mt-2 flex gap-6 overflow-x-auto">
-              {AGENTS.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => setAgentId(a.id)}
-                  disabled={streaming}
-                  className={`border-b-2 pb-2 font-sans text-[12px] font-semibold tracking-[0.14em] whitespace-nowrap uppercase transition-colors ${
-                    a.id === agentId
-                      ? "border-accent text-ink"
-                      : "border-transparent text-faint hover:text-muted"
-                  }`}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </nav>
-            <p className="border-t border-line py-1.5 font-mono text-[10px] text-muted">
-              {activeAgent.tagline}
-            </p>
-          </div>
+        <header className="rise rise-2 flex items-center justify-between border-b border-line px-6 py-3">
+          <p className="truncate font-mono text-[10px] tracking-[0.22em] text-faint uppercase">
+            {activeMatter?.name ?? "—"}
+            {activeThread ? ` / ${activeThread.title}` : " / new thread"}
+            <span className="text-line-strong"> · </span>
+            <span className="text-muted">{agentById(agentId).name}</span>
+          </p>
+          <ThemeToggle />
         </header>
 
-        <section className="flex-1 overflow-y-auto">
-          <Transcript
-            messages={activeThread?.messages ?? []}
-            live={live}
-            statuses={statuses}
-            streaming={streaming}
-            agentId={agentId}
-            onPickAgent={(id) => setAgentId(id)}
-            bottomRef={bottomRef}
-          />
-        </section>
-
-        <Composer
-          disabled={streaming || !matterId}
-          matterId={matterId}
-          onSend={handleSend}
-        />
+        {isEmpty ? (
+          /* ── new-thread hero: greeting, composer, pills ── */
+          <section className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-6 pb-16">
+            <div className="w-full max-w-2xl">
+              <h2 className="rise rise-2 mb-8 text-center font-serif text-4xl text-ink">
+                <span className="mr-3 text-accent">✳</span>
+                {greeting()}
+              </h2>
+              <div className="rise rise-3">{composer}</div>
+              <div className="rise rise-4 mt-4">
+                <SuggestionPills
+                  onAction={(agent, prompt) => {
+                    setAgentId(agent);
+                    setDraft(prompt);
+                  }}
+                  onConnector={() => setConnectorsOpen(true)}
+                />
+              </div>
+            </div>
+          </section>
+        ) : (
+          /* ── active thread: transcript + docked composer ── */
+          <>
+            <section className="flex-1 overflow-y-auto">
+              <Transcript
+                messages={activeThread?.messages ?? []}
+                live={live}
+                statuses={statuses}
+                streaming={streaming}
+                agentId={agentId}
+                bottomRef={bottomRef}
+              />
+            </section>
+            <div className="px-6 pb-4">
+              <div className="mx-auto max-w-3xl">
+                {composer}
+                <p className="mt-2 text-center font-mono text-[10px] tracking-wider text-faint">
+                  AI work product — review before filing or sending.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </main>
+
+      <ConnectorsDialog
+        open={connectorsOpen}
+        onClose={() => setConnectorsOpen(false)}
+      />
     </div>
   );
 }

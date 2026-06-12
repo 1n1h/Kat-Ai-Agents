@@ -1,7 +1,36 @@
 @import "tailwindcss";
 
+/*
+  Dark is the system default (warm Claude-style dark);
+  the `.light` class on <html> switches to the paper palette.
+*/
 @theme {
-  /* Anthropic-adjacent paper palette */
+  --color-paper: #262624;
+  --color-panel: #1f1e1c;
+  --color-panel-deep: #30302e;
+  --color-ink: #eceae2;
+  --color-ink-soft: #c2c0b6;
+  --color-muted: #9b968c;
+  --color-faint: #6e6a61;
+  --color-line: #393834;
+  --color-line-strong: #4a4843;
+  --color-accent: #d97757;
+  --color-accent-soft: #e08b6d;
+  --color-accent-wash: #3b2d25;
+  --color-input: #30302e;
+  --color-ok: #7a9a6f;
+
+  --font-serif: var(--font-source-serif), Georgia, serif;
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+:root {
+  --grain-dot: rgba(255, 255, 255, 0.02);
+  color-scheme: dark;
+}
+
+.light {
   --color-paper: #faf9f5;
   --color-panel: #f0eee6;
   --color-panel-deep: #e9e6da;
@@ -14,11 +43,10 @@
   --color-accent: #c6593c;
   --color-accent-soft: #d97757;
   --color-accent-wash: #f6e8e2;
+  --color-input: rgba(255, 255, 255, 0.6);
   --color-ok: #5a7a52;
-
-  --font-serif: var(--font-source-serif), Georgia, serif;
-  --font-sans: var(--font-archivo), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --grain-dot: rgba(31, 30, 29, 0.025);
+  color-scheme: light;
 }
 
 html,
@@ -28,14 +56,12 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* faint paper grain so large fields never read as flat white */
+/* faint paper grain so large fields never read as flat */
 .grain {
-  background-image: radial-gradient(
-      rgba(31, 30, 29, 0.025) 1px,
-      transparent 1px
-    );
+  background-image: radial-gradient(var(--grain-dot) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
@@ -63,6 +89,21 @@ body {
 .rise-3 { animation-delay: 0.23s; }
 .rise-4 { animation-delay: 0.32s; }
 .rise-5 { animation-delay: 0.41s; }
+
+/* dropdowns / dialogs */
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.pop {
+  animation: pop 0.16s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
 
 /* ── status caret while an agent works ──────────────────────── */
 @keyframes caret {
@@ -113,13 +154,13 @@ body {
 .prose-legal code {
   font-family: var(--font-mono);
   font-size: 0.82em;
-  background: var(--color-panel);
+  background: var(--color-panel-deep);
   border: 1px solid var(--color-line);
   border-radius: 3px;
   padding: 0.08em 0.35em;
 }
 .prose-legal pre {
-  background: var(--color-panel);
+  background: var(--color-panel-deep);
   border: 1px solid var(--color-line);
   border-radius: 6px;
   padding: 0.9em 1em;
@@ -147,7 +188,7 @@ body {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  background: var(--color-panel);
+  background: var(--color-panel-deep);
 }
 .prose-legal hr {
   border: none;

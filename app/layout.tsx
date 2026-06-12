@@ -31,10 +31,17 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${sourceSerif.variable} ${archivo.variable} ${plexMono.variable} antialiased`}
       >
+        {/* dark is the default; apply .light before paint if the user chose it */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('counselos.theme')==='light')document.documentElement.classList.add('light')}catch(e){}",
+          }}
+        />
         {children}
       </body>
     </html>
