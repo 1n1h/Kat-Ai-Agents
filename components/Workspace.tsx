@@ -570,17 +570,17 @@ export default function Workspace() {
   if (!ready) return null;
 
   const menuItem =
-    "flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-[13px] text-ink transition-colors hover:bg-panel";
+    "flex w-full items-center gap-2 rounded-md px-2 py-[5px] text-left text-[13px] leading-5 text-ink transition-colors hover:bg-panel";
 
   /* fixed-position panel anchored to the trigger, clamped to the viewport */
   const menuStyle = menuPos
     ? {
-        left: Math.max(8, Math.min(menuPos.x - 160, window.innerWidth - 168)),
-        top: Math.min(menuPos.y + 4, window.innerHeight - 230),
+        left: Math.max(8, Math.min(menuPos.x - 152, window.innerWidth - 160)),
+        top: Math.min(menuPos.y + 4, window.innerHeight - 210),
       }
     : undefined;
   const menuPanel =
-    "pop fixed z-[80] w-40 rounded-lg border border-line-strong bg-panel-deep p-1.5 shadow-2xl";
+    "pop fixed z-[80] w-[9.5rem] rounded-lg border border-line-strong bg-panel-deep p-1 shadow-xl";
 
   const renderThreadRow = (t: Thread) => (
     <li key={t.id} className="group relative">
@@ -716,7 +716,7 @@ export default function Workspace() {
                 onClick={() => deleteThread(openThread.id)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                Delete permanently?
+                Confirm delete?
               </button>
             )}
           </div>,
@@ -761,7 +761,7 @@ export default function Workspace() {
                 onClick={() => deleteCase(openCase.id)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                Delete case &amp; threads?
+                Confirm delete?
               </button>
             )}
           </div>,
