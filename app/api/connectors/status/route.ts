@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     dropbox: Boolean(req.cookies.get("dbx_refresh")?.value),
     outlook: Boolean(req.cookies.get("ms_refresh")?.value),
+    gmail: Boolean(req.cookies.get("g_refresh")?.value),
   });
 }
 
@@ -16,5 +17,6 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ ok: true });
   if (id === "dropbox") res.cookies.delete("dbx_refresh");
   if (id === "outlook") res.cookies.delete("ms_refresh");
+  if (id === "gmail") res.cookies.delete("g_refresh");
   return res;
 }
