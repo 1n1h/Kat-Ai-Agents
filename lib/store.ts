@@ -27,6 +27,7 @@ export interface Matter {
   id: string;
   name: string;
   createdAt: number;
+  starred?: boolean;
 }
 
 export interface WorkspaceState {

@@ -112,9 +112,10 @@ export default function Workspace() {
   const [filesOpen, setFilesOpen] = useState(true);
   const [newCaseOpen, setNewCaseOpen] = useState(false);
   const [newCaseName, setNewCaseName] = useState("");
-  const [confirmDeleteCase, setConfirmDeleteCase] = useState<string | null>(
-    null,
-  );
+  const [caseMenuFor, setCaseMenuFor] = useState<string | null>(null);
+  const [caseMenuMode, setCaseMenuMode] = useState<"main" | "confirm">("main");
+  const [renamingCaseId, setRenamingCaseId] = useState<string | null>(null);
+  const [renameCaseText, setRenameCaseText] = useState("");
   const [heroLeaving, setHeroLeaving] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [menuFor, setMenuFor] = useState<string | null>(null);
@@ -274,16 +275,19 @@ export default function Workspace() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [threads, live, statuses]);
 
-  /* close the thread menu on outside click */
+  /* close the thread/case menus on outside click */
   useEffect(() => {
-    if (!menuFor) return;
+    if (!menuFor && !caseMenuFor) return;
     function onDown(e: MouseEvent) {
       const el = e.target as HTMLElement;
-      if (!el.closest("[data-thread-menu]")) setMenuFor(null);
+      if (!el.closest("[data-thread-menu]")) {
+        setMenuFor(null);
+        setCaseMenuFor(null);
+      }
     }
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
-  }, [menuFor]);
+  }, [menuFor, caseMenuFor]);
 
   /* close the profile menu on outside click */
   useEffect(() => {
@@ -372,6 +376,37 @@ export default function Workspace() {
     setMenuFor(null);
   }
 
+  function updateMatter(id: string, fn: (m: Matter) => Matter) {
+    setMatters((prev) =>
+      prev.map((m) => {
+        if (m.id !== id) return m;
+        const next = fn(m);
+        persistMatter(next);
+        return next;
+      }),
+    );
+  }
+
+  function toggleCaseStar(m: Matter) {
+    updateMatter(m.id, (x) => ({ ...x, starred: !x.starred }));
+    setCaseMenuFor(null);
+  }
+
+  function startCaseRename(m: Matter) {
+    setRenameCaseText(m.name);
+    setRenamingCaseId(m.id);
+    setCaseMenuFor(null);
+  }
+
+  function commitCaseRename() {
+    if (!renamingCaseId) return;
+    const name = renameCaseText.trim();
+    if (name) {
+      updateMatter(renamingCaseId, (m) => ({ ...m, name: name.slice(0, 80) }));
+    }
+    setRenamingCaseId(null);
+  }
+
   function deleteCase(id: string) {
     const doomed = threads.filter((t) => t.matterId === id);
     setThreads((prev) => prev.filter((t) => t.matterId !== id));
@@ -396,7 +431,7 @@ export default function Workspace() {
       for (const t of doomed) void deleteThreadDoc(u, t.id);
     }
     setThreadId(null);
-    setConfirmDeleteCase(null);
+    setCaseMenuFor(null);
   }
 
   /** Sends a turn through the agents; returns the reply (voice mode reads it). */
@@ -752,44 +787,108 @@ export default function Workspace() {
             </button>
             {casesOpen && (
               <ul className="space-y-0.5 pb-1 pl-10">
-                {matters.map((m) => (
-                  <li key={m.id} className="group relative">
-                    <button
-                      onClick={() => {
-                        setMatterId(m.id);
-                        setThreadId(null);
-                        closeSidebarOnMobile();
-                      }}
-                      className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14px] transition-colors ${
-                        m.id === matterId
-                          ? "bg-panel-deep font-medium text-ink"
-                          : "text-muted hover:bg-panel-deep hover:text-ink"
-                      }`}
-                    >
-                      {m.name}
-                    </button>
-                    <button
-                      onClick={() =>
-                        confirmDeleteCase === m.id
-                          ? deleteCase(m.id)
-                          : setConfirmDeleteCase(m.id)
-                      }
-                      onBlur={() => setConfirmDeleteCase(null)}
-                      title={
-                        confirmDeleteCase === m.id
-                          ? "Click again to delete this case and its threads"
-                          : "Delete case"
-                      }
-                      className={`absolute top-1/2 right-1 -translate-y-1/2 rounded-md p-1 transition-opacity hover:bg-panel-deep ${
-                        confirmDeleteCase === m.id
-                          ? "text-accent opacity-100"
-                          : "text-muted opacity-0 group-hover:opacity-100 hover:text-accent"
-                      }`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </li>
-                ))}
+                {[...matters]
+                  .sort(
+                    (a, b) =>
+                      (b.starred ? 1 : 0) - (a.starred ? 1 : 0) ||
+                      a.createdAt - b.createdAt,
+                  )
+                  .map((m) =>
+                    renamingCaseId === m.id ? (
+                      <li key={m.id}>
+                        <input
+                          autoFocus
+                          value={renameCaseText}
+                          onChange={(e) => setRenameCaseText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") commitCaseRename();
+                            if (e.key === "Escape") setRenamingCaseId(null);
+                          }}
+                          onBlur={commitCaseRename}
+                          className="w-full rounded-lg border border-accent bg-input px-2 py-1.5 text-[14px] text-ink outline-none"
+                        />
+                      </li>
+                    ) : (
+                      <li key={m.id} className="group relative">
+                        <button
+                          onClick={() => {
+                            setMatterId(m.id);
+                            setThreadId(null);
+                            closeSidebarOnMobile();
+                          }}
+                          className={`w-full truncate rounded-lg px-2 py-1.5 pr-8 text-left text-[14px] transition-colors ${
+                            m.id === matterId
+                              ? "bg-panel-deep font-medium text-ink"
+                              : "text-muted hover:bg-panel-deep hover:text-ink"
+                          }`}
+                        >
+                          {m.starred && (
+                            <Star className="mr-1.5 inline h-3 w-3 fill-accent text-accent" />
+                          )}
+                          {m.name}
+                        </button>
+                        <button
+                          data-thread-menu
+                          onClick={() => {
+                            setCaseMenuFor(caseMenuFor === m.id ? null : m.id);
+                            setCaseMenuMode("main");
+                          }}
+                          aria-label="Case options"
+                          className={`absolute top-1/2 right-1 -translate-y-1/2 rounded-md p-1 text-muted transition-opacity hover:bg-panel-deep hover:text-ink ${
+                            caseMenuFor === m.id
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-100"
+                          }`}
+                        >
+                          <EllipsisVertical className="h-4 w-4" />
+                        </button>
+
+                        {caseMenuFor === m.id && (
+                          <div
+                            data-thread-menu
+                            className="pop absolute top-8 right-0 z-40 w-56 rounded-xl border border-line-strong bg-panel-deep p-1.5 shadow-2xl"
+                          >
+                            {caseMenuMode === "main" ? (
+                              <>
+                                <button
+                                  className={menuItem}
+                                  onClick={() => toggleCaseStar(m)}
+                                >
+                                  <Star
+                                    className={`h-4 w-4 ${m.starred ? "fill-accent text-accent" : "text-muted"}`}
+                                  />
+                                  {m.starred ? "Unstar" : "Star"}
+                                </button>
+                                <button
+                                  className={menuItem}
+                                  onClick={() => startCaseRename(m)}
+                                >
+                                  <Pencil className="h-4 w-4 text-muted" />
+                                  Rename
+                                </button>
+                                <hr className="my-1 border-line" />
+                                <button
+                                  className={`${menuItem} text-accent hover:text-accent`}
+                                  onClick={() => setCaseMenuMode("confirm")}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Delete
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                className={`${menuItem} text-accent hover:text-accent`}
+                                onClick={() => deleteCase(m.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete case &amp; its threads?
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </li>
+                    ),
+                  )}
               </ul>
             )}
 
