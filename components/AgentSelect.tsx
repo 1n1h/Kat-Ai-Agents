@@ -1,15 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 import { AGENTS, agentById, type AgentId } from "@/lib/agent-meta";
 
 /**
  * Claude-style model selector, repurposed for specialists. Lives inside the
- * composer's bottom row and opens upward. The panel is rendered with fixed
- * positioning and clamped to the viewport so it never clips off-screen — the
- * trigger sits mid-row on mobile, so a plain right-aligned panel would spill
- * past the left edge on narrow phones.
+ * composer's bottom row and opens upward.
+ *
+ * The panel is rendered through a portal to <body> and positioned with fixed
+ * coordinates clamped to the viewport, so it always stays fully on-screen.
+ * The portal matters: the composer sits inside a `.rise` wrapper whose lingering
+ * `transform` would otherwise become the containing block for a fixed child,
+ * throwing the panel off-screen.
  */
 export default function AgentSelect({
   value,
@@ -21,8 +31,8 @@ export default function AgentSelect({
   disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{
     left: number;
     bottom: number;
@@ -61,7 +71,10 @@ export default function AgentSelect({
 
   useEffect(() => {
     function onDown(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const t = e.target as Node;
+      // The panel is portaled out of this component's subtree, so check both
+      // the trigger and the panel before deciding the tap was "outside".
+      if (!btnRef.current?.contains(t) && !panelRef.current?.contains(t)) {
         setOpen(false);
       }
     }
@@ -70,7 +83,7 @@ export default function AgentSelect({
   }, []);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative">
       <button
         ref={btnRef}
         disabled={disabled}
@@ -83,45 +96,50 @@ export default function AgentSelect({
         />
       </button>
 
-      {open && pos && (
-        <div
-          className="pop fixed z-30 overflow-y-auto rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl"
-          style={{
-            left: pos.left,
-            bottom: pos.bottom,
-            width: pos.width,
-            maxHeight: pos.maxHeight,
-          }}
-        >
-          <p className="px-3 pt-2 pb-1 font-mono text-[11px] tracking-[0.2em] text-faint uppercase">
-            Specialists
-          </p>
-          {AGENTS.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => {
-                onChange(a.id);
-                setOpen(false);
-              }}
-              className={`flex w-full items-center justify-between gap-3 rounded-lg p-3 text-left transition-colors hover:bg-panel-deep ${
-                a.id === value ? "bg-panel-deep" : ""
-              }`}
-            >
-              <span>
-                <span className="block text-[15px] font-medium text-ink">
-                  {a.name}
+      {open &&
+        pos &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={panelRef}
+            className="pop fixed z-50 overflow-y-auto rounded-xl border border-line-strong bg-panel p-1.5 shadow-2xl"
+            style={{
+              left: pos.left,
+              bottom: pos.bottom,
+              width: pos.width,
+              maxHeight: pos.maxHeight,
+            }}
+          >
+            <p className="px-3 pt-2 pb-1 font-mono text-[11px] tracking-[0.2em] text-faint uppercase">
+              Specialists
+            </p>
+            {AGENTS.map((a) => (
+              <button
+                key={a.id}
+                onClick={() => {
+                  onChange(a.id);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between gap-3 rounded-lg p-3 text-left transition-colors hover:bg-panel-deep ${
+                  a.id === value ? "bg-panel-deep" : ""
+                }`}
+              >
+                <span>
+                  <span className="block text-[15px] font-medium text-ink">
+                    {a.name}
+                  </span>
+                  <span className="mt-0.5 block text-[13px] leading-snug text-muted">
+                    {a.tagline}
+                  </span>
                 </span>
-                <span className="mt-0.5 block text-[13px] leading-snug text-muted">
-                  {a.tagline}
-                </span>
-              </span>
-              {a.id === value && (
-                <Check className="h-4.5 w-4.5 shrink-0 text-accent" />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+                {a.id === value && (
+                  <Check className="h-4.5 w-4.5 shrink-0 text-accent" />
+                )}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
