@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { AgentId } from "@/lib/agent-meta";
 import { cloudUpload } from "@/lib/cloudFiles";
+import { primeAudioPlayback } from "@/lib/audioPlayback";
 import AgentSelect from "./AgentSelect";
 
 export default function Composer({
@@ -308,7 +309,12 @@ export default function Composer({
             )}
           </button>
           <button
-            onClick={onOpenVoice}
+            onClick={() => {
+              // Unlock audio output on this tap so the first spoken reply in
+              // voice mode isn't blocked by the browser's autoplay policy.
+              primeAudioPlayback();
+              onOpenVoice();
+            }}
             disabled={disabled}
             title="Voice conversation"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink disabled:opacity-40"
