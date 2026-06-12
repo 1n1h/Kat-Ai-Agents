@@ -44,6 +44,7 @@ export default function LandingPage() {
 
       <main>
         <Hero onRequestAccess={openWaitlist} onSignIn={openSignIn} />
+        <TrustBar />
 
         {/* the centerpiece */}
         <section className="px-6 py-20 sm:py-28">
