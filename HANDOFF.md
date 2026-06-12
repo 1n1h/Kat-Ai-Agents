@@ -135,6 +135,23 @@ Firm-pivot TODO:
    letterhead/caption templates; landing copy pass with Kat (testimonials
    are placeholders); rotate suggestion pool per Kat's practice areas.
 
+## Parked: vanity auth domain (Google popup text)
+
+Attempted 2026-06-12: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+kat-ai-agents.vercel.app with /__/auth proxy rewrites (rewrites are
+still in next.config.ts and verified serving the Firebase handler on
+both localhost and prod). Google kept rejecting with
+redirect_uri_mismatch even after Kat added the vercel handler URI to
+"Web client (auto created by Google Service)" — likely she edited the
+WRONG client (Firebase's is usually "auto created by Firebase
+Service") or propagation lag. REVERTED authDomain to
+ai-paralegal-b0b9d.firebaseapp.com (env, both local and Vercel) so
+sign-in works. To retry: Firebase console → Authentication →
+Sign-in method → Google → Web SDK configuration → copy the exact Web
+client ID → in GCP Clients open THAT client → add redirect URI
+https://kat-ai-agents.vercel.app/__/auth/handler → wait 10 min →
+flip the env var back on both environments.
+
 ## Gotchas for the next agent
 
 - `npm run build` while `npm run dev` is running breaks the dev server
