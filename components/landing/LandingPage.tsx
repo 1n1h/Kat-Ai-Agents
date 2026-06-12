@@ -3,47 +3,36 @@
 import { useState } from "react";
 import AuthDialog from "@/components/AuthDialog";
 import LandingHeader from "./LandingHeader";
-import TrustBar from "./TrustBar";
 import Hero from "./Hero";
 import OrchestrationShowcase from "./OrchestrationShowcase";
 import AgentCards from "./AgentCards";
 import Capabilities from "./Capabilities";
-import TrustSection from "./TrustSection";
-import Testimonials from "./Testimonials";
+import TourSection from "./TourSection";
+import GetStarted from "./GetStarted";
 import CTASection from "./CTASection";
 import Footer from "./Footer";
-import WaitlistDialog from "./WaitlistDialog";
 import { useReveal, revealClass } from "./useReveal";
 
 /**
- * Public marketing landing for logged-out visitors. Owns the sign-in and
- * request-access modals; a successful sign-in is picked up by the auth
- * listener in AuthGate, which swaps this out for the workspace.
+ * Firm-internal welcome + onboarding page for signed-out visitors. Owns the
+ * sign-in modal; a successful sign-in is picked up by the auth listener in
+ * AuthGate, which swaps this out for the workspace.
  */
 export default function LandingPage() {
   const [authOpen, setAuthOpen] = useState(false);
-  const [waitlistOpen, setWaitlistOpen] = useState(false);
   const diagram = useReveal<HTMLDivElement>();
 
-  const openSignIn = () => {
-    setWaitlistOpen(false);
-    setAuthOpen(true);
-  };
-  const openWaitlist = () => {
-    setAuthOpen(false);
-    setWaitlistOpen(true);
-  };
+  const openSignIn = () => setAuthOpen(true);
 
   return (
     <div
       id="landing-scroll"
       className="h-dvh overflow-y-auto overflow-x-hidden bg-paper text-ink"
     >
-      <LandingHeader onSignIn={openSignIn} onRequestAccess={openWaitlist} />
+      <LandingHeader onSignIn={openSignIn} />
 
       <main>
-        <Hero onRequestAccess={openWaitlist} onSignIn={openSignIn} />
-        <TrustBar />
+        <Hero onSignIn={openSignIn} />
 
         {/* the centerpiece */}
         <section className="px-6 py-20 sm:py-28">
@@ -72,15 +61,14 @@ export default function LandingPage() {
 
         <AgentCards />
         <Capabilities />
-        <TrustSection />
-        <Testimonials />
-        <CTASection onRequestAccess={openWaitlist} onSignIn={openSignIn} />
+        <TourSection />
+        <GetStarted onSignIn={openSignIn} />
+        <CTASection onSignIn={openSignIn} />
       </main>
 
       <Footer />
 
       <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
-      <WaitlistDialog open={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
     </div>
   );
 }

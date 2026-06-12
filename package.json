@@ -6,11 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "film": "remotion render HeroFilm out/hero-film.mp4"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.160",
     "@anthropic-ai/sdk": "^0.104.1",
+    "@remotion/player": "^4.0.476",
     "docx": "^9.7.1",
     "driver.js": "^1.4.0",
     "exceljs": "^4.4.0",
@@ -25,9 +27,11 @@
     "react-icons": "^5.6.0",
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
+    "remotion": "^4.0.476",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.476",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.10.0",
     "@types/pdfkit": "^0.17.6",

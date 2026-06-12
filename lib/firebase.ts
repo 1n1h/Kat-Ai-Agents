@@ -15,13 +15,7 @@ import {
   type Auth,
 } from "firebase/auth";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
-import {
-  addDoc,
-  collection,
-  getFirestore,
-  serverTimestamp,
-  type Firestore,
-} from "firebase/firestore";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 export const firebaseEnabled = Boolean(
   process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -60,34 +54,6 @@ export function firebaseStorage(): FirebaseStorage | null {
 export function firebaseDb(): Firestore | null {
   const a = firebaseApp();
   return a ? getFirestore(a) : null;
-}
-
-export interface WaitlistEntry {
-  name: string;
-  email: string;
-  firm?: string;
-  note?: string;
-}
-
-/**
- * Record a request-access lead in the `waitlist` collection. Returns true when
- * stored. In local mode (no Firebase) it's a no-op that returns false — the
- * landing still shows a success state so testing isn't blocked. Requires a
- * Firestore rule allowing `create` on `waitlist`.
- */
-export async function submitWaitlist(entry: WaitlistEntry): Promise<boolean> {
-  const db = firebaseDb();
-  if (!db) return false;
-  await addDoc(collection(db, "waitlist"), {
-    name: entry.name.trim(),
-    email: entry.email.trim(),
-    firm: entry.firm?.trim() || null,
-    note: entry.note?.trim() || null,
-    createdAt: serverTimestamp(),
-    userAgent:
-      typeof navigator !== "undefined" ? navigator.userAgent : null,
-  });
-  return true;
 }
 
 export async function signInWithGoogle() {
