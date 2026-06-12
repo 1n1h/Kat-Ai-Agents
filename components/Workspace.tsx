@@ -5,12 +5,16 @@ import {
   Briefcase,
   Cable,
   ChevronLeft,
+  ChevronsUpDown,
+  CircleHelp,
   EllipsisVertical,
   FolderOpen,
   LogOut,
   Pencil,
   Plus,
+  Settings,
   Star,
+  SunMoon,
   Trash2,
 } from "lucide-react";
 import { agentById, type AgentId } from "@/lib/agent-meta";
@@ -29,7 +33,9 @@ import Composer from "./Composer";
 import ThemeToggle from "./ThemeToggle";
 import SuggestionPills from "./SuggestionPills";
 import VoiceMode from "./VoiceMode";
+import SettingsDialog from "./SettingsDialog";
 import { ConnectorsDialog } from "./connectors";
+import { getSettings, isLightTheme, setTheme } from "@/lib/settings";
 
 interface MatterFile {
   name: string;
@@ -92,6 +98,8 @@ export default function Workspace() {
   );
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameText, setRenameText] = useState("");
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -149,6 +157,17 @@ export default function Workspace() {
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
   }, [menuFor]);
+
+  /* close the profile menu on outside click */
+  useEffect(() => {
+    if (!profileOpen) return;
+    function onDown(e: MouseEvent) {
+      const el = e.target as HTMLElement;
+      if (!el.closest("[data-profile-menu]")) setProfileOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [profileOpen]);
 
   const matterThreads = threads
     .filter((t) => t.matterId === matterId)
@@ -590,45 +609,94 @@ export default function Workspace() {
           </div>
         </div>
 
-        {/* footer: avatar profile */}
-        <div className="rise rise-4 flex items-center gap-3 border-t border-line px-4 py-3">
-          {user?.photoURL ? (
-            // Google profile photo; no-referrer avoids Google's hotlink 403
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.photoURL}
-              alt={fullName}
-              referrerPolicy="no-referrer"
-              className="h-9 w-9 shrink-0 rounded-full border border-line object-cover"
-            />
-          ) : (
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-wash font-serif text-lg text-accent">
-              {fullName.charAt(0).toUpperCase()}
+        {/* footer: profile menu */}
+        <div className="rise rise-4 relative border-t border-line" data-profile-menu>
+          <button
+            onClick={() => setProfileOpen((o) => !o)}
+            className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-panel-deep"
+          >
+            {user?.photoURL ? (
+              // Google profile photo; no-referrer avoids Google's hotlink 403
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.photoURL}
+                alt={fullName}
+                referrerPolicy="no-referrer"
+                className="h-9 w-9 shrink-0 rounded-full border border-line object-cover"
+              />
+            ) : (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-wash font-serif text-lg text-accent">
+                {fullName.charAt(0).toUpperCase()}
+              </span>
+            )}
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[14px] font-medium text-ink">
+                {fullName}
+              </span>
+              <span className="block truncate text-[12.5px] text-muted">
+                {firebaseEnabled ? "Signed in" : "Local mode"}
+              </span>
             </span>
-          )}
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[14px] font-medium text-ink">
-              {fullName}
-            </span>
-            <span
-              className="block truncate text-[12.5px] text-muted"
-              title={
-                firebaseEnabled
-                  ? (user?.email ?? "Signed in")
-                  : "Auth activates once Firebase keys are configured — files stay on this machine"
-              }
-            >
-              {firebaseEnabled ? "Signed in" : "Local mode"}
-            </span>
-          </span>
-          {firebaseEnabled && (
-            <button
-              onClick={() => signOut()}
-              title="Sign out"
-              className="rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted" />
+          </button>
+
+          {profileOpen && (
+            <div className="pop absolute right-3 bottom-full left-3 z-40 mb-2 rounded-xl border border-line-strong bg-panel-deep p-1.5 shadow-2xl">
+              <p className="truncate px-2.5 pt-2 pb-1.5 text-[12.5px] text-muted">
+                {user?.email ?? "Local mode — this machine"}
+              </p>
+              <button
+                className={menuItem}
+                onClick={() => {
+                  setProfileOpen(false);
+                  setSettingsOpen(true);
+                }}
+              >
+                <Settings className="h-4 w-4 text-muted" />
+                Settings
+              </button>
+              <button
+                className={menuItem}
+                onClick={() => {
+                  setProfileOpen(false);
+                  setConnectorsOpen(true);
+                }}
+              >
+                <Cable className="h-4 w-4 text-muted" />
+                Connectors
+              </button>
+              <button
+                className={menuItem}
+                onClick={() => setTheme(!isLightTheme())}
+              >
+                <SunMoon className="h-4 w-4 text-muted" />
+                Toggle light / dark
+              </button>
+              <button
+                className={menuItem}
+                onClick={() =>
+                  window.open(
+                    "https://github.com/1n1h/Kat-Ai-Agents",
+                    "_blank",
+                    "noopener",
+                  )
+                }
+              >
+                <CircleHelp className="h-4 w-4 text-muted" />
+                Get help
+              </button>
+              <hr className="my-1 border-line" />
+              {firebaseEnabled ? (
+                <button className={menuItem} onClick={() => signOut()}>
+                  <LogOut className="h-4 w-4 text-muted" />
+                  Log out
+                </button>
+              ) : (
+                <p className="px-2.5 py-2 text-[12.5px] text-faint italic">
+                  Sign-in activates with Firebase keys.
+                </p>
+              )}
+            </div>
           )}
         </div>
       </aside>
@@ -741,8 +809,16 @@ export default function Workspace() {
       <VoiceMode
         open={voiceOpen}
         onClose={() => setVoiceOpen(false)}
-        ask={(text) => handleSend(text, [], { voice: true })}
+        ask={(text) =>
+          handleSend(text, [], { voice: getSettings().voiceConcise })
+        }
         agentName={agentById(agentId).name}
+      />
+
+      <SettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        userEmail={user?.email}
       />
     </div>
   );

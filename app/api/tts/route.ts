@@ -31,16 +31,31 @@ function speakable(md: string): string {
     .slice(0, 2400);
 }
 
+const VOICES = new Set([
+  "af_heart",
+  "af_bella",
+  "af_nicole",
+  "am_michael",
+  "am_fenrir",
+  "bf_emma",
+  "bm_george",
+]);
+
 export async function POST(req: NextRequest) {
-  const { text } = (await req.json()) as { text?: string };
+  const { text, voice } = (await req.json()) as {
+    text?: string;
+    voice?: string;
+  };
   const clean = speakable(text ?? "");
   if (!clean) {
     return Response.json({ error: "Nothing to read." }, { status: 400 });
   }
+  const chosen = voice && VOICES.has(voice) ? voice : "af_heart";
 
   try {
     const tts = await getTTS();
-    const audio = await tts.generate(clean, { voice: "af_heart" });
+    // allowlisted above; cast narrows to kokoro-js's voice union
+    const audio = await tts.generate(clean, { voice: chosen as "af_heart" });
     const wav = audio.toWav();
     return new Response(wav, {
       headers: {

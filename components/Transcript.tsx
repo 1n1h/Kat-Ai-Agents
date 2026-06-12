@@ -14,15 +14,21 @@ function Turn({
   msg,
   index,
   showActions,
+  noBorder,
 }: {
   msg: Msg;
   index: number;
   showActions?: boolean;
+  noBorder?: boolean;
 }) {
   const isUser = msg.role === "user";
   const label = isUser ? "You" : agentById(msg.agentId ?? "auto").name;
   return (
-    <div className="grid grid-cols-[3.5rem_1fr] gap-x-4 border-b border-line py-6">
+    <div
+      className={`grid grid-cols-[3.5rem_1fr] gap-x-4 py-6 ${
+        noBorder ? "" : "border-b border-line"
+      }`}
+    >
       <span className="pt-1 text-right font-mono text-[12px] text-faint select-none">
         {bates(index)}
       </span>
@@ -69,13 +75,21 @@ export default function Transcript({
   return (
     <div className="mx-auto max-w-3xl px-6 pb-10">
       {messages.map((m, i) => (
-        <Turn key={i} msg={m} index={i} showActions />
+        <Turn
+          key={i}
+          msg={m}
+          index={i}
+          showActions
+          // no hairline between the last turn and the in-progress response
+          noBorder={streaming && i === messages.length - 1}
+        />
       ))}
 
       {live && (
         <Turn
           msg={{ role: "assistant", content: live, agentId }}
           index={messages.length}
+          noBorder
         />
       )}
 

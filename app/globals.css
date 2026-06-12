@@ -30,6 +30,7 @@
 
 :root {
   --grain-dot: rgba(255, 255, 255, 0.02);
+  --color-code: #eb8e7a; /* salmon inline-code, per reference */
   color-scheme: dark;
 }
 
@@ -49,6 +50,7 @@
   --color-input: rgba(255, 255, 255, 0.6);
   --color-ok: #5a7a52;
   --grain-dot: rgba(31, 30, 29, 0.025);
+  --color-code: #b4502f;
   color-scheme: light;
 }
 
@@ -169,10 +171,14 @@ body {
 }
 
 /* ── transcript prose (assistant turns) ─────────────────────── */
+/* tuned to the reference: 17px serif, 1.62 leading, roomy paragraphs,
+   heavy bold runs, underlined same-color links, salmon code chips */
 .prose-legal {
   font-family: var(--font-serif);
   font-size: 1.0625rem;
-  line-height: 1.75;
+  font-weight: 400;
+  line-height: 1.62;
+  letter-spacing: 0.001em;
   color: var(--color-ink);
 }
 .prose-legal h1,
@@ -186,16 +192,16 @@ body {
   color: var(--color-ink-soft);
   margin: 1.6em 0 0.6em;
 }
-.prose-legal p { margin: 0.7em 0; }
+.prose-legal p { margin: 0.95em 0; }
 .prose-legal ul,
 .prose-legal ol {
-  margin: 0.7em 0;
+  margin: 0.95em 0;
   padding-left: 1.4em;
 }
 .prose-legal ul { list-style: disc; }
 .prose-legal ol { list-style: decimal; }
-.prose-legal li { margin: 0.3em 0; }
-.prose-legal strong { font-weight: 600; }
+.prose-legal li { margin: 0.35em 0; }
+.prose-legal strong { font-weight: 700; }
 .prose-legal blockquote {
   border-left: 2px solid var(--color-line-strong);
   padding-left: 1em;
@@ -204,11 +210,12 @@ body {
 }
 .prose-legal code {
   font-family: var(--font-mono);
-  font-size: 0.82em;
+  font-size: 0.78em;
+  color: var(--color-code);
   background: var(--color-panel-deep);
   border: 1px solid var(--color-line);
-  border-radius: 3px;
-  padding: 0.08em 0.35em;
+  border-radius: 6px;
+  padding: 0.16em 0.5em;
 }
 .prose-legal pre {
   background: var(--color-panel-deep);
@@ -247,9 +254,16 @@ body {
   margin: 1.4em 0;
 }
 .prose-legal a {
-  color: var(--color-accent);
+  color: var(--color-ink);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.prose-legal a:hover {
+  color: var(--color-accent);
+}
+.prose-legal pre code {
+  color: var(--color-ink);
 }
 
 /* thin scrollbars to keep the paper feel */

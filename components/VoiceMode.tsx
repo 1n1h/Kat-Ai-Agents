@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, X } from "lucide-react";
 import Spinner from "./Spinner";
+import { getSettings } from "@/lib/settings";
 
 /**
  * Hands-free conversation:
@@ -141,7 +142,7 @@ export default function VoiceMode({
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: reply }),
+        body: JSON.stringify({ text: reply, voice: getSettings().voice }),
       });
       if (!res.ok) throw new Error("tts failed");
       const url = URL.createObjectURL(await res.blob());

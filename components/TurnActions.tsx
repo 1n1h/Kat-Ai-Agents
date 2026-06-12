@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, Loader2, Square, Volume2 } from "lucide-react";
+import { getSettings } from "@/lib/settings";
 
 /** Only one turn speaks at a time. */
 let currentAudio: HTMLAudioElement | null = null;
@@ -51,7 +52,7 @@ export default function TurnActions({ text }: { text: string }) {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, voice: getSettings().voice }),
         signal: ac.signal,
       });
       if (!res.ok) throw new Error("TTS unavailable");

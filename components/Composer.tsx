@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, AudioLines, Cable, Plus, UploadCloud, X } from "lucide-react";
+import {
+  ArrowUp,
+  AudioLines,
+  Cable,
+  Loader2,
+  Mic,
+  Plus,
+  Square,
+  UploadCloud,
+  X,
+} from "lucide-react";
 import type { AgentId } from "@/lib/agent-meta";
 import AgentSelect from "./AgentSelect";
 
@@ -32,9 +42,15 @@ export default function Composer({
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
+  const [dictation, setDictation] = useState<
+    "idle" | "recording" | "transcribing"
+  >("idle");
   const fileInput = useRef<HTMLInputElement>(null);
   const area = useRef<HTMLTextAreaElement>(null);
   const plusRef = useRef<HTMLDivElement>(null);
+  const recRef = useRef<MediaRecorder | null>(null);
+  const recStreamRef = useRef<MediaStream | null>(null);
+  const recChunksRef = useRef<Blob[]>([]);
 
   /* close the + menu on outside click */
   useEffect(() => {
@@ -81,6 +97,61 @@ export default function Composer({
     onSend(t, attached);
     setAttached([]);
   }
+
+  /* dictation: record → Scribe transcribes → text lands in the input.
+     Nothing is sent to the agent until the user hits Submit. */
+  async function toggleDictation() {
+    if (dictation === "recording") {
+      recRef.current?.stop();
+      return;
+    }
+    if (dictation !== "idle") return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true },
+      });
+      recStreamRef.current = stream;
+      recChunksRef.current = [];
+      const rec = new MediaRecorder(stream);
+      recRef.current = rec;
+      rec.ondataavailable = (e) => {
+        if (e.data.size) recChunksRef.current.push(e.data);
+      };
+      rec.onstop = async () => {
+        recStreamRef.current?.getTracks().forEach((t) => t.stop());
+        recStreamRef.current = null;
+        setDictation("transcribing");
+        try {
+          const blob = new Blob(recChunksRef.current, { type: rec.mimeType });
+          const form = new FormData();
+          form.set(
+            "audio",
+            new File([blob], "dictation.webm", { type: blob.type }),
+          );
+          const res = await fetch("/api/stt", { method: "POST", body: form });
+          const data = (await res.json()) as { text?: string };
+          const text = (data.text ?? "").trim();
+          if (text) {
+            onChange(value ? `${value.trimEnd()} ${text}` : text);
+            area.current?.focus();
+          }
+        } finally {
+          setDictation("idle");
+        }
+      };
+      rec.start();
+      setDictation("recording");
+    } catch {
+      setDictation("idle");
+    }
+  }
+
+  /* release the mic if the composer unmounts mid-recording */
+  useEffect(() => {
+    return () => {
+      recStreamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
 
   const canSend = Boolean(value.trim()) && !disabled && !uploading;
 
@@ -205,6 +276,28 @@ export default function Composer({
             onChange={onAgentChange}
             disabled={disabled}
           />
+          <button
+            onClick={toggleDictation}
+            disabled={disabled}
+            title={
+              dictation === "recording"
+                ? "Stop and transcribe into the input"
+                : "Dictate — speech becomes text here, nothing is sent"
+            }
+            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-panel-deep disabled:opacity-40 ${
+              dictation === "recording"
+                ? "text-accent"
+                : "text-muted hover:text-ink"
+            }`}
+          >
+            {dictation === "recording" ? (
+              <Square className="h-3.5 w-3.5" />
+            ) : dictation === "transcribing" ? (
+              <Loader2 className="h-4.5 w-4.5 animate-spin text-accent" />
+            ) : (
+              <Mic className="h-4.5 w-4.5" />
+            )}
+          </button>
           <button
             onClick={onOpenVoice}
             disabled={disabled}
