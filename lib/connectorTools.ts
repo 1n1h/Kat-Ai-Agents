@@ -618,15 +618,15 @@ export const CONNECTOR_TOOLS: ToolSpec[] = [
     },
   },
 
-  /* ── Web search (Tavily; env-keyed, available to everyone) ── */
+  /* ── Web search backup (Tavily; env-keyed, available to everyone) ── */
   {
-    name: "web_search",
+    name: "tavily_search",
     connector: "tavily",
     description:
-      "Search the live web. Use whenever you are unsure of a fact, when " +
-      "information may have changed (law, court rules, deadlines, news, " +
-      "companies, people), or before stating anything time-sensitive. " +
-      "Returns titles, URLs, and content snippets — cite the URLs you rely on.",
+      "BACKUP web search via Tavily. Use when no primary web_search tool " +
+      "is available, or when the primary search fails or returns nothing " +
+      "useful. Returns titles, URLs, and content snippets — cite the URLs " +
+      "you rely on.",
     params: {
       query: { type: "string", description: "Search query", required: true },
       count: { type: "number", description: "Max results (default 6)" },
@@ -677,14 +677,16 @@ export function toolGuidance(tokens: ConnectorTokens): string {
   const tools = availableTools(tokens);
   if (!tools.length) return "";
   let g = `\n\n[CONNECTED TOOLS: ${tools.map((t) => t.name).join(", ")}. Use them whenever the user's request involves their email, calendar, cloud files, or facts you cannot verify from the conversation.`;
-  if (tools.some((t) => t.name === "web_search")) {
+  if (tools.some((t) => t.name === "tavily_search")) {
     g +=
       " You have live web search. Whenever you are unsure of something, " +
       "when information may be outdated, or before stating any " +
       "time-sensitive fact (law, court rules, deadlines, cases, people, " +
-      "companies, news), use web_search first. NEVER fabricate or guess " +
-      "at facts, citations, or current events: verify with web_search, " +
-      "or say plainly that you do not know.";
+      "companies, news), SEARCH FIRST: prefer the primary web search " +
+      "tool when one is available, and fall back to tavily_search if it " +
+      "is not or if it fails. NEVER fabricate or guess at facts, " +
+      "citations, or current events: verify by searching, or say " +
+      "plainly that you do not know.";
   }
   g += "]";
   return g;

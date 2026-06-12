@@ -156,6 +156,13 @@ async function cloudChat(
   const firmCtx = firmContext(userEmail);
   const connTools = anthropicToolDefs(tokens);
   const guidance = toolGuidance(tokens);
+  // primary web search: Anthropic-hosted (server-side execution);
+  // tavily_search in connTools is the backup
+  const hostedSearch = {
+    type: "web_search_20250305" as const,
+    name: "web_search" as const,
+    max_uses: 5,
+  };
   if (!process.env.ANTHROPIC_API_KEY) {
     return Response.json(
       { error: "ANTHROPIC_API_KEY is not configured." },
@@ -185,7 +192,7 @@ async function cloudChat(
               system:
                 spec.prompt + CLOUD_NOTE + identityNote(id) + firmCtx +
                 guidance + (voice ? VOICE_NOTE : ""),
-              ...(connTools.length ? { tools: connTools } : {}),
+              tools: [hostedSearch, ...connTools],
               messages: turns,
             });
             let firstDelta = true;
@@ -265,7 +272,7 @@ async function cloudChat(
             system:
               ORCH_CLOUD_PROMPT + firmCtx + guidance +
               (voice ? VOICE_NOTE : ""),
-            tools: [consultTool, ...connTools],
+            tools: [consultTool, hostedSearch, ...connTools],
             messages: turns,
           });
           turns.push({ role: "assistant", content: resp.content });
@@ -449,12 +456,6 @@ export async function POST(req: NextRequest) {
             model: isAuto
               ? ORCHESTRATOR_MODEL
               : MODEL_IDS[(spec!.model ?? "sonnet") as keyof typeof MODEL_IDS],
-            // with Tavily configured, all web searches go through our
-            // web_search tool (visible in the Tavily dashboard) — block the
-            // runtime's built-in search so usage is consistent local/cloud
-            ...(process.env.TAVILY_API_KEY
-              ? { disallowedTools: ["WebSearch"] }
-              : {}),
             ...(mcpToolNames.length
               ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 { mcpServers: mcpServers as any }
