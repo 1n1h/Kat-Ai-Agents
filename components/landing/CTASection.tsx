@@ -3,13 +3,7 @@
 import { ArrowRight } from "lucide-react";
 import { useReveal, revealClass } from "./useReveal";
 
-export default function CTASection({
-  onRequestAccess,
-  onSignIn,
-}: {
-  onRequestAccess: () => void;
-  onSignIn: () => void;
-}) {
+export default function CTASection({ onSignIn }: { onSignIn: () => void }) {
   const { ref, shown } = useReveal<HTMLDivElement>();
 
   return (
@@ -38,17 +32,11 @@ export default function CTASection({
         </p>
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <button
-            onClick={onRequestAccess}
+            onClick={onSignIn}
             className="group flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[15px] font-semibold text-paper shadow-lg transition-all hover:bg-accent-soft"
           >
-            Request access
+            Open the workspace
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </button>
-          <button
-            onClick={onSignIn}
-            className="rounded-full border border-line-strong bg-paper/40 px-7 py-3.5 text-[15px] font-medium text-ink transition-colors hover:bg-panel-deep"
-          >
-            I already have an account
           </button>
         </div>
       </div>

@@ -1,0 +1,26 @@
+{
+  "name": "Sheehe & Associates — AI Workspace",
+  "short_name": "Sheehe AI",
+  "description": "Your firm's AI legal team — research, drafting, and citation check, orchestrated and verified.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f1b26",
+  "theme_color": "#0f1b26",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

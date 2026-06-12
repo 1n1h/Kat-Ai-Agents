@@ -6,13 +6,7 @@ import { useEffect, useState } from "react";
  * Sticky landing header. The Sign-in button is always visible — during
  * testing it's the user's own door into the workspace.
  */
-export default function LandingHeader({
-  onSignIn,
-  onRequestAccess,
-}: {
-  onSignIn: () => void;
-  onRequestAccess: () => void;
-}) {
+export default function LandingHeader({ onSignIn }: { onSignIn: () => void }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -43,12 +37,6 @@ export default function LandingHeader({
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <button
-          onClick={onRequestAccess}
-          className="hidden rounded-full px-4 py-2 text-[14px] font-medium text-ink-soft transition-colors hover:text-ink sm:block"
-        >
-          Request access
-        </button>
         <button
           onClick={onSignIn}
           className="rounded-full bg-accent px-5 py-2 text-[14px] font-semibold text-paper shadow transition-colors hover:bg-accent-soft"
