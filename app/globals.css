@@ -510,6 +510,59 @@ body {
   }
 }
 
+/* flowing background line-paths — a dash travels along each normalized path
+   (pathLength=1), giving the drifting-lines effect. */
+@keyframes flow-path {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+.flow-path {
+  animation: flow-path linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-path {
+    animation: none;
+  }
+}
+
+/* rotating brass gradient rim — a glowing animated border (the bottom agent
+   card). @property registers the angle so it interpolates smoothly. */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes gradient-rotate {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+.glow-rim {
+  border: 3px solid transparent;
+  background-image:
+    linear-gradient(var(--color-panel), var(--color-panel)),
+    conic-gradient(
+      from var(--gradient-angle),
+      #584827 0%,
+      #c7a03c 25%,
+      #f9de90 50%,
+      #c7a03c 75%,
+      #584827 100%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  animation: gradient-rotate 5s linear infinite;
+  box-shadow:
+    0 24px 50px -20px rgba(0, 0, 0, 0.4),
+    0 0 30px -4px rgba(201, 160, 60, 0.55);
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-rim {
+    animation: none;
+  }
+}
+
 /* vertical marquee — identical stacked segments scroll up/down seamlessly
    (used by the testimonials wall) */
 @keyframes cosVMarquee {

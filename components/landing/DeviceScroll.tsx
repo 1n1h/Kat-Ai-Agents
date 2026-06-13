@@ -89,18 +89,19 @@ export default function DeviceScroll({
           {title}
         </div>
 
-        {/* device frame — thin, uniform brass bezel */}
+        {/* device frame — thin brass body rim, then a uniform black bezel,
+            then the screen (like an actual iPad) */}
         <div
           ref={frameRef}
-          className="relative z-10 mx-auto w-full max-w-5xl rounded-[40px] p-2.5 shadow-2xl"
+          className="relative z-10 mx-auto w-full max-w-5xl rounded-[44px] p-1.5 shadow-2xl"
           style={{
             transformStyle: "preserve-3d",
             transformOrigin: "center top",
             background: "var(--color-accent)",
           }}
         >
-          <div className="overflow-hidden rounded-[32px] ring-1 ring-black/25">
-            {children}
+          <div className="rounded-[38px] bg-black p-3.5">
+            <div className="overflow-hidden rounded-[24px]">{children}</div>
           </div>
         </div>
       </div>

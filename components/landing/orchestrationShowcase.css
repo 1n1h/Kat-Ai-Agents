@@ -24,7 +24,9 @@
   --serif: var(--font-serif);
 
   width: 100%;
-  max-width: 1060px;
+  /* fill the container (e.g. the iPad screen) edge-to-edge so the device's
+     bezel is the only border and reads uniform all the way around */
+  max-width: none;
   margin: 0 auto;
   font-family: var(--sans);
   color: var(--text);
@@ -35,8 +37,10 @@
 
 .cos-orch .frame {
   position: relative;
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  /* no inner border/radius — the device bezel is the only frame; the screen
+     wrapper clips the corners */
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
   background: var(--bg);
   /* 16:9 — matches the aspect-video used by every other card on the page, and

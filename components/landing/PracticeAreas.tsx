@@ -81,12 +81,10 @@ export default function PracticeAreas() {
             Areas of practice
           </p>
           <h2 className="mx-auto mt-4 max-w-3xl font-serif text-5xl leading-[1.05] text-ink sm:text-6xl">
-            Boutique civil litigation, built on it
+            AI Paralegals
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft sm:text-xl">
-            Sheehe &amp; Associates tries cases across Florida and the
-            Southeast — and the workspace is tuned to every one of these
-            practices.
+            Trained on most legal fields.
           </p>
         </div>
 

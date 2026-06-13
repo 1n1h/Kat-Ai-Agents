@@ -27,7 +27,7 @@ export default function VideoCard({
 }) {
   return (
     <div
-      className={`group/video relative overflow-hidden ${rounded} border border-line-strong bg-panel ${
+      className={`group/video relative overflow-hidden ${rounded} border-[3px] border-[#1e3a5f] bg-panel ${
         fill ? "relative h-full w-full" : ""
       } ${className}`}
       style={{

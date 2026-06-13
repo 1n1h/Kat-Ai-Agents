@@ -80,7 +80,7 @@ export default function CTASection({ onSignIn }: { onSignIn: () => void }) {
         }}
         className={revealClass(
           shown,
-          "grain relative z-10 mx-auto max-w-4xl overflow-hidden rounded-[2rem] border border-line-strong bg-panel/55 px-8 py-20 text-center shadow-2xl backdrop-blur-md sm:px-12",
+          "grain relative z-10 mx-auto max-w-4xl overflow-hidden rounded-[2rem] border-[3px] border-[#1e3a5f] bg-panel/55 px-8 py-20 text-center shadow-2xl backdrop-blur-md sm:px-12",
         )}
       >
         <div
