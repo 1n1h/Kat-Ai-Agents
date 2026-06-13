@@ -1,4 +1,6 @@
+import { File, Paths } from "expo-file-system";
 import { fetch as expoFetch } from "expo/fetch";
+import * as Sharing from "expo-sharing";
 import { API_BASE } from "./config";
 import type { AgentId } from "./agents";
 
@@ -64,6 +66,112 @@ export async function streamChat(
 /** Convert drafted Markdown to a downloadable file URL (PDF/Word/etc.). */
 export function convertDocUrl() {
   return `${API_BASE}/api/files/convert`;
+}
+
+/**
+ * Stream one Mock Trial turn (NDJSON). onDelta receives the accumulated text;
+ * onCaseLaw receives the grounding payload from the opening turn. Returns the
+ * full text when the turn completes.
+ */
+export async function streamMockTrial(
+  body: Record<string, unknown>,
+  onDelta: (text: string) => void,
+  onCaseLaw?: (text: string) => void,
+): Promise<string> {
+  let acc = "";
+  const res = await expoFetch(`${API_BASE}/api/mock-trial`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok || !res.body) {
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(j?.error || "The court is unavailable.");
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split("\n");
+    buf = lines.pop() ?? "";
+    for (const raw of lines) {
+      if (!raw.trim()) continue;
+      try {
+        const ev = JSON.parse(raw) as { t: string; text?: string };
+        if (ev.t === "delta" && ev.text) {
+          acc += ev.text;
+          onDelta(acc);
+        } else if (ev.t === "caselaw") {
+          onCaseLaw?.(ev.text ?? "");
+        } else if (ev.t === "error" && ev.text) {
+          acc += `${acc ? "\n\n" : ""}${ev.text}`;
+          onDelta(acc);
+        }
+      } catch {
+        /* partial line */
+      }
+    }
+  }
+  return acc.trim() || "(no response)";
+}
+
+export interface CaseResult {
+  name: string;
+  court: string;
+  date: string;
+  citation: string;
+  url: string;
+  snippet: string;
+}
+
+/** Search U.S. case law (CourtListener) for the Research tab. */
+export async function searchCaseLaw(query: string): Promise<CaseResult[]> {
+  const res = await fetch(`${API_BASE}/api/research`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  const j = (await res.json().catch(() => ({}))) as {
+    results?: CaseResult[];
+    error?: string;
+  };
+  if (!res.ok) throw new Error(j?.error || "Search failed.");
+  return j.results ?? [];
+}
+
+/**
+ * Convert a drafted document to PDF/Word/Markdown and open the iOS share sheet
+ * so the user can save it to Files, AirDrop, email, etc.
+ */
+export async function shareDocument(
+  name: string,
+  content: string,
+  to: "pdf" | "docx" | "md",
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/files/convert`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, content, to }),
+  });
+  if (!res.ok) throw new Error("Couldn't create that file.");
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  const stem = (name.replace(/\.[^.]+$/, "") || "document").replace(
+    /[^\w. -]/g,
+    "_",
+  );
+  const file = new File(Paths.cache, `${stem}.${to}`);
+  try {
+    file.create({ overwrite: true });
+  } catch {
+    /* already exists — write overwrites */
+  }
+  file.write(bytes);
+  if (await Sharing.isAvailableAsync()) {
+    await Sharing.shareAsync(file.uri);
+  }
 }
 
 /**

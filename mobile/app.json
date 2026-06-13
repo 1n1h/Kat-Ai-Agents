@@ -55,7 +55,8 @@
           "microphonePermission": "Lex uses the microphone so you can dictate your messages."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,
