@@ -5,6 +5,7 @@ import {
   ArrowUp,
   AudioLines,
   Cable,
+  FileText,
   Loader2,
   Mic,
   Plus,
@@ -43,13 +44,16 @@ export default function Composer({
   autoFocus?: boolean;
 }) {
   const [attached, setAttached] = useState<string[]>([]);
+  const [reads, setReads] = useState<{ name: string; text: string }[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [plusOpen, setPlusOpen] = useState(false);
   const [dictation, setDictation] = useState<
     "idle" | "recording" | "transcribing"
   >("idle");
   const fileInput = useRef<HTMLInputElement>(null);
+  const readInput = useRef<HTMLInputElement>(null);
   const area = useRef<HTMLTextAreaElement>(null);
   const plusRef = useRef<HTMLDivElement>(null);
   const recRef = useRef<MediaRecorder | null>(null);
@@ -103,11 +107,52 @@ export default function Composer({
     }
   }
 
+  /** Read a document's text so the agent can review/revise it (no storage). */
+  async function extractDocs(files: FileList | File[]) {
+    const list = Array.from(files);
+    if (!list.length) return;
+    setExtracting(true);
+    try {
+      const form = new FormData();
+      for (const f of list) form.append("files", f);
+      const res = await fetch("/api/files/extract", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json()) as {
+        docs?: { name: string; text: string; error?: string }[];
+      };
+      const ok = (data.docs ?? []).filter((d) => d.text);
+      if (ok.length) {
+        setReads((prev) => [
+          ...prev,
+          ...ok.map((d) => ({ name: d.name, text: d.text })),
+        ]);
+      }
+    } catch {
+      /* extraction failed — chip simply doesn't appear */
+    } finally {
+      setExtracting(false);
+    }
+  }
+
   function send() {
     const t = value.trim();
-    if (!t || disabled || uploading) return;
-    onSend(t, attached);
+    if ((!t && !reads.length) || disabled || uploading || extracting) return;
+    const docBlock = reads.length
+      ? "\n\n" +
+        reads
+          .map((r) => `[Attached document — ${r.name}]\n${r.text}`)
+          .join("\n\n")
+      : "";
+    const content =
+      (t + docBlock).trim() ||
+      `Please review the attached document(s): ${reads
+        .map((r) => r.name)
+        .join(", ")}.`;
+    onSend(content, attached);
     setAttached([]);
+    setReads([]);
   }
 
   /* dictation: record → Scribe transcribes → text lands in the input.
@@ -165,7 +210,11 @@ export default function Composer({
     };
   }, []);
 
-  const canSend = Boolean(value.trim()) && !disabled && !uploading;
+  const canSend =
+    (Boolean(value.trim()) || reads.length > 0) &&
+    !disabled &&
+    !uploading &&
+    !extracting;
 
   return (
     <div
@@ -192,7 +241,10 @@ export default function Composer({
         </div>
       )}
 
-      {(attached.length > 0 || uploading) && (
+      {(attached.length > 0 ||
+        reads.length > 0 ||
+        uploading ||
+        extracting) && (
         <div className="flex flex-wrap gap-2 border-b border-line px-4 pt-3 pb-2.5">
           {attached.map((name) => (
             <span
@@ -209,9 +261,31 @@ export default function Composer({
               </button>
             </span>
           ))}
+          {reads.map((r) => (
+            <span
+              key={r.name}
+              className="flex items-center gap-1.5 rounded-lg border border-accent/40 bg-accent-wash px-2 py-1 font-mono text-[12px] text-accent"
+              title="Document text read for the agent"
+            >
+              <FileText className="h-3 w-3" />
+              {r.name}
+              <button
+                className="text-accent/70 hover:text-accent"
+                onClick={() => setReads((p) => p.filter((d) => d.name !== r.name))}
+                aria-label={`Remove ${r.name}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
           {uploading && (
             <span className="caret font-mono text-[11px] text-muted">
               uploading
+            </span>
+          )}
+          {extracting && (
+            <span className="caret font-mono text-[11px] text-muted">
+              reading document
             </span>
           )}
         </div>
@@ -263,6 +337,16 @@ export default function Composer({
                 className="flex w-full items-center gap-2.5 rounded-lg p-3 text-left text-[14px] text-ink transition-colors hover:bg-panel-deep"
                 onClick={() => {
                   setPlusOpen(false);
+                  readInput.current?.click();
+                }}
+              >
+                <FileText className="h-4 w-4 text-muted" />
+                Read a document
+              </button>
+              <button
+                className="flex w-full items-center gap-2.5 rounded-lg p-3 text-left text-[14px] text-ink transition-colors hover:bg-panel-deep"
+                onClick={() => {
+                  setPlusOpen(false);
                   onOpenConnectors();
                 }}
               >
@@ -279,6 +363,17 @@ export default function Composer({
           hidden
           onChange={(e) => {
             if (e.target.files) void upload(e.target.files);
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={readInput}
+          type="file"
+          multiple
+          hidden
+          accept=".pdf,.docx,.txt,.md,.markdown,.csv,.json,.rtf,application/pdf,text/*"
+          onChange={(e) => {
+            if (e.target.files) void extractDocs(e.target.files);
             e.target.value = "";
           }}
         />

@@ -1,7 +1,12 @@
 /**
- * Firm context injection (server-side). Every conversation gets the company
- * profile; if the signed-in email matches an employee profile's frontmatter,
- * that profile rides along too — so Phil's agent knows it's talking to Phil.
+ * Firm context injection (server-side), gated by email domain.
+ *
+ * The firm's company profile is NOT hard-prompted into every agent. It's only
+ * attached when the signed-in user's email is on the firm's domain (derived
+ * from the employee profiles, plus the optional FIRM_DOMAINS env override).
+ * Anyone else — a different firm, or an unauthenticated/mobile session with no
+ * email — gets a clean, firm-neutral assistant. This keeps the product
+ * multi-tenant: one firm's profile never leaks into another's session.
  *
  * Profiles live in firm/ as markdown with YAML-ish frontmatter:
  *   emails:
@@ -48,21 +53,47 @@ function load(): FirmData {
   return cache;
 }
 
+/** The set of email domains that count as "the firm" (employees + env override). */
+function firmDomains(employees: EmployeeProfile[]): Set<string> {
+  const fromEnv = (process.env.FIRM_DOMAINS ?? "")
+    .toLowerCase()
+    .split(/[,\s]+/)
+    .map((d) => d.trim())
+    .filter(Boolean);
+  const fromEmployees = employees
+    .flatMap((e) => e.emails)
+    .map((em) => em.split("@")[1])
+    .filter(Boolean);
+  return new Set([...fromEnv, ...fromEmployees]);
+}
+
+const NEUTRAL_NOTE =
+  "\n\n[No firm profile is attached to this session. Act as a general-purpose " +
+  "legal assistant for the signed-in user. Do not reference any specific law " +
+  "firm, its staff, or its matters.]";
+
 /**
- * Context block appended to every system prompt. Fails soft: if the firm
- * files are unreadable, chat still works without them.
+ * Context block appended to every system prompt — but only the firm's own
+ * people get the firm profile. Fails soft: if the firm files are unreadable,
+ * chat still works without them.
  */
 export function firmContext(userEmail?: string | null): string {
   try {
     const { company, employees } = load();
+    const domain = userEmail?.toLowerCase().split("@")[1];
+    const isFirmUser = !!domain && firmDomains(employees).has(domain);
+
+    // Not a firm work email (or no email at all) — keep it firm-neutral.
+    if (!isFirmUser) return NEUTRAL_NOTE;
+
     let ctx =
-      "\n\n[FIRM CONTEXT — this deployment serves the following firm. " +
-      "Ground all work in its practice scope, posture, and jurisdiction.]\n" +
+      "\n\n[FIRM CONTEXT — the signed-in user works at this firm. Ground all " +
+      "work in its practice scope, posture, and jurisdiction.]\n" +
       company;
 
-    const me = userEmail
-      ? employees.find((e) => e.emails.includes(userEmail.toLowerCase()))
-      : undefined;
+    const me = employees.find((e) =>
+      e.emails.includes(userEmail!.toLowerCase()),
+    );
     if (me) {
       ctx +=
         `\n\n[CURRENT USER — the signed-in user is ${me.name}. Address ` +

@@ -12,6 +12,8 @@ import {
   Shield,
   Sparkles,
   Swords,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
 import { FirmMark } from "@/components/FirmLogo";
@@ -62,6 +64,8 @@ export default function MockTrial({ onExit }: { onExit: () => void }) {
   const [live, setLive] = useState("");
   const [liveBy, setLiveBy] = useState<TrialRoleId | null>(null);
   const [gavel, setGavel] = useState(false);
+  const [voice, setVoice] = useState(false);
+  const voiceRef = useRef(false);
   const [isCustom, setIsCustom] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -89,6 +93,36 @@ export default function MockTrial({ onExit }: { onExit: () => void }) {
   const bang = () => {
     setGavel(true);
     setTimeout(() => setGavel(false), 480);
+  };
+
+  useEffect(() => {
+    voiceRef.current = voice;
+    if (!voice && typeof window !== "undefined") window.speechSynthesis?.cancel();
+  }, [voice]);
+
+  // stop any speech when the simulator unmounts
+  useEffect(
+    () => () => {
+      if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+    },
+    [],
+  );
+
+  /** Read a line aloud in a role-appropriate voice (browser on-device TTS). */
+  const say = (text: string, role: TrialRoleId) => {
+    if (!voiceRef.current || typeof window === "undefined") return;
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/[*_#`>[\]()]/g, ""));
+    if (role === "judge") {
+      u.pitch = 0.8;
+      u.rate = 0.92; // measured, authoritative bench
+    } else {
+      u.pitch = 1.0;
+      u.rate = 1.06; // sharper opposing counsel
+    }
+    synth.speak(u);
   };
 
   const filtered = useMemo(
@@ -234,6 +268,7 @@ export default function MockTrial({ onExit }: { onExit: () => void }) {
       "judge",
     );
     setMessages([{ by: "judge", label: c.judge, text: opening, ts: clock() }]);
+    say(opening, "judge");
     setBusy(false);
     setTimeout(() => inputRef.current?.focus(), 120);
   }
@@ -290,6 +325,7 @@ export default function MockTrial({ onExit }: { onExit: () => void }) {
     ];
     setMessages(afterAi);
     bang();
+    say(aiReply, "counsel");
 
     const nextRound = round + 1;
     if (nextRound >= MAX_ROUNDS) {
@@ -321,6 +357,7 @@ export default function MockTrial({ onExit }: { onExit: () => void }) {
           isVerdict: true,
         },
       ]);
+      say(vText, "judge");
       setRound(nextRound);
       setScreen("verdict");
       setBusy(false);
@@ -345,12 +382,14 @@ export default function MockTrial({ onExit }: { onExit: () => void }) {
       ...afterAi,
       { by: "judge", label: selected.judge, text: ruling, ts: clock() },
     ]);
+    say(ruling, "judge");
     setRound(nextRound);
     setBusy(false);
     setTimeout(() => inputRef.current?.focus(), 120);
   }
 
   function reset() {
+    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
     setScreen("lobby");
     setSelected(null);
     setYourKey("");
@@ -795,10 +834,19 @@ export default function MockTrial({ onExit }: { onExit: () => void }) {
         </div>
 
         {/* scoreboard */}
-        <div className="flex items-center justify-center gap-6 border-b border-line bg-panel/40 py-2">
+        <div className="relative flex items-center justify-center gap-6 border-b border-line bg-panel/40 py-2">
           <Score n={scores.you} label="You" color={TRIAL_ROLES.you.color} />
           <span className="font-mono text-[11px] text-faint">vs</span>
           <Score n={scores.ai} label={ai.counsel.split(" ").pop() ?? "AI"} color={TRIAL_ROLES.counsel.color} />
+          <button
+            onClick={() => setVoice((v) => !v)}
+            title={voice ? "Mute the courtroom" : "Hear the courtroom aloud"}
+            className={`absolute right-3 flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+              voice ? "text-accent" : "text-muted hover:bg-panel-deep hover:text-ink"
+            }`}
+          >
+            {voice ? <Volume2 className="h-4.5 w-4.5" /> : <VolumeX className="h-4.5 w-4.5" />}
+          </button>
         </div>
 
         {/* transcript */}
