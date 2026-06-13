@@ -14,7 +14,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Seal } from "@/components/seal";
 import { ThemedText } from "@/components/themed-text";
 import { Radius, Spacing } from "@/constants/theme";
@@ -24,8 +24,12 @@ import { streamChat } from "@/lib/api";
 import { agentName } from "@/lib/agents";
 import type { Msg } from "@/lib/store";
 
+/** Approx. height of the floating native tab bar, so the composer clears it. */
+const TAB_BAR_SPACE = 52;
+
 export default function Assistant() {
   const { palette } = useTheme();
+  const insets = useSafeAreaInsets();
   const { active, appendMessage } = useMatters();
   const [draft, setDraft] = useState("");
   const [live, setLive] = useState("");
@@ -219,82 +223,86 @@ export default function Assistant() {
             )}
           </ScrollView>
 
-          {/* composer */}
+          {/* composer — a floating rounded pill that clears the tab bar */}
           <View
             style={{
-              flexDirection: "row",
-              alignItems: "flex-end",
-              gap: Spacing.sm,
               paddingHorizontal: Spacing.lg,
               paddingTop: Spacing.sm,
-              paddingBottom: Spacing.md,
-              borderTopWidth: 1,
-              borderTopColor: palette.divider,
-              backgroundColor: palette.bg,
+              paddingBottom: insets.bottom + TAB_BAR_SPACE,
             }}
           >
-            <Pressable
-              onPress={attach}
-              disabled={streaming || reading}
+            <View
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                alignItems: "center",
-                justifyContent: "center",
+                flexDirection: "row",
+                alignItems: "flex-end",
+                gap: 4,
                 backgroundColor: palette.bgRaised,
-                opacity: streaming || reading ? 0.5 : 1,
-              }}
-            >
-              {reading ? (
-                <ActivityIndicator color={palette.brand} />
-              ) : (
-                <SymbolView name="paperclip" size={18} tintColor={palette.inkSoft} />
-              )}
-            </Pressable>
-            <TextInput
-              value={draft}
-              onChangeText={setDraft}
-              placeholder="State your question for the record…"
-              placeholderTextColor={palette.inkMuted}
-              multiline
-              style={{
-                flex: 1,
-                maxHeight: 120,
-                minHeight: 44,
-                borderRadius: Radius.lg,
+                borderRadius: 26,
                 borderWidth: 1,
                 borderColor: palette.divider,
-                backgroundColor: palette.bgRaised,
-                color: palette.ink,
-                paddingHorizontal: Spacing.md,
-                paddingTop: 12,
-                paddingBottom: 12,
-                fontSize: 16,
+                paddingHorizontal: 6,
+                paddingVertical: 6,
               }}
-            />
-            <Pressable
-              onPress={send}
-              disabled={!draft.trim() || streaming}
-              style={({ pressed }) => [
-                {
-                  width: 44,
-                  height: 44,
-                  borderRadius: 22,
+            >
+              <Pressable
+                onPress={attach}
+                disabled={streaming || reading}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor:
-                    !draft.trim() || streaming ? palette.bgRaised : palette.brand,
-                },
-                pressed && { transform: [{ scale: 0.95 }] },
-              ]}
-            >
-              <SymbolView
-                name="arrow.up"
-                size={18}
-                tintColor={!draft.trim() || streaming ? palette.inkMuted : "#FFFFFF"}
+                  backgroundColor: palette.bg,
+                  opacity: streaming || reading ? 0.5 : 1,
+                }}
+              >
+                {reading ? (
+                  <ActivityIndicator color={palette.brand} />
+                ) : (
+                  <SymbolView name="plus" size={18} tintColor={palette.inkSoft} />
+                )}
+              </Pressable>
+              <TextInput
+                value={draft}
+                onChangeText={setDraft}
+                placeholder="Ask Lex anything…"
+                placeholderTextColor={palette.inkMuted}
+                multiline
+                style={{
+                  flex: 1,
+                  maxHeight: 120,
+                  minHeight: 38,
+                  color: palette.ink,
+                  paddingHorizontal: 6,
+                  paddingTop: 9,
+                  paddingBottom: 9,
+                  fontSize: 16,
+                }}
               />
-            </Pressable>
+              <Pressable
+                onPress={send}
+                disabled={!draft.trim() || streaming}
+                style={({ pressed }) => [
+                  {
+                    width: 38,
+                    height: 38,
+                    borderRadius: 19,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor:
+                      !draft.trim() || streaming ? palette.bg : palette.brand,
+                  },
+                  pressed && { transform: [{ scale: 0.95 }] },
+                ]}
+              >
+                <SymbolView
+                  name="arrow.up"
+                  size={18}
+                  tintColor={!draft.trim() || streaming ? palette.inkMuted : "#FFFFFF"}
+                />
+              </Pressable>
+            </View>
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
