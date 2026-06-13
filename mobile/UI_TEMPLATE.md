@@ -526,4 +526,44 @@ Native splash (OS, white bg, logo)
 | halo | `#FFE8D6 → #FFFFFF → #DBEAFE` | `#2A1606 → #0A0F1F → #0B1E47` | Welcome/paywall gradient |
 | overlay pill | `rgba(10,15,31,0.78)` | (same) | Dark translucent badge over media |
 
+---
+
+### Appendix — Keyboard & composer spacing (avoid the gap bug)
+
+**Do NOT wrap the chat screen in `KeyboardAvoidingView` when the layout also
+has a floating tab bar.** It double-counts: the avoiding view pushes content up
+by the keyboard height *and* your composer's bottom padding (for the tab bar)
+stays applied — leaving a dead gap between the input bar and the keyboard.
+
+**Do this instead** — track the keyboard height yourself and pad with it:
+
+```tsx
+const insets = useSafeAreaInsets();
+const [kb, setKb] = useState(0);
+useEffect(() => {
+  const show = Keyboard.addListener("keyboardWillShow", (e) => setKb(e.endCoordinates.height));
+  const hide = Keyboard.addListener("keyboardWillHide", () => setKb(0));
+  return () => { show.remove(); hide.remove(); };
+}, []);
+
+// Root content view: lift everything by the keyboard height.
+<View style={{ flex: 1, paddingBottom: kb }}>
+  {/* header … scroll … */}
+
+  {/* Composer: tight on the keyboard when open, on the tab bar when closed. */}
+  <View style={{
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+    paddingBottom: kb > 0 ? Spacing.xs : Math.max(insets.bottom, Spacing.sm) + Spacing.xs,
+  }}>
+    {/* rounded input pill */}
+  </View>
+</View>
+```
+
+Rules of thumb:
+- The composer's `paddingBottom` is **tiny (`Spacing.xs`) when the keyboard is up**, and **`max(insets.bottom, Spacing.sm) + Spacing.xs` when it's down**. Never add a hardcoded "tab bar height" constant — `expo-router` native tabs already inset the content frame; extra padding is what creates the gap.
+- Use `keyboardWillShow/Hide` on iOS (smooth, fires before the animation). Use `keyboardDidShow/Hide` if you target Android too.
+- Keep the `ScrollView` with `keyboardDismissMode="interactive"` so dragging the transcript dismisses the keyboard naturally.
+
 *End of spec.*
