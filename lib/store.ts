@@ -9,8 +9,10 @@ export interface Msg {
   role: "user" | "assistant";
   content: string;
   agentId?: AgentId;
-  /** files the agent wrote during this turn (downloadable in the UI) */
+  /** files the agent wrote to the matter dir (local path; downloaded by name) */
   files?: string[];
+  /** documents the agent drafted in the cloud (content carried for convert) */
+  docs?: { name: string; content: string }[];
 }
 
 export interface Thread {
@@ -28,6 +30,8 @@ export interface Matter {
   name: string;
   createdAt: number;
   starred?: boolean;
+  /** long-term memory: durable facts the agents accumulate across threads */
+  memory?: string;
 }
 
 export interface WorkspaceState {

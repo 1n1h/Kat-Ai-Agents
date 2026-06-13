@@ -16,6 +16,13 @@ import {
   toolGuidance,
   type ConnectorTokens,
 } from "@/lib/connectorTools";
+import {
+  researchToolDefs,
+  executeResearchTool,
+  isResearchTool,
+  researchGuidance,
+  availableResearchTools,
+} from "@/lib/researchTools";
 
 export const runtime = "nodejs";
 export const maxDuration = 600;
@@ -35,6 +42,8 @@ interface ChatRequest {
   userEmail?: string | null;
   /** self-onboarded profile summary (from users/{uid}/profile/self) */
   userProfile?: string | null;
+  /** long-term memory for this matter (client-persisted, injected as context) */
+  matterMemory?: string | null;
 }
 
 const VOICE_NOTE =
@@ -44,10 +53,66 @@ const VOICE_NOTE =
   "elaborating unprompted.]";
 
 const CLOUD_NOTE =
-  "\n\n[Cloud session: file tools are unavailable here. Work from the " +
-  "conversation only, and ask the user to paste any document text they " +
-  "want analyzed. The full file workspace runs on the firm's local " +
-  "install.]";
+  "\n\n[Cloud session: to deliver a finished document (letter, brief, memo, " +
+  "or agreement), call the write_document tool with the full text as Markdown " +
+  "— the user gets a one-click Word and PDF download. To read an uploaded " +
+  "document's contents in this session, ask the user to paste the text.]";
+
+const MEMORY_NOTE =
+  "\n\n[MEMORY — you may call the `remember` tool to save a durable fact about " +
+  "THIS matter (a party, key date, decision, ruling, or standing instruction/" +
+  "preference) to long-term memory that persists across future conversations. " +
+  "Use it sparingly, only for things worth carrying forward — not transient " +
+  "chatter — and don't announce that you saved it.]";
+
+/** Tool that produces a downloadable deliverable in the cloud (no filesystem). */
+const WRITE_DOC_TOOL = {
+  name: "write_document",
+  description:
+    "Produce a finished deliverable for the user to download as Word or PDF. " +
+    "Provide the full document as Markdown (use #/## headings, blank lines " +
+    "between paragraphs, and - bullets). Use for letters, briefs, memos, and " +
+    "agreements — not for short chat replies.",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      filename: {
+        type: "string",
+        description: 'A short file name without extension, e.g. "demand-letter".',
+      },
+      content: {
+        type: "string",
+        description: "The full document body in Markdown.",
+      },
+    },
+    required: ["filename", "content"],
+  },
+};
+
+/** Tool the orchestrator (and direct specialists) use to write matter memory. */
+const REMEMBER_TOOL = {
+  name: "remember",
+  description:
+    "Save one durable fact about this matter to long-term memory (persists " +
+    "across future conversations). Lasting facts only: parties, key dates, " +
+    "decisions, rulings, standing instructions or preferences.",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      note: {
+        type: "string",
+        description: "A concise fact to remember, phrased as one line.",
+      },
+    },
+    required: ["note"],
+  },
+};
+
+// rolling-summary thresholds: once a thread passes SUMMARIZE_AFTER turns we
+// summarize all but the last KEEP_RECENT into a context note so the prompt
+// stays bounded instead of resending the whole transcript forever.
+const SUMMARIZE_AFTER = 24;
+const KEEP_RECENT = 12;
 
 /** User-facing professional role for each specialist (no persona names). */
 const ROLE_NAMES: Record<Exclude<AgentId, "auto">, string> = {
@@ -158,6 +223,57 @@ const textOf = (content: { type: string; text?: string }[]) =>
     .join("")
     .trim();
 
+type Convo = { role: "user" | "assistant"; content: string }[];
+
+/**
+ * Rolling thread summarization. Short threads pass through unchanged. Long ones
+ * keep the last KEEP_RECENT turns verbatim and fold everything before them into
+ * a compact summary (a cheap haiku call) returned as a context note for the
+ * system prompt — so the prompt stays bounded as the thread grows.
+ */
+async function condenseHistory(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: any,
+  messages: ChatMessage[],
+): Promise<{ convo: Convo; historyNote: string }> {
+  const all: Convo = messages.map(({ role, content }) => ({ role, content }));
+  if (all.length <= SUMMARIZE_AFTER) return { convo: all, historyNote: "" };
+
+  const older = all.slice(0, all.length - KEEP_RECENT);
+  let recent = all.slice(all.length - KEEP_RECENT);
+  // the model requires the first turn to be the user's
+  while (recent.length && recent[0].role !== "user") recent = recent.slice(1);
+  if (!recent.length) recent = all.slice(-KEEP_RECENT);
+
+  const transcript = older
+    .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
+    .join("\n\n")
+    .slice(0, 24000);
+
+  try {
+    const res = await client.messages.create({
+      model: MODEL_IDS.haiku,
+      max_tokens: 700,
+      system:
+        "Summarize this legal-assistant conversation so far into a tight brief " +
+        "the assistant can rely on to continue: the matter, the parties, key " +
+        "facts and findings, decisions made, open questions, and any deadlines. " +
+        "Bullet points. No preamble.",
+      messages: [{ role: "user", content: transcript }],
+    });
+    const summary = textOf(res.content as { type: string; text?: string }[]);
+    const historyNote = summary
+      ? "\n\n[EARLIER IN THIS CONVERSATION — summary of the turns before the " +
+        "recent ones shown below; treat as established context.]\n" +
+        summary
+      : "";
+    return { convo: recent, historyNote };
+  } catch {
+    // summarization failed — fall back to a hard recent-window cap (no note)
+    return { convo: recent, historyNote: "" };
+  }
+}
+
 /**
  * Run one specialist privately and return its text. Specialists never see the
  * conversation; the orchestrator hands them everything they need.
@@ -195,8 +311,8 @@ async function cloudChat(
   tokens: ConnectorTokens = {},
   extraCtx = "",
 ): Promise<Response> {
-  const firmCtx = firmContext(userEmail) + extraCtx;
   const connTools = anthropicToolDefs(tokens);
+  const researchTools = researchToolDefs();
   const guidance = toolGuidance(tokens);
   // primary web search: Anthropic-hosted (server-side execution);
   // tavily_search in connTools is the backup
@@ -213,7 +329,13 @@ async function cloudChat(
   }
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic();
-  const convo = messages.map(({ role, content }) => ({ role, content }));
+  const { convo, historyNote } = await condenseHistory(client, messages);
+  const firmCtx =
+    firmContext(userEmail) +
+    extraCtx +
+    historyNote +
+    MEMORY_NOTE +
+    researchGuidance();
   const isAuto = agentId === "auto" || !SPECIALISTS[agentId as SpecialistId];
 
   const stream = new ReadableStream({
@@ -235,7 +357,13 @@ async function cloudChat(
                 spec.prompt + CLOUD_NOTE + identityNote(id) + firmCtx +
                   guidance + (voice ? VOICE_NOTE : ""),
               ),
-              tools: [hostedSearch, ...connTools],
+              tools: [
+                WRITE_DOC_TOOL,
+                REMEMBER_TOOL,
+                hostedSearch,
+                ...connTools,
+                ...researchTools,
+              ],
               messages: turns,
             });
             let firstDelta = true;
@@ -257,14 +385,48 @@ async function cloudChat(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const results: any[] = [];
             for (const call of calls) {
+              if (call.name === "write_document") {
+                const di = (call.input ?? {}) as {
+                  filename?: string;
+                  content?: string;
+                };
+                const dname = (di.filename || "document").replace(
+                  /[^\w. -]/g,
+                  "_",
+                );
+                const dcontent = String(di.content ?? "");
+                if (dcontent.trim())
+                  controller.enqueue(
+                    line({ t: "document", name: dname, text: dcontent }),
+                  );
+                results.push({
+                  type: "tool_result",
+                  tool_use_id: call.id,
+                  content: dcontent.trim()
+                    ? `Document "${dname}" is ready — the user can download it as Word or PDF.`
+                    : "No content provided; nothing written.",
+                });
+                continue;
+              }
+              if (call.name === "remember") {
+                const note = String(
+                  (call.input as { note?: string })?.note ?? "",
+                ).trim();
+                if (note) controller.enqueue(line({ t: "memory", text: note }));
+                results.push({
+                  type: "tool_result",
+                  tool_use_id: call.id,
+                  content: "Saved to matter memory.",
+                });
+                continue;
+              }
               controller.enqueue(
                 line({ t: "status", text: `using: ${call.name}` }),
               );
-              const out = await executeConnectorTool(
-                call.name,
-                (call.input ?? {}) as Record<string, unknown>,
-                tokens,
-              );
+              const input = (call.input ?? {}) as Record<string, unknown>;
+              const out = isResearchTool(call.name)
+                ? await executeResearchTool(call.name, input)
+                : await executeConnectorTool(call.name, input, tokens);
               results.push({
                 type: "tool_result",
                 tool_use_id: call.id,
@@ -316,7 +478,14 @@ async function cloudChat(
               ORCH_CLOUD_PROMPT + firmCtx + guidance +
                 (voice ? VOICE_NOTE : ""),
             ),
-            tools: [consultTool, hostedSearch, ...connTools],
+            tools: [
+              consultTool,
+              WRITE_DOC_TOOL,
+              REMEMBER_TOOL,
+              hostedSearch,
+              ...connTools,
+              ...researchTools,
+            ],
             messages: turns,
           });
           turns.push({ role: "assistant", content: resp.content });
@@ -334,16 +503,50 @@ async function cloudChat(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const results: any[] = [];
           for (const call of calls) {
+            if (call.name === "write_document") {
+              const di = (call.input ?? {}) as {
+                filename?: string;
+                content?: string;
+              };
+              const dname = (di.filename || "document").replace(
+                /[^\w. -]/g,
+                "_",
+              );
+              const dcontent = String(di.content ?? "");
+              if (dcontent.trim())
+                controller.enqueue(
+                  line({ t: "document", name: dname, text: dcontent }),
+                );
+              results.push({
+                type: "tool_result",
+                tool_use_id: call.id,
+                content: dcontent.trim()
+                  ? `Document "${dname}" is ready — the user can download it as Word or PDF.`
+                  : "No content provided; nothing written.",
+              });
+              continue;
+            }
+            if (call.name === "remember") {
+              const note = String(
+                (call.input as { note?: string })?.note ?? "",
+              ).trim();
+              if (note) controller.enqueue(line({ t: "memory", text: note }));
+              results.push({
+                type: "tool_result",
+                tool_use_id: call.id,
+                content: "Saved to matter memory.",
+              });
+              continue;
+            }
             if (call.name !== "consult_specialist") {
-              // connector tool (Dropbox / Outlook / Gmail)
+              // connector tool (Dropbox / Outlook / Gmail) or research tool
               controller.enqueue(
                 line({ t: "status", text: `using: ${call.name}` }),
               );
-              const out = await executeConnectorTool(
-                call.name,
-                (call.input ?? {}) as Record<string, unknown>,
-                tokens,
-              );
+              const input = (call.input ?? {}) as Record<string, unknown>;
+              const out = isResearchTool(call.name)
+                ? await executeResearchTool(call.name, input)
+                : await executeConnectorTool(call.name, input, tokens);
               results.push({
                 type: "tool_result",
                 tool_use_id: call.id,
@@ -407,11 +610,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { messages, agentId, matterId, voice, userEmail, userProfile } =
-    (await req.json()) as ChatRequest;
+  const {
+    messages,
+    agentId,
+    matterId,
+    voice,
+    userEmail,
+    userProfile,
+    matterMemory,
+  } = (await req.json()) as ChatRequest;
   const profileCtx = userProfile
     ? `\n\n[CURRENT USER — self-onboarded employee profile. Address them by name and tailor work to their role.]\n${userProfile.slice(0, 1500)}`
     : "";
+  const matterCtx =
+    matterMemory && matterMemory.trim()
+      ? "\n\n[MATTER MEMORY — durable facts accumulated for THIS matter across " +
+        "prior conversations. Treat as established context; build on it and " +
+        "don't contradict it.]\n" + matterMemory.slice(0, 4000)
+      : "";
+  const extraCtx = profileCtx + matterCtx;
   if (!messages?.length) {
     return Response.json({ error: "No messages." }, { status: 400 });
   }
@@ -435,7 +652,7 @@ export async function POST(req: NextRequest) {
   };
 
   if (!query || !cwd) {
-    return cloudChat(messages, agentId, voice, userEmail, tokens, profileCtx);
+    return cloudChat(messages, agentId, voice, userEmail, tokens, extraCtx);
   }
 
   const promptText = buildPrompt(messages) + (voice ? VOICE_NOTE : "");
@@ -445,47 +662,72 @@ export async function POST(req: NextRequest) {
 
   // expose connector tools to the local runtime as an in-process MCP server
   const liveTools = availableTools(tokens);
-  let mcpServers: Record<string, unknown> = {};
+  const liveResearch = availableResearchTools();
+  const mcpServers: Record<string, unknown> = {};
   let mcpToolNames: string[] = [];
-  if (liveTools.length) {
+  if (liveTools.length || liveResearch.length) {
     const { createSdkMcpServer, tool } = await import(
       "@anthropic-ai/claude-agent-sdk"
     );
     const { z } = await import("zod");
-    mcpServers = {
-      connectors: createSdkMcpServer({
+    const zshape = (
+      params: Record<
+        string,
+        { type: string; description: string; required?: boolean }
+      >,
+    ) =>
+      Object.fromEntries(
+        Object.entries(params).map(([k, p]) => {
+          const base =
+            p.type === "number"
+              ? z.number().describe(p.description)
+              : z.string().describe(p.description);
+          return [k, p.required ? base : base.optional()];
+        }),
+      );
+    if (liveTools.length) {
+      mcpServers.connectors = createSdkMcpServer({
         name: "connectors",
         version: "1.0.0",
         tools: liveTools.map((t) =>
-          tool(
-            t.name,
-            t.description,
-            Object.fromEntries(
-              Object.entries(t.params).map(([k, p]) => {
-                const base =
-                  p.type === "number"
-                    ? z.number().describe(p.description)
-                    : z.string().describe(p.description);
-                return [k, p.required ? base : base.optional()];
-              }),
-            ),
-            async (args) => ({
-              content: [
-                {
-                  type: "text" as const,
-                  text: await executeConnectorTool(
-                    t.name,
-                    args as Record<string, unknown>,
-                    tokens,
-                  ),
-                },
-              ],
-            }),
-          ),
+          tool(t.name, t.description, zshape(t.params), async (args) => ({
+            content: [
+              {
+                type: "text" as const,
+                text: await executeConnectorTool(
+                  t.name,
+                  args as Record<string, unknown>,
+                  tokens,
+                ),
+              },
+            ],
+          })),
         ),
-      }),
-    };
-    mcpToolNames = liveTools.map((t) => `mcp__connectors__${t.name}`);
+      });
+    }
+    if (liveResearch.length) {
+      mcpServers.research = createSdkMcpServer({
+        name: "research",
+        version: "1.0.0",
+        tools: liveResearch.map((t) =>
+          tool(t.name, t.description, zshape(t.params), async (args) => ({
+            content: [
+              {
+                type: "text" as const,
+                text: await executeResearchTool(
+                  t.name,
+                  args as Record<string, unknown>,
+                ),
+              },
+            ],
+          })),
+        ),
+      });
+    }
+    mcpToolNames = [
+      ...liveTools.map((t) => `mcp__connectors__${t.name}`),
+      ...liveResearch.map((t) => `mcp__research__${t.name}`),
+    ];
   }
 
   const stream = new ReadableStream({
@@ -513,8 +755,9 @@ export async function POST(req: NextRequest) {
                 : spec!.prompt +
                   identityNote(agentId as Exclude<AgentId, "auto">)) +
               firmContext(userEmail) +
-              profileCtx +
-              toolGuidance(tokens),
+              extraCtx +
+              toolGuidance(tokens) +
+              researchGuidance(),
             model: isAuto
               ? ORCHESTRATOR_MODEL
               : MODEL_IDS[(spec!.model ?? "sonnet") as keyof typeof MODEL_IDS],

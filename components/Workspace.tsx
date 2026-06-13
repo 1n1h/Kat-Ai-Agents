@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  Brain,
   Briefcase,
   Cable,
   ChevronLeft,
@@ -18,6 +19,7 @@ import {
   Star,
   SunMoon,
   Trash2,
+  X,
 } from "lucide-react";
 import { agentById, type AgentId } from "@/lib/agent-meta";
 import {
@@ -116,6 +118,9 @@ export default function Workspace() {
   const [newCaseName, setNewCaseName] = useState("");
   const [caseMenuFor, setCaseMenuFor] = useState<string | null>(null);
   const [caseMenuMode, setCaseMenuMode] = useState<"main" | "confirm">("main");
+  /* matter-memory viewer/editor */
+  const [memoryFor, setMemoryFor] = useState<string | null>(null);
+  const [memoryDraft, setMemoryDraft] = useState("");
   /* anchor (viewport coords) for whichever kebab menu is open */
   const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(
     null,
@@ -482,6 +487,7 @@ export default function Workspace() {
 
     const blocks: string[] = [];
     const filesMade = new Set<string>();
+    const docsMade: { name: string; content: string }[] = [];
     let deltaIdx = -1; // cloud chat streams partial text as deltas
     try {
       const res = await fetch("/api/chat", {
@@ -494,6 +500,7 @@ export default function Workspace() {
           voice: opts?.voice ?? false,
           userEmail: user?.email ?? null,
           userProfile: myProfile ? profileContext(myProfile) : null,
+          matterMemory: activeMatter?.memory ?? null,
         }),
       });
 
@@ -533,6 +540,18 @@ export default function Workspace() {
                 setStatuses((prev) => [...prev, ev.text!]);
               } else if (ev.t === "file" && ev.name) {
                 filesMade.add(ev.name);
+              } else if (ev.t === "document" && ev.name && ev.text) {
+                // a cloud-drafted document (content carried for conversion)
+                docsMade.push({ name: ev.name, content: ev.text });
+              } else if (ev.t === "memory" && ev.text) {
+                // the agent saved a durable fact for this matter
+                const note = ev.text.trim();
+                if (note) {
+                  updateMatter(matterId, (m) => ({
+                    ...m,
+                    memory: m.memory ? `${m.memory}\n- ${note}` : `- ${note}`,
+                  }));
+                }
               } else if (ev.t === "error" && ev.text) {
                 blocks.push(`*${ev.text}*`);
                 setLive(blocks.join("\n\n"));
@@ -559,6 +578,7 @@ export default function Workspace() {
           content: finalText,
           agentId,
           ...(filesMade.size ? { files: [...filesMade] } : {}),
+          ...(docsMade.length ? { docs: docsMade } : {}),
         },
       ],
     }));
@@ -748,6 +768,17 @@ export default function Workspace() {
                   <Pencil className="h-3.5 w-3.5 text-muted" />
                   Rename
                 </button>
+                <button
+                  className={menuItem}
+                  onClick={() => {
+                    setMemoryDraft(openCase.memory ?? "");
+                    setMemoryFor(openCase.id);
+                    setCaseMenuFor(null);
+                  }}
+                >
+                  <Brain className="h-3.5 w-3.5 text-muted" />
+                  Matter memory
+                </button>
                 <hr className="my-1 border-line" />
                 <button
                   className={`${menuItem} text-accent hover:text-accent`}
@@ -766,6 +797,78 @@ export default function Workspace() {
                 Confirm delete?
               </button>
             )}
+          </div>,
+          document.body,
+        )
+      : null;
+
+  const memoryMatter = memoryFor
+    ? matters.find((m) => m.id === memoryFor)
+    : null;
+  const memoryModal =
+    memoryMatter && typeof document !== "undefined"
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setMemoryFor(null);
+            }}
+          >
+            <div className="pop flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl border border-line-strong bg-panel p-6 shadow-2xl">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="flex items-center gap-2 font-serif text-2xl text-ink">
+                    <Brain className="h-5 w-5 text-accent" />
+                    Matter memory
+                  </h2>
+                  <p className="mt-1 text-[13px] text-muted">
+                    Durable facts the agents carry into every conversation in{" "}
+                    <span className="text-ink">{memoryMatter.name}</span>.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setMemoryFor(null)}
+                  className="rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+                  aria-label="Close"
+                >
+                  <X className="h-4.5 w-4.5" />
+                </button>
+              </div>
+              <textarea
+                value={memoryDraft}
+                onChange={(e) => setMemoryDraft(e.target.value)}
+                placeholder="No memory yet — the agents add durable facts here as you work, and you can jot anything the team should always know."
+                className="mt-4 h-64 w-full resize-none rounded-xl border border-line bg-input px-3 py-2.5 font-mono text-[13px] leading-relaxed text-ink outline-none focus:border-accent"
+              />
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <button
+                  onClick={() => setMemoryDraft("")}
+                  className="text-[13px] text-muted transition-colors hover:text-accent"
+                >
+                  Clear
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setMemoryFor(null)}
+                    className="rounded-lg px-3.5 py-2 text-[14px] text-muted transition-colors hover:text-ink"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      updateMatter(memoryMatter.id, (m) => ({
+                        ...m,
+                        memory: memoryDraft.trim() || undefined,
+                      }));
+                      setMemoryFor(null);
+                    }}
+                    className="rounded-lg bg-accent px-4 py-2 text-[14px] font-semibold text-paper transition-colors hover:bg-accent-soft"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>,
           document.body,
         )
@@ -1308,6 +1411,7 @@ export default function Workspace() {
 
       {threadMenuPortal}
       {caseMenuPortal}
+      {memoryModal}
 
       {needsOnboarding && user?.uid && user.email && (
         <Onboarding

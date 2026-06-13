@@ -49,6 +49,75 @@ function FileChip({ name, matterId }: { name: string; matterId: string }) {
   );
 }
 
+/** A document the agent drafted in the cloud — content is converted on click. */
+function DocChip({ name, content }: { name: string; content: string }) {
+  const stem = name.replace(/\.[^.]+$/, "");
+  const isCsv = name.toLowerCase().endsWith(".csv");
+  const download = async (to: string) => {
+    const res = await fetch("/api/files/convert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, content, to }),
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${stem}.${to}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+  const convBtn =
+    "rounded border border-line px-1.5 py-0.5 font-mono text-[10px] text-muted transition-colors hover:border-accent hover:text-accent";
+  return (
+    <span className="flex items-center gap-2 rounded-lg border border-line bg-panel px-2.5 py-1.5">
+      <FileText className="h-4 w-4 shrink-0 text-accent" />
+      <span
+        className="max-w-56 truncate font-mono text-[12px] text-ink"
+        title={name}
+      >
+        {name}
+      </span>
+      {isCsv ? (
+        <button
+          onClick={() => download("xlsx")}
+          className={convBtn}
+          title="Download as Excel"
+        >
+          XLSX
+        </button>
+      ) : (
+        <>
+          <button
+            onClick={() => download("pdf")}
+            className={convBtn}
+            title="Download as PDF"
+          >
+            PDF
+          </button>
+          <button
+            onClick={() => download("docx")}
+            className={convBtn}
+            title="Download as Word"
+          >
+            DOCX
+          </button>
+          <button
+            onClick={() => download("md")}
+            className={convBtn}
+            title="Download Markdown"
+          >
+            MD
+          </button>
+        </>
+      )}
+    </span>
+  );
+}
+
 /** Bates-style margin numbering — every turn in the record gets a locator. */
 const bates = (n: number) => String(n + 1).padStart(3, "0");
 
@@ -95,6 +164,13 @@ function Turn({
           <div className="mt-3 flex flex-wrap gap-2">
             {msg.files.map((f) => (
               <FileChip key={f} name={f} matterId={matterId} />
+            ))}
+          </div>
+        )}
+        {!isUser && msg.docs && msg.docs.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {msg.docs.map((d) => (
+              <DocChip key={d.name} name={d.name} content={d.content} />
             ))}
           </div>
         )}
