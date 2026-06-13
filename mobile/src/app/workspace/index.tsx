@@ -1,4 +1,5 @@
 import TextRecognition from "@react-native-ml-kit/text-recognition";
+import * as DocumentPicker from "expo-document-picker";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import * as Speech from "expo-speech";
@@ -20,7 +21,7 @@ import { ThemedText } from "@/components/themed-text";
 import { Radius, Spacing } from "@/constants/theme";
 import { useMatters } from "@/hooks/use-matters";
 import { useTheme } from "@/hooks/use-theme";
-import { streamChat } from "@/lib/api";
+import { extractDocument, streamChat } from "@/lib/api";
 import { agentName } from "@/lib/agents";
 import type { Msg } from "@/lib/store";
 
@@ -81,12 +82,49 @@ export default function Assistant() {
     if (!res.canceled && a?.uri) void recognizeUri(a.uri);
   }
 
+  async function chooseDocument() {
+    const res = await DocumentPicker.getDocumentAsync({
+      type: [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+        "text/markdown",
+      ],
+      copyToCacheDirectory: true,
+    });
+    const a = res.assets?.[0];
+    if (res.canceled || !a) return;
+    setReading(true);
+    setStatus("Reading document…");
+    try {
+      const text = await extractDocument(
+        a.uri,
+        a.name,
+        a.mimeType || "application/octet-stream",
+      );
+      if (text) {
+        setDraft((d) => (d ? `${d}\n\n${text}` : text));
+      } else {
+        Alert.alert("Nothing found", "I couldn't read any text from that file.");
+      }
+    } catch (e) {
+      Alert.alert(
+        "Couldn't read it",
+        e instanceof Error ? e.message : "Try a PDF, Word doc, or text file.",
+      );
+    } finally {
+      setReading(false);
+      setStatus(null);
+    }
+  }
+
   function attach() {
     if (streaming || reading) return;
     Haptics.selectionAsync().catch(() => {});
-    Alert.alert("Scan a document", "Read text from a photo into this matter.", [
+    Alert.alert("Add a document", "Read a document into this matter.", [
       { text: "Scan with camera", onPress: () => void scanCamera() },
       { text: "Choose a photo", onPress: () => void choosePhoto() },
+      { text: "Choose a file (PDF, Word)", onPress: () => void chooseDocument() },
       { text: "Cancel", style: "cancel" },
     ]);
   }

@@ -88,6 +88,31 @@ export async function ocrImage(
   return (j.text ?? "").trim();
 }
 
+/**
+ * Send a picked document (PDF / Word / text) to the backend extractor and get
+ * its plain text back, so the agent can review or revise it.
+ */
+export async function extractDocument(
+  uri: string,
+  name: string,
+  mimeType: string,
+): Promise<string> {
+  const form = new FormData();
+  // RN multipart file part
+  form.append("files", { uri, name, type: mimeType } as unknown as Blob);
+  const res = await expoFetch(`${API_BASE}/api/files/extract`, {
+    method: "POST",
+    body: form as unknown as BodyInit,
+  });
+  const j = (await res.json().catch(() => ({}))) as {
+    docs?: { name: string; text: string; error?: string }[];
+  };
+  if (!res.ok) throw new Error("Couldn't read that document.");
+  const d = j.docs?.[0];
+  if (d?.error) throw new Error(d.error);
+  return (d?.text ?? "").trim();
+}
+
 /** Read a local file URI (from a picker) into raw base64, via fetch + FileReader. */
 export async function uriToBase64(uri: string): Promise<string> {
   const res = await fetch(uri);
