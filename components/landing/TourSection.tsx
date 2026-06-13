@@ -25,7 +25,7 @@ export default function TourSection() {
   if (!TOUR_ENABLED) return null;
 
   return (
-    <section className="px-6 py-20 sm:py-28">
+    <section className="px-6 py-24 sm:py-32">
       <div ref={ref} className="mx-auto max-w-4xl">
         <div className={revealClass(shown)}>
           <p className="text-center font-mono text-[11px] tracking-[0.28em] text-accent uppercase">

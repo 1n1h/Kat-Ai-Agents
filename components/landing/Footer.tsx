@@ -1,13 +1,13 @@
 "use client";
 
+import { FirmMark } from "@/components/FirmLogo";
+
 export default function Footer() {
   return (
-    <footer className="border-t border-line px-6 py-10">
+    <footer className="px-6 py-10">
       <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-wash">
-            <span className="font-serif text-[13px] text-accent">✳</span>
-          </span>
+          <FirmMark className="h-6 w-6 text-accent" />
           <span className="font-serif text-[15px] text-ink">
             Sheehe <span className="text-accent">&amp;</span> Associates
           </span>

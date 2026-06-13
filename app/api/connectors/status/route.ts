@@ -6,9 +6,12 @@ export const runtime = "nodejs";
 export async function GET(req: NextRequest) {
   // one Google grant covers Gmail + Drive + Calendar
   const google = Boolean(req.cookies.get("g_refresh")?.value);
+  // one Microsoft grant covers Outlook (mail/calendar) + Microsoft 365 (files)
+  const microsoft = Boolean(req.cookies.get("ms_refresh")?.value);
   return NextResponse.json({
     dropbox: Boolean(req.cookies.get("dbx_refresh")?.value),
-    outlook: Boolean(req.cookies.get("ms_refresh")?.value),
+    outlook: microsoft,
+    m365: microsoft,
     gmail: google,
     gdrive: google,
     calendar: google,
@@ -20,7 +23,7 @@ export async function POST(req: NextRequest) {
   const { id } = (await req.json().catch(() => ({}))) as { id?: string };
   const res = NextResponse.json({ ok: true });
   if (id === "dropbox") res.cookies.delete("dbx_refresh");
-  if (id === "outlook") res.cookies.delete("ms_refresh");
+  if (id === "outlook" || id === "m365") res.cookies.delete("ms_refresh");
   if (id === "gmail" || id === "gdrive" || id === "calendar") {
     res.cookies.delete("g_refresh");
   }

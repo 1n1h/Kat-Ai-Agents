@@ -39,7 +39,10 @@
   border-radius: 18px;
   overflow: hidden;
   background: var(--bg);
-  height: 640px;
+  /* 16:9 — matches the aspect-video used by every other card on the page, and
+     gives the agent rail (nodes + names + spotlight panels, laid out down to
+     ~500px) the height it needs. A shorter banner clips the stations. */
+  aspect-ratio: 16 / 9;
 }
 
 .cos-orch .ticker {

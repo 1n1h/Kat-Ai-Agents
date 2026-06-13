@@ -65,6 +65,21 @@ const identityNote = (id: Exclude<AgentId, "auto">) =>
   `a personal first name or persona name.]`;
 
 /**
+ * Identity suppression for the LOCAL orchestrator. The persona .md files name
+ * the orchestrator and specialists (Atlas, Sol, Cass, Lex, Vera); the user must
+ * never hear those — only the professional roles. (The cloud path enforces the
+ * same via ORCH_CLOUD_PROMPT + identityNote.)
+ */
+const ORCH_IDENTITY_NOTE =
+  "\n\n[Identity: you are the firm's orchestrator and speak in one steady " +
+  "voice. You have no personal name, and neither do your specialists as far " +
+  "as the user is concerned. NEVER reveal internal agent, model, or persona " +
+  "names (e.g. Atlas, Sol, Cass, Lex, Vera) and never describe your internal " +
+  "tooling or skills. If asked who you are or how you work, refer to the " +
+  "specialists only by their professional roles: Litigation Analysis, " +
+  "Contract Review, Drafting, Citation Check, and Practice Strategy.]";
+
+/**
  * Cloud orchestrator persona. The local install runs the real Atlas via the
  * Agent SDK's Task tool; here we reproduce the single-voice contract on the
  * direct API: the user only ever talks to the orchestrator, which consults
@@ -481,8 +496,22 @@ export async function POST(req: NextRequest) {
           options: {
             cwd,
             permissionMode: "bypassPermissions",
+            // Isolation: the local Agent SDK otherwise inherits the developer's
+            // own Claude config (CLI default loads all settings sources), which
+            // leaks their personal claude.ai MCP connectors — Asana, Figma,
+            // Box, Docusign, etc. — into the legal workspace and makes the agent
+            // advertise tools that don't exist in the cloud (direct-API) path.
+            // Lock it to ONLY the in-process `connectors` server so localhost
+            // matches production exactly.
+            settingSources: [],
+            strictMcpConfig: true,
+            // don't expose dev-environment skills to the legal agent
+            skills: [],
             systemPrompt:
-              (isAuto ? ORCHESTRATOR_PROMPT : spec!.prompt) +
+              (isAuto
+                ? ORCHESTRATOR_PROMPT + ORCH_IDENTITY_NOTE
+                : spec!.prompt +
+                  identityNote(agentId as Exclude<AgentId, "auto">)) +
               firmContext(userEmail) +
               profileCtx +
               toolGuidance(tokens),

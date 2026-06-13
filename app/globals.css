@@ -77,6 +77,28 @@ body {
   background-size: 24px 24px;
 }
 
+/* subtle triangular tessellation — a faint brass mesh over the paper field.
+   Three sets of thin parallel lines (0°/60°/120°) form an equilateral grid. */
+.tessellate {
+  background-color: var(--color-paper);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--color-accent) 8%, transparent) 0 1px,
+      transparent 1px 52px
+    ),
+    repeating-linear-gradient(
+      60deg,
+      color-mix(in srgb, var(--color-accent) 8%, transparent) 0 1px,
+      transparent 1px 52px
+    ),
+    repeating-linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-accent) 8%, transparent) 0 1px,
+      transparent 1px 52px
+    );
+}
+
 ::selection {
   background: var(--color-accent-wash);
   color: var(--color-accent);
@@ -485,6 +507,19 @@ body {
 @keyframes marquee {
   to {
     transform: translateX(-50%);
+  }
+}
+
+/* vertical marquee — identical stacked segments scroll up/down seamlessly
+   (used by the testimonials wall) */
+@keyframes cosVMarquee {
+  to {
+    transform: translateY(calc(-100% - 1rem));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cos-vcol {
+    animation: none !important;
   }
 }
 

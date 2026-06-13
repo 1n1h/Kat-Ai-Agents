@@ -398,6 +398,112 @@ export const CONNECTOR_TOOLS: ToolSpec[] = [
     },
   },
 
+  /* ── Microsoft 365 / OneDrive (same Microsoft grant as Outlook) ── */
+  {
+    name: "onedrive_search",
+    connector: "outlook",
+    description:
+      "Search the connected Microsoft 365 OneDrive for files (Word, Excel, " +
+      "PDF, etc.) by name or content. Returns item ids for onedrive_read.",
+    params: {
+      query: { type: "string", description: "Search terms", required: true },
+    },
+    exec: async (input, access) => {
+      const q = encodeURIComponent(str(input.query).replace(/'/g, ""));
+      const res = await fetch(
+        `https://graph.microsoft.com/v1.0/me/drive/root/search(q='${q}')?$top=20&$select=id,name,size,folder,webUrl,lastModifiedDateTime`,
+        { headers: { Authorization: `Bearer ${access}` } },
+      );
+      if (!res.ok) {
+        return res.status === 403
+          ? "Microsoft 365 file access not granted — disconnect and reconnect Microsoft 365 in Connectors to add Files permission."
+          : `OneDrive search failed (${res.status}).`;
+      }
+      const data = (await res.json()) as {
+        value?: {
+          id: string;
+          name: string;
+          size?: number;
+          folder?: unknown;
+          lastModifiedDateTime?: string;
+        }[];
+      };
+      const rows = (data.value ?? []).map(
+        (f) =>
+          `[${f.id}] ${f.folder ? "📁" : "📄"} ${f.name}${
+            f.size != null ? ` (${f.size} bytes)` : ""
+          } — modified ${f.lastModifiedDateTime}`,
+      );
+      return rows.length ? rows.join("\n") : "No matches.";
+    },
+  },
+  {
+    name: "onedrive_list",
+    connector: "outlook",
+    description:
+      "List a OneDrive folder's contents. Leave itemId empty for the root; " +
+      "pass a folder's id (from onedrive_search/onedrive_list) to go deeper.",
+    params: {
+      itemId: {
+        type: "string",
+        description: "Folder item id — empty for the drive root",
+      },
+    },
+    exec: async (input, access) => {
+      const id = str(input.itemId);
+      const base = id
+        ? `https://graph.microsoft.com/v1.0/me/drive/items/${encodeURIComponent(id)}/children`
+        : "https://graph.microsoft.com/v1.0/me/drive/root/children";
+      const res = await fetch(
+        `${base}?$top=100&$select=id,name,size,folder,file,lastModifiedDateTime`,
+        { headers: { Authorization: `Bearer ${access}` } },
+      );
+      if (!res.ok) {
+        return res.status === 403
+          ? "Microsoft 365 file access not granted — reconnect Microsoft 365 in Connectors."
+          : `OneDrive list failed (${res.status}) — check the id.`;
+      }
+      const data = (await res.json()) as {
+        value?: { id: string; name: string; size?: number; folder?: unknown }[];
+      };
+      const rows = (data.value ?? []).map(
+        (e) =>
+          `[${e.id}] ${e.folder ? "📁" : "📄"} ${e.name}${
+            e.size != null ? ` (${e.size} bytes)` : ""
+          }`,
+      );
+      return rows.length ? rows.join("\n") : "Empty folder.";
+    },
+  },
+  {
+    name: "onedrive_read",
+    connector: "outlook",
+    description:
+      "Read a text-based file (txt, md, csv, json, html...) from OneDrive by " +
+      "item id (from onedrive_search). Binary formats like Word (.docx) and " +
+      "PDF can't be read as text this way — say so and suggest the user " +
+      "upload them into the case instead.",
+    params: {
+      itemId: { type: "string", description: "Drive item id", required: true },
+    },
+    exec: async (input, access) => {
+      const id = encodeURIComponent(str(input.itemId));
+      const res = await fetch(
+        `https://graph.microsoft.com/v1.0/me/drive/items/${id}/content`,
+        { headers: { Authorization: `Bearer ${access}` } },
+      );
+      if (!res.ok) return `OneDrive download failed (${res.status}) — check the id.`;
+      const buf = Buffer.from(await res.arrayBuffer());
+      const slice = buf.subarray(0, 200000);
+      let nulls = 0;
+      for (const b of slice.subarray(0, 2000)) if (b === 0) nulls++;
+      if (nulls > 10) {
+        return "This is a binary file (Word/PDF/image) — it can't be read as text here. Ask the user to upload it into the case working directory instead.";
+      }
+      return cap(slice.toString("utf-8"));
+    },
+  },
+
   /* ── Gmail ── */
   {
     name: "gmail_search",

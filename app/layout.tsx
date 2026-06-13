@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Serif_4, Archivo, IBM_Plex_Mono, Inter } from "next/font/google";
+import {
+  Source_Serif_4,
+  Archivo,
+  IBM_Plex_Mono,
+  Inter,
+  Bricolage_Grotesque,
+  Anton,
+} from "next/font/google";
 import "./globals.css";
 import PwaRegister from "@/components/PwaRegister";
 
@@ -28,6 +35,22 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   weight: ["400", "500", "600", "700"],
+});
+
+// Display font — the landing hero headline only. Distinctive, confident
+// grotesque that stands apart from the serif body and reads as a direct,
+// modern statement.
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["600", "700", "800"],
+});
+
+// Impact face for the hero headline — heavy, condensed, unmistakable.
+const anton = Anton({
+  subsets: ["latin"],
+  variable: "--font-impact",
+  weight: ["400"],
 });
 
 export const viewport: Viewport = {
@@ -76,7 +99,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${sourceSerif.variable} ${archivo.variable} ${plexMono.variable} ${inter.variable} antialiased`}
+        className={`${sourceSerif.variable} ${archivo.variable} ${plexMono.variable} ${inter.variable} ${bricolage.variable} ${anton.variable} antialiased`}
       >
         {/* dark is the default; apply .light before paint if the user chose it */}
         <script

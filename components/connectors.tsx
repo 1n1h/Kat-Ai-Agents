@@ -46,6 +46,8 @@ export const CONNECTORS: Connector[] = [
 const FLOW_ALIAS: Record<string, string> = {
   gdrive: "gmail",
   calendar: "gmail",
+  // one Microsoft grant covers Outlook (mail/calendar) + Microsoft 365 (files)
+  m365: "outlook",
 };
 
 export function ConnectorsDialog({
@@ -59,6 +61,7 @@ export function ConnectorsDialog({
   const CONNECTABLE = new Set([
     "dropbox",
     "outlook",
+    "m365",
     "gmail",
     "gdrive",
     "calendar",

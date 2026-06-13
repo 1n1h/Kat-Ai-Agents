@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { FirmMark } from "@/components/FirmLogo";
 import {
   authErrorMessage,
   signInWithEmail,
@@ -71,9 +72,7 @@ export default function AuthDialog({
           <X className="h-4.5 w-4.5" />
         </button>
 
-        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-accent-wash shadow-lg">
-          <span className="font-serif text-2xl text-accent">✳</span>
-        </div>
+        <FirmMark className="mb-5 h-12 w-12 text-accent" />
         <h2 className="font-serif text-2xl text-ink">
           {mode === "signin" ? "Welcome back" : "Create your account"}
         </h2>
