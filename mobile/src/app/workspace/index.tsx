@@ -10,12 +10,11 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import * as Speech from "expo-speech";
 import { SymbolView } from "expo-symbols";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
+  Keyboard,
   Pressable,
   ScrollView,
   TextInput,
@@ -31,9 +30,6 @@ import { extractDocument, streamChat, transcribeAudio } from "@/lib/api";
 import { agentName } from "@/lib/agents";
 import type { Msg } from "@/lib/store";
 
-/** Approx. height of the floating native tab bar, so the composer clears it. */
-const TAB_BAR_SPACE = 52;
-
 export default function Assistant() {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
@@ -45,8 +41,22 @@ export default function Assistant() {
   const [reading, setReading] = useState(false);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
+  const [kbHeight, setKbHeight] = useState(0);
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const scrollRef = useRef<ScrollView>(null);
+
+  // Track the keyboard so the composer sits flush on top of it (no gap),
+  // and on the tab bar when it's down — same approach as the reference app.
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardWillShow", (e) =>
+      setKbHeight(e.endCoordinates.height),
+    );
+    const hide = Keyboard.addListener("keyboardWillHide", () => setKbHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   const messages = active?.messages ?? [];
   const empty = messages.length === 0 && !live;
@@ -239,11 +249,7 @@ export default function Assistant() {
   return (
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={8}
-        >
+        <View style={{ flex: 1, paddingBottom: kbHeight }}>
           {/* header */}
           <View
             style={{
@@ -321,12 +327,15 @@ export default function Assistant() {
             )}
           </ScrollView>
 
-          {/* composer — a floating rounded pill that clears the tab bar */}
+          {/* composer — flush on the keyboard when open, on the tab bar when not */}
           <View
             style={{
               paddingHorizontal: Spacing.lg,
               paddingTop: Spacing.sm,
-              paddingBottom: insets.bottom + TAB_BAR_SPACE,
+              paddingBottom:
+                kbHeight > 0
+                  ? Spacing.xs
+                  : Math.max(insets.bottom, Spacing.sm) + Spacing.xs,
             }}
           >
             <View
@@ -445,7 +454,7 @@ export default function Assistant() {
               )}
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </View>
   );

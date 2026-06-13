@@ -100,7 +100,9 @@ export async function extractDocument(
   const form = new FormData();
   // RN multipart file part
   form.append("files", { uri, name, type: mimeType } as unknown as Blob);
-  const res = await expoFetch(`${API_BASE}/api/files/extract`, {
+  // Multipart uploads must use RN's global fetch — expo/fetch can't serialize
+  // a {uri,name,type} file part ("Unsupported FormDataPart implementation").
+  const res = await fetch(`${API_BASE}/api/files/extract`, {
     method: "POST",
     body: form as unknown as BodyInit,
   });
@@ -121,7 +123,8 @@ export async function transcribeAudio(uri: string): Promise<string> {
     name: "dictation.m4a",
     type: "audio/m4a",
   } as unknown as Blob);
-  const res = await expoFetch(`${API_BASE}/api/stt`, {
+  // Global fetch (not expo/fetch) for multipart file uploads.
+  const res = await fetch(`${API_BASE}/api/stt`, {
     method: "POST",
     body: form as unknown as BodyInit,
   });
