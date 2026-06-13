@@ -148,7 +148,7 @@ export default function InstallButton({
           >
             <div className="flex items-start justify-between gap-3">
               <p className="font-mono text-[10px] tracking-[0.22em] text-accent uppercase">
-                Install Sheehe AI
+                Install Lex
               </p>
               <button
                 onClick={() => setHelpOpen(false)}
@@ -170,7 +170,7 @@ export default function InstallButton({
                 <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
                 <span>
                   Or open the browser menu →{" "}
-                  <strong className="text-ink">Install Sheehe AI</strong>.
+                  <strong className="text-ink">Install Lex</strong>.
                 </span>
               </li>
               <li className="flex gap-2">

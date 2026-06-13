@@ -1,7 +1,7 @@
 {
-  "name": "Sheehe & Associates — AI Workspace",
-  "short_name": "Sheehe AI",
-  "description": "Your firm's AI legal team — research, drafting, and citation check, orchestrated and verified.",
+  "name": "Lex — AI workspace for attorneys",
+  "short_name": "Lex",
+  "description": "An AI legal team — research, drafting, and citation check, orchestrated and verified.",
   "id": "/?source=pwa",
   "start_url": "/?source=pwa",
   "scope": "/",

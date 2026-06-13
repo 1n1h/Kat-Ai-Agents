@@ -5,7 +5,7 @@
   the `.light` class on <html> switches to the paper palette.
 */
 @theme {
-  /* Sheehe & Associates: deep litigation navy with brass accents */
+  /* Lex: deep litigation navy with brass accents */
   --color-paper: #0f1b26;
   --color-panel: #0a141d;
   --color-panel-deep: #182a3b;

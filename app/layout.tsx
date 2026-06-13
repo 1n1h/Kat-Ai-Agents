@@ -64,14 +64,14 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Sheehe & Associates — AI Workspace",
+  title: "Lex — AI workspace for attorneys",
   description:
     "A team of legal specialists — litigation analysis, contract review, drafting, and citation check — orchestrated under one system that delegates, sequences, and verifies. Every finding cited; every draft audited.",
   manifest: "/manifest.webmanifest",
-  applicationName: "Sheehe AI",
+  applicationName: "Lex",
   appleWebApp: {
     capable: true,
-    title: "Sheehe AI",
+    title: "Lex",
     statusBarStyle: "black-translucent",
   },
   icons: {
@@ -79,15 +79,15 @@ export const metadata: Metadata = {
     apple: [{ url: "/icon.svg" }],
   },
   openGraph: {
-    title: "Sheehe & Associates — AI Workspace",
+    title: "Lex — AI workspace for attorneys",
     description:
       "Specialist legal AI agents, orchestrated, cited, and verified. You speak to the orchestrator; it runs the rest.",
-    siteName: "Sheehe & Associates",
+    siteName: "Lex",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sheehe & Associates — AI Workspace",
+    title: "Lex — AI workspace for attorneys",
     description:
       "Specialist legal AI agents, orchestrated, cited, and verified.",
   },

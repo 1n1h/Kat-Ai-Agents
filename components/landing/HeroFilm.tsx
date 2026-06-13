@@ -50,7 +50,7 @@ export default function HeroFilm() {
     <div
       className="relative mx-auto w-full overflow-hidden rounded-2xl border border-line-strong bg-panel shadow-2xl"
       style={{ aspectRatio: `${FILM_W} / ${FILM_H}` }}
-      aria-label="Sheehe & Associates AI workspace — orchestration overview"
+      aria-label="Lex AI workspace — orchestration overview"
     >
       {reduced === null ? (
         // pre-hydration / measuring: brand-colored placeholder, no layout shift

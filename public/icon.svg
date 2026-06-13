@@ -2,5 +2,5 @@
   <rect width="512" height="512" rx="104" fill="#0f1b26"/>
   <circle cx="256" cy="256" r="190" fill="none" stroke="#c9a55c" stroke-width="14"/>
   <circle cx="256" cy="256" r="152" fill="none" stroke="#c9a55c" stroke-width="5" opacity="0.5"/>
-  <text x="256" y="344" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="248" font-style="italic" fill="#c9a55c">S</text>
+  <text x="256" y="344" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="248" font-style="italic" fill="#c9a55c">L</text>
 </svg>

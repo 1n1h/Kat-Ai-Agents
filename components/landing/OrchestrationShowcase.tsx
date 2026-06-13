@@ -148,7 +148,7 @@ export default function OrchestrationShowcase() {
       tl = gsap.timeline({ delay: 0.5, repeat: -1, repeatDelay: 3.2 });
 
       /* SCENE 1 · the UI */
-      tl.call(setT("COUNSELOS"));
+      tl.call(setT("LEX"));
       tl.call(setT("ATTACHING DOCUMENT"), undefined, "+=.4")
         .to(q("#plusBtn"), {
           scale: 0.78,
@@ -161,7 +161,7 @@ export default function OrchestrationShowcase() {
         .to(q("#fbarFill"), { width: "100%", duration: 0.8, ease: "power1.inOut" })
         .to(q("#fdone"), { opacity: 1, duration: 0.25 })
         .fromTo(q("#fdone"), { scale: 1.6 }, { scale: 1, duration: 0.25, ease: "back.out(2)" }, "<");
-      tl.call(setT("COUNSELOS"), undefined, "+=.3");
+      tl.call(setT("LEX"), undefined, "+=.3");
       typeText(tl, q("#typed"), PROMPT, 2.3);
       tl.to(q("#send"), { scale: 0.85, duration: 0.1, yoyo: true, repeat: 1 }).set(
         q("#caret"),
@@ -528,8 +528,8 @@ export default function OrchestrationShowcase() {
         <div className="ui-scene" id="uiScene">
           <div className="sidebar">
             <div className="logo">
-              <b>Counsel</b>
-              <span>OS</span>
+              <b>Le</b>
+              <span>x</span>
             </div>
             <div className="side-item">
               <svg viewBox="0 0 24 24">
@@ -665,7 +665,7 @@ export default function OrchestrationShowcase() {
                 verify every citation.
               </div>
               <div className="msg reply" id="reply">
-                <div className="rh">Sheehe &amp; Associates · Orchestrated</div>
+                <div className="rh">Lex · Orchestrated</div>
                 <div className="rl">
                   <span>01</span>3 risk clauses flagged — severity ranked (§8.2,
                   §11.4, §14.1)
@@ -687,7 +687,7 @@ export default function OrchestrationShowcase() {
 
         <div className="ticker">
           <div className="ticker-box">
-            <span id="tickerText">COUNSELOS</span>
+            <span id="tickerText">LEX</span>
             <span className="cursor" />
           </div>
         </div>

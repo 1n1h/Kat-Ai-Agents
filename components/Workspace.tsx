@@ -39,6 +39,7 @@ import {
   watchWorkspace,
 } from "@/lib/firestoreStore";
 import FirmLogo, { FirmMark } from "./FirmLogo";
+import Tooltip from "./Tooltip";
 import {
   getMyProfile,
   hasAccessGrant,
@@ -1100,6 +1101,70 @@ export default function Workspace() {
         </div>
       </aside>
 
+      {/* ── collapsed icon rail (desktop, when the sidebar is closed) ── */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 hidden w-14 shrink-0 flex-col items-center border-r border-line bg-panel py-4 md:static ${
+          sidebarOpen ? "md:hidden" : "md:flex"
+        }`}
+      >
+        <Tooltip label="Open sidebar">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+          >
+            <PanelLeft className="h-5 w-5" />
+          </button>
+        </Tooltip>
+
+        <div className="mt-5 flex flex-col items-center gap-1">
+          <Tooltip label="New thread">
+            <button
+              onClick={() => setThreadId(null)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          </Tooltip>
+          <Tooltip label="Cases">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+            >
+              <Briefcase className="h-[18px] w-[18px]" />
+            </button>
+          </Tooltip>
+          <Tooltip label="Connectors">
+            <button
+              onClick={() => setConnectorsOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+            >
+              <Cable className="h-5 w-5" />
+            </button>
+          </Tooltip>
+        </div>
+
+        <Tooltip label={fullName} className="mt-auto">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-full ring-offset-2 transition hover:ring-2 hover:ring-accent/40"
+          >
+            {user?.photoURL ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={user.photoURL}
+                alt={fullName}
+                referrerPolicy="no-referrer"
+                className="h-9 w-9 rounded-full border border-line object-cover"
+              />
+            ) : (
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-wash font-serif text-base text-accent">
+                {fullName.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </button>
+        </Tooltip>
+      </aside>
+
       {/* ── main ──────────────────────────────────────────────── */}
       <main className="grain flex min-w-0 flex-1 flex-col">
         <header className="rise rise-2 flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -1108,7 +1173,7 @@ export default function Workspace() {
               <button
                 onClick={() => setSidebarOpen(true)}
                 title="Open sidebar"
-                className="shrink-0 rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+                className="shrink-0 rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-deep hover:text-ink md:hidden"
               >
                 <PanelLeft className="h-4.5 w-4.5" />
               </button>

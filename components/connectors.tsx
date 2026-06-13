@@ -12,7 +12,7 @@ import {
 } from "react-icons/si";
 
 /**
- * Connectors for this firm's actual stack (Sheehe & Associates):
+ * Connectors for the firm's connected stack:
  * Microsoft 365 / Outlook, MyCase, Dropbox — plus the Google family.
  * UI is wired now; OAuth / API configuration arrives in a later phase.
  */

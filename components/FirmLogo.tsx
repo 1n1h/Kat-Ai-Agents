@@ -1,7 +1,6 @@
 /**
- * Sheehe & Associates lockup, recreated from the firm's logo (S-monogram
- * seal · divider · name) as theme-aware SVG/JSX so it stays crisp on the
- * navy and cream themes alike.
+ * Lex lockup — an L-monogram seal · divider · wordmark, as theme-aware SVG/JSX
+ * so it stays crisp on the navy and cream themes alike.
  */
 
 export function FirmMark({ className }: { className?: string }) {
@@ -33,7 +32,7 @@ export function FirmMark({ className }: { className?: string }) {
         fontStyle="italic"
         fill="currentColor"
       >
-        S
+        L
       </text>
     </svg>
   );
@@ -59,7 +58,7 @@ export default function FirmLogo({
       <FirmMark className={`${mark} shrink-0 text-accent`} />
       <span className={`w-px self-stretch bg-line-strong ${divider} my-auto`} />
       <span className={`font-serif text-ink uppercase ${name} leading-snug`}>
-        Sheehe &amp; Associates, P.A.
+        Lex <span className="text-[#16304d]">&amp;</span> Co.
       </span>
     </span>
   );

@@ -9,15 +9,14 @@ export default function Footer() {
         <div className="flex items-center gap-2">
           <FirmMark className="h-6 w-6 text-accent" />
           <span className="font-serif text-[15px] text-ink">
-            Sheehe <span className="text-accent">&amp;</span> Associates
+            Lex <span className="text-[#16304d]">&amp;</span> Co.
           </span>
         </div>
         <p className="font-mono text-[11px] tracking-[0.16em] text-faint uppercase">
-          Privileged &amp; confidential · Experience. Knowledge. Strategy.
+          Privileged &amp; confidential · Cited. Verified. On the record.
         </p>
         <p className="text-[12px] text-muted">
-          © {new Date().getFullYear()} Sheehe &amp; Associates, P.A. · Powered
-          by CounselOS
+          © {new Date().getFullYear()} Lex
         </p>
       </div>
     </footer>

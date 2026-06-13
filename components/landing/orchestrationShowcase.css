@@ -1,6 +1,6 @@
 /* Scoped styles for the orchestration showcase. Everything is namespaced under
    .cos-orch so none of these generic class names leak into the rest of the app.
-   Fonts are mapped to the CounselOS type stack. */
+   Fonts are mapped to the Lex type stack. */
 
 .cos-orch {
   --bg: #1d1e19;

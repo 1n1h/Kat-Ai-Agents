@@ -118,7 +118,7 @@ export default function Hero({ onSignIn }: { onSignIn: () => void }) {
 
         {/* headline — centered, stacked; the two lines part on scroll */}
         <h1
-          className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-1 text-center uppercase leading-[0.9] tracking-wide text-[3.5rem] sm:text-8xl md:text-[7.5rem]"
+          className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-1 text-center uppercase leading-[0.9] tracking-wide text-[2.4rem] sm:text-6xl md:text-[5.5rem]"
           style={{
             fontFamily: "var(--font-impact)",
             // bright brass, hardcoded: this sits over the dark footage, so it
@@ -128,8 +128,10 @@ export default function Hero({ onSignIn }: { onSignIn: () => void }) {
               "0 2px 10px rgba(0,0,0,0.55), 0 6px 44px rgba(0,0,0,0.6)",
           }}
         >
-          <span ref={leftRef}>Seven</span>
-          <span ref={rightRef}>AI Agents</span>
+          <span ref={leftRef}>
+            Lex <span style={{ color: "#3a6098" }}>&amp;</span> Co.
+          </span>
+          <span ref={rightRef}>AI Case Management</span>
         </h1>
 
         {/* brand lockup — under the card; the two lines part in sync with the

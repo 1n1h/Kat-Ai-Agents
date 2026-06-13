@@ -263,10 +263,10 @@ export const HeroFilm: React.FC = () => {
               marginBottom: 18,
             }}
           >
-            Sheehe &amp; Associates
+            Lex
           </div>
           <div style={{ fontSize: 52, color: INK, letterSpacing: 0.5 }}>
-            Experience. Knowledge. Strategy.
+            Cited. Verified. On the record.
           </div>
         </div>
       </AbsoluteFill>
