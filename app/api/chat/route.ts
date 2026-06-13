@@ -23,6 +23,12 @@ import {
   researchGuidance,
   availableResearchTools,
 } from "@/lib/researchTools";
+import {
+  togetherEnabled,
+  isProviderDown,
+  streamTogether,
+  togetherCheapModel,
+} from "@/lib/llm";
 
 export const runtime = "nodejs";
 export const maxDuration = 600;
@@ -44,7 +50,17 @@ interface ChatRequest {
   userProfile?: string | null;
   /** long-term memory for this matter (client-persisted, injected as context) */
   matterMemory?: string | null;
+  /** force a provider — "together" runs the cheap model directly (mobile). */
+  provider?: "together";
 }
+
+/** Lightweight, tool-less assistant prompt for the direct cheap-model path. */
+const DIRECT_PROMPT =
+  "You are Lex, an AI legal assistant for attorneys. Answer clearly, " +
+  "accurately, and concisely in plain prose. In this mode you have no tools " +
+  "or document access; if a request needs a citation you can't verify or a " +
+  "file you don't have, say what you'd need rather than guessing. Never " +
+  "fabricate case citations or quotes. No em dashes.";
 
 const VOICE_NOTE =
   "\n\n[Voice mode: the user is speaking aloud and will hear this reply as " +
@@ -340,6 +356,9 @@ async function cloudChat(
 
   const stream = new ReadableStream({
     async start(controller) {
+      // tracked across both paths so the fallback only fires if Anthropic
+      // produced nothing (avoids a doubled answer after partial output)
+      let streamedAny = false;
       try {
         if (!isAuto) {
           // Direct specialist: stream its reply, persona name kept internal.
@@ -348,7 +367,6 @@ async function cloudChat(
           const spec = SPECIALISTS[id];
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const turns: any[] = [...convo];
-          let streamedAny = false;
           for (let hop = 0; hop < 5; hop++) {
             const s = client.messages.stream({
               model: modelFor(id),
@@ -496,7 +514,10 @@ async function cloudChat(
           );
           if (resp.stop_reason !== "tool_use" || calls.length === 0) {
             const final = textOf(resp.content);
-            if (final) controller.enqueue(line({ t: "text", text: final }));
+            if (final) {
+              streamedAny = true;
+              controller.enqueue(line({ t: "text", text: final }));
+            }
             break;
           }
 
@@ -582,10 +603,40 @@ async function cloudChat(
 
         controller.enqueue(line({ t: "done" }));
       } catch (err) {
+        // Anthropic failed. If nothing reached the user yet and Together AI is
+        // configured, answer from the backup model (text-only — no tools).
+        if (!streamedAny && togetherEnabled()) {
+          try {
+            const sys = isAuto
+              ? ORCH_CLOUD_PROMPT + firmCtx
+              : SPECIALISTS[agentId as SpecialistId].prompt +
+                identityNote(agentId as SpecialistId) +
+                firmCtx;
+            controller.enqueue(line({ t: "status", text: "backup engine" }));
+            let any = false;
+            await streamTogether({
+              system: sys,
+              messages: convo,
+              maxTokens: 4000,
+              onText: (t) => {
+                any = true;
+                controller.enqueue(line({ t: "delta", text: t }));
+              },
+            });
+            if (any) {
+              controller.enqueue(line({ t: "done" }));
+              return;
+            }
+          } catch {
+            /* backup also failed — fall through to the graceful notice */
+          }
+        }
         controller.enqueue(
           line({
             t: "error",
-            text: err instanceof Error ? err.message : String(err),
+            text: isProviderDown(err)
+              ? "The assistant is temporarily unavailable — the model provider is over capacity or out of credits. Please try again shortly."
+              : "Something went wrong handling that request. Please try again.",
           }),
         );
       } finally {
@@ -618,6 +669,7 @@ export async function POST(req: NextRequest) {
     userEmail,
     userProfile,
     matterMemory,
+    provider,
   } = (await req.json()) as ChatRequest;
   const profileCtx = userProfile
     ? `\n\n[CURRENT USER — self-onboarded employee profile. Address them by name and tailor work to their role.]\n${userProfile.slice(0, 1500)}`
@@ -631,6 +683,58 @@ export async function POST(req: NextRequest) {
   const extraCtx = profileCtx + matterCtx;
   if (!messages?.length) {
     return Response.json({ error: "No messages." }, { status: 400 });
+  }
+
+  // Cheap direct path (mobile): stream straight from Together, no tools, no
+  // Anthropic. Keeps the phone fast and independent of the API credit balance.
+  if (provider === "together") {
+    if (!togetherEnabled()) {
+      return Response.json(
+        { error: "Backup model is not configured." },
+        { status: 500 },
+      );
+    }
+    const convo = messages.map(({ role, content }) => ({ role, content }));
+    const sys =
+      DIRECT_PROMPT + firmContext(userEmail) + extraCtx + (voice ? VOICE_NOTE : "");
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          let any = false;
+          await streamTogether({
+            system: sys,
+            messages: convo,
+            maxTokens: 2000,
+            model: togetherCheapModel(),
+            onText: (t) => {
+              any = true;
+              controller.enqueue(line({ t: "delta", text: t }));
+            },
+          });
+          if (!any) {
+            controller.enqueue(
+              line({ t: "text", text: "I couldn't generate a reply. Please try again." }),
+            );
+          }
+          controller.enqueue(line({ t: "done" }));
+        } catch {
+          controller.enqueue(
+            line({
+              t: "error",
+              text: "The assistant is temporarily unavailable. Please try again shortly.",
+            }),
+          );
+        } finally {
+          controller.close();
+        }
+      },
+    });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "application/x-ndjson; charset=utf-8",
+        "Cache-Control": "no-cache",
+      },
+    });
   }
 
   // the agent runtime is excluded from cloud deploys (function size limit);
@@ -659,6 +763,16 @@ export async function POST(req: NextRequest) {
 
   const isAuto = agentId === "auto" || !SPECIALISTS[agentId as never];
   const spec = isAuto ? null : SPECIALISTS[agentId as Exclude<AgentId, "auto">];
+
+  // shared so the Together backup can reuse the same persona + context
+  const localSystem =
+    (isAuto
+      ? ORCHESTRATOR_PROMPT + ORCH_IDENTITY_NOTE
+      : spec!.prompt + identityNote(agentId as Exclude<AgentId, "auto">)) +
+    firmContext(userEmail) +
+    extraCtx +
+    toolGuidance(tokens) +
+    researchGuidance();
 
   // expose connector tools to the local runtime as an in-process MCP server
   const liveTools = availableTools(tokens);
@@ -732,6 +846,7 @@ export async function POST(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      let streamedAny = false;
       try {
         const q = query({
           prompt: promptText,
@@ -749,15 +864,7 @@ export async function POST(req: NextRequest) {
             strictMcpConfig: true,
             // don't expose dev-environment skills to the legal agent
             skills: [],
-            systemPrompt:
-              (isAuto
-                ? ORCHESTRATOR_PROMPT + ORCH_IDENTITY_NOTE
-                : spec!.prompt +
-                  identityNote(agentId as Exclude<AgentId, "auto">)) +
-              firmContext(userEmail) +
-              extraCtx +
-              toolGuidance(tokens) +
-              researchGuidance(),
+            systemPrompt: localSystem,
             model: isAuto
               ? ORCHESTRATOR_MODEL
               : MODEL_IDS[(spec!.model ?? "sonnet") as keyof typeof MODEL_IDS],
@@ -780,6 +887,7 @@ export async function POST(req: NextRequest) {
           if (msg.type === "assistant") {
             for (const block of msg.message.content) {
               if (block.type === "text" && block.text.trim()) {
+                streamedAny = true;
                 controller.enqueue(line({ t: "text", text: block.text }));
               } else if (block.type === "tool_use") {
                 // surface files the agents create/modify so the UI can
@@ -807,8 +915,36 @@ export async function POST(req: NextRequest) {
         }
         controller.enqueue(line({ t: "done" }));
       } catch (err) {
+        // Local runtime failed (often the same provider credit/quota issue).
+        // Fail over to Together AI if nothing has reached the user yet.
+        if (!streamedAny && togetherEnabled()) {
+          try {
+            controller.enqueue(line({ t: "status", text: "backup engine" }));
+            let any = false;
+            await streamTogether({
+              system: localSystem,
+              messages: messages.map(({ role, content }) => ({ role, content })),
+              maxTokens: 4000,
+              onText: (t) => {
+                any = true;
+                controller.enqueue(line({ t: "delta", text: t }));
+              },
+            });
+            if (any) {
+              controller.enqueue(line({ t: "done" }));
+              return;
+            }
+          } catch {
+            /* backup also failed — fall through to the graceful notice */
+          }
+        }
         controller.enqueue(
-          line({ t: "error", text: err instanceof Error ? err.message : String(err) }),
+          line({
+            t: "error",
+            text: isProviderDown(err)
+              ? "The assistant is temporarily unavailable — the model provider is over capacity or out of credits. Please try again shortly."
+              : "Something went wrong handling that request. Please try again.",
+          }),
         );
       } finally {
         controller.close();

@@ -15,6 +15,7 @@ import {
   PanelLeft,
   Pencil,
   Plus,
+  Scale,
   Settings,
   Star,
   SunMoon,
@@ -51,6 +52,7 @@ import {
 import Onboarding from "./Onboarding";
 import Transcript from "./Transcript";
 import Composer from "./Composer";
+import MockTrial from "./mocktrial/MockTrial";
 import ThemeToggle from "./ThemeToggle";
 import SuggestionPills from "./SuggestionPills";
 import VoiceMode from "./VoiceMode";
@@ -138,6 +140,7 @@ export default function Workspace() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mockTrialOpen, setMockTrialOpen] = useState(false);
 
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
@@ -885,6 +888,7 @@ export default function Workspace() {
       onSend={handleSend}
       onOpenConnectors={() => setConnectorsOpen(true)}
       onOpenVoice={() => setVoiceOpen(true)}
+      onMockTrial={() => setMockTrialOpen(true)}
       autoFocus={isEmpty}
     />
   );
@@ -1083,6 +1087,20 @@ export default function Workspace() {
               </span>
               Connectors
             </button>
+
+            <button
+              onClick={() => {
+                setMockTrialOpen(true);
+                closeSidebarOnMobile();
+              }}
+              className={navRow}
+              title="Argue a landmark case against AI counsel"
+            >
+              <span className="flex h-7 w-7 items-center justify-center">
+                <Scale className="h-[18px] w-[18px]" />
+              </span>
+              Mock Trial
+            </button>
           </nav>
 
           {/* starred + recents */}
@@ -1244,6 +1262,14 @@ export default function Workspace() {
               <Cable className="h-5 w-5" />
             </button>
           </Tooltip>
+          <Tooltip label="Mock Trial">
+            <button
+              onClick={() => setMockTrialOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel-deep hover:text-ink"
+            >
+              <Scale className="h-5 w-5" />
+            </button>
+          </Tooltip>
         </div>
 
         <Tooltip label={fullName} className="mt-auto">
@@ -1270,6 +1296,10 @@ export default function Workspace() {
 
       {/* ── main ──────────────────────────────────────────────── */}
       <main className="grain flex min-w-0 flex-1 flex-col">
+        {mockTrialOpen ? (
+          <MockTrial onExit={() => setMockTrialOpen(false)} />
+        ) : (
+        <>
         <header className="rise rise-2 flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
             {!sidebarOpen && (
@@ -1343,6 +1373,8 @@ export default function Workspace() {
               </div>
             </div>
           </>
+        )}
+        </>
         )}
       </main>
 

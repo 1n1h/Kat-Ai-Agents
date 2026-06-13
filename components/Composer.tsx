@@ -27,6 +27,7 @@ export default function Composer({
   onSend,
   onOpenConnectors,
   onOpenVoice,
+  onMockTrial,
   autoFocus,
 }: {
   value: string;
@@ -38,6 +39,7 @@ export default function Composer({
   onSend: (text: string, attached: string[]) => void;
   onOpenConnectors: () => void;
   onOpenVoice: () => void;
+  onMockTrial?: () => void;
   autoFocus?: boolean;
 }) {
   const [attached, setAttached] = useState<string[]>([]);
@@ -285,6 +287,7 @@ export default function Composer({
           <AgentSelect
             value={agentId}
             onChange={onAgentChange}
+            onMockTrial={onMockTrial}
             disabled={disabled}
           />
           <button

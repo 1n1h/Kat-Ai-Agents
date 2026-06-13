@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Scale } from "lucide-react";
 import { AGENTS, agentById, type AgentId } from "@/lib/agent-meta";
 
 /**
@@ -24,10 +24,13 @@ import { AGENTS, agentById, type AgentId } from "@/lib/agent-meta";
 export default function AgentSelect({
   value,
   onChange,
+  onMockTrial,
   disabled,
 }: {
   value: AgentId;
   onChange: (id: AgentId) => void;
+  /** launches the Mock Trial simulator (a feature, not a chat agent) */
+  onMockTrial?: () => void;
   disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -138,6 +141,34 @@ export default function AgentSelect({
                 )}
               </button>
             ))}
+
+            {onMockTrial && (
+              <>
+                <hr className="my-1.5 border-line" />
+                <p className="px-3 pt-1 pb-1 font-mono text-[11px] tracking-[0.2em] text-faint uppercase">
+                  Simulate
+                </p>
+                <button
+                  onClick={() => {
+                    onMockTrial();
+                    setOpen(false);
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-panel-deep"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-wash text-accent">
+                    <Scale className="h-4.5 w-4.5" />
+                  </span>
+                  <span>
+                    <span className="block text-[15px] font-medium text-ink">
+                      Mock Trial
+                    </span>
+                    <span className="mt-0.5 block text-[13px] leading-snug text-muted">
+                      Argue a landmark case against AI counsel before the bench.
+                    </span>
+                  </span>
+                </button>
+              </>
+            )}
           </div>,
           document.body,
         )}

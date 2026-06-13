@@ -316,6 +316,68 @@ body {
   scrollbar-color: var(--color-line-strong) transparent;
 }
 
+/* ── Mock Trial simulator ─────────────────────────────────────── */
+/* lobby/side cards arrive staggered */
+.trial-rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+/* each new transcript entry slides in */
+@keyframes trialMsg {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.trial-msg {
+  animation: trialMsg 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+/* the active speaker's indicator dot pulses */
+@keyframes trialPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.9); }
+}
+.trial-pulse {
+  animation: trialPulse 0.7s ease-in-out infinite;
+}
+/* gavel strike */
+@keyframes trialGavel {
+  0% { transform: rotate(0); }
+  30% { transform: rotate(-42deg); }
+  70% { transform: rotate(8deg); }
+  100% { transform: rotate(0); }
+}
+.trial-gavel {
+  transform-origin: bottom right;
+  animation: trialGavel 0.45s ease;
+}
+/* a faint brass footlight glow under the courtroom stage */
+.trial-stage {
+  background:
+    radial-gradient(
+      120% 90% at 50% 120%,
+      color-mix(in srgb, var(--color-accent) 14%, transparent),
+      transparent 70%
+    ),
+    var(--color-panel);
+}
+/* verdict confetti fall */
+@keyframes trialConfetti {
+  0% { transform: translateY(-10%) rotate(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(360%) rotate(540deg); opacity: 0; }
+}
+.trial-confetti {
+  animation: trialConfetti linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .trial-rise,
+  .trial-msg,
+  .trial-pulse,
+  .trial-gavel,
+  .trial-confetti {
+    animation: none !important;
+  }
+  .trial-confetti { display: none; }
+}
+
 /* ── product tour (Driver.js) ───────────────────────────────────
    Popovers are always the light "vanilla" card (with green accents),
    so they stay legible even over the dark workspace. */
