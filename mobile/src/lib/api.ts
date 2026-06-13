@@ -113,6 +113,26 @@ export async function extractDocument(
   return (d?.text ?? "").trim();
 }
 
+/** Transcribe a recorded audio file (m4a) to text via the backend (Scribe). */
+export async function transcribeAudio(uri: string): Promise<string> {
+  const form = new FormData();
+  form.append("audio", {
+    uri,
+    name: "dictation.m4a",
+    type: "audio/m4a",
+  } as unknown as Blob);
+  const res = await expoFetch(`${API_BASE}/api/stt`, {
+    method: "POST",
+    body: form as unknown as BodyInit,
+  });
+  const j = (await res.json().catch(() => ({}))) as {
+    text?: string;
+    error?: string;
+  };
+  if (!res.ok) throw new Error(j?.error || "Transcription failed.");
+  return (j.text ?? "").trim();
+}
+
 /** Read a local file URI (from a picker) into raw base64, via fetch + FileReader. */
 export async function uriToBase64(uri: string): Promise<string> {
   const res = await fetch(uri);

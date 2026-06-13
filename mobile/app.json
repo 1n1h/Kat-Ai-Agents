@@ -48,7 +48,14 @@
           "photosPermission": "Lex reads documents and images you choose so it can transcribe and analyze them.",
           "cameraPermission": "Lex uses the camera to scan documents and read them into a matter."
         }
-      ]
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Lex uses the microphone so you can dictate your messages."
+        }
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

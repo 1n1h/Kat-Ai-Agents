@@ -1,4 +1,10 @@
 import TextRecognition from "@react-native-ml-kit/text-recognition";
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+} from "expo-audio";
 import * as DocumentPicker from "expo-document-picker";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -21,7 +27,7 @@ import { ThemedText } from "@/components/themed-text";
 import { Radius, Spacing } from "@/constants/theme";
 import { useMatters } from "@/hooks/use-matters";
 import { useTheme } from "@/hooks/use-theme";
-import { extractDocument, streamChat } from "@/lib/api";
+import { extractDocument, streamChat, transcribeAudio } from "@/lib/api";
 import { agentName } from "@/lib/agents";
 import type { Msg } from "@/lib/store";
 
@@ -37,6 +43,9 @@ export default function Assistant() {
   const [status, setStatus] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [reading, setReading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const scrollRef = useRef<ScrollView>(null);
 
   const messages = active?.messages ?? [];
@@ -127,6 +136,57 @@ export default function Assistant() {
       { text: "Choose a file (PDF, Word)", onPress: () => void chooseDocument() },
       { text: "Cancel", style: "cancel" },
     ]);
+  }
+
+  /** Dictation: hold-free tap to start, tap again to stop and transcribe. */
+  async function toggleMic() {
+    if (streaming) return;
+    if (recording) {
+      setRecording(false);
+      try {
+        await recorder.stop();
+      } catch {
+        /* ignore */
+      }
+      const uri = recorder.uri;
+      if (uri) await transcribeInto(uri);
+      return;
+    }
+    const perm = await AudioModule.requestRecordingPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert(
+        "Microphone access needed",
+        "Enable microphone access in Settings to dictate.",
+      );
+      return;
+    }
+    try {
+      await setAudioModeAsync({ playsInSilentMode: true, allowsRecording: true });
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+      setRecording(true);
+      Haptics.selectionAsync().catch(() => {});
+    } catch {
+      Alert.alert("Couldn't start recording", "Please try again.");
+    }
+  }
+
+  async function transcribeInto(uri: string) {
+    setTranscribing(true);
+    setStatus("Transcribing…");
+    try {
+      const text = await transcribeAudio(uri);
+      if (text) setDraft((d) => (d ? `${d} ${text}` : text));
+      else Alert.alert("Nothing heard", "I couldn't make out any speech.");
+    } catch (e) {
+      Alert.alert(
+        "Couldn't transcribe",
+        e instanceof Error ? e.message : "Try again.",
+      );
+    } finally {
+      setTranscribing(false);
+      setStatus(null);
+    }
   }
 
   const send = async () => {
@@ -318,28 +378,71 @@ export default function Assistant() {
                   fontSize: 16,
                 }}
               />
-              <Pressable
-                onPress={send}
-                disabled={!draft.trim() || streaming}
-                style={({ pressed }) => [
-                  {
+              {recording ? (
+                <Pressable
+                  onPress={() => void toggleMic()}
+                  style={{
                     width: 38,
                     height: 38,
                     borderRadius: 19,
                     alignItems: "center",
                     justifyContent: "center",
-                    backgroundColor:
-                      !draft.trim() || streaming ? palette.bg : palette.brand,
-                  },
-                  pressed && { transform: [{ scale: 0.95 }] },
-                ]}
-              >
-                <SymbolView
-                  name="arrow.up"
-                  size={18}
-                  tintColor={!draft.trim() || streaming ? palette.inkMuted : "#FFFFFF"}
-                />
-              </Pressable>
+                    backgroundColor: "#c0392b",
+                  }}
+                >
+                  <SymbolView name="stop.fill" size={15} tintColor="#FFFFFF" />
+                </Pressable>
+              ) : transcribing ? (
+                <View
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 19,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: palette.bg,
+                  }}
+                >
+                  <ActivityIndicator color={palette.brand} />
+                </View>
+              ) : draft.trim() ? (
+                <Pressable
+                  onPress={send}
+                  disabled={streaming}
+                  style={({ pressed }) => [
+                    {
+                      width: 38,
+                      height: 38,
+                      borderRadius: 19,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: streaming ? palette.bg : palette.brand,
+                    },
+                    pressed && { transform: [{ scale: 0.95 }] },
+                  ]}
+                >
+                  <SymbolView
+                    name="arrow.up"
+                    size={18}
+                    tintColor={streaming ? palette.inkMuted : "#FFFFFF"}
+                  />
+                </Pressable>
+              ) : (
+                <Pressable
+                  onPress={() => void toggleMic()}
+                  disabled={streaming}
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 19,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: palette.bg,
+                  }}
+                >
+                  <SymbolView name="mic.fill" size={17} tintColor={palette.inkSoft} />
+                </Pressable>
+              )}
             </View>
           </View>
         </KeyboardAvoidingView>

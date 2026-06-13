@@ -23,6 +23,7 @@ type Ctx = {
   appendMessage: (matterId: string, msg: Msg) => void;
   renameMatter: (id: string, name: string) => void;
   deleteMatter: (id: string) => void;
+  resetAll: () => void;
 };
 
 const C = createContext<Ctx | null>(null);
@@ -79,6 +80,17 @@ export function MattersProvider({ children }: { children: ReactNode }) {
       return next;
     });
 
+  const resetAll = () => {
+    const g: Matter = {
+      id: uid(),
+      name: "General",
+      createdAt: Date.now(),
+      messages: [],
+    };
+    setMatters([g]);
+    setActiveId(g.id);
+  };
+
   const active = matters.find((m) => m.id === activeId) ?? null;
 
   return (
@@ -93,6 +105,7 @@ export function MattersProvider({ children }: { children: ReactNode }) {
         appendMessage,
         renameMatter,
         deleteMatter,
+        resetAll,
       }}
     >
       {children}
