@@ -60,7 +60,10 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build:ios": "eas build --profile production --platform ios",
+    "release:ios": "eas build --profile production --platform ios --auto-submit",
+    "release:ios:preview": "eas build --profile preview --platform ios --auto-submit"
   },
   "private": true
 }
