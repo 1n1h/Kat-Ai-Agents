@@ -14,11 +14,6 @@ export default function WorkspaceTabsLayout() {
         <NativeTabs.Trigger.Label>Assistant</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="cases">
-        <NativeTabs.Trigger.Icon sf="briefcase.fill" />
-        <NativeTabs.Trigger.Label>Cases</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
-
       <NativeTabs.Trigger name="trial">
         <NativeTabs.Trigger.Icon sf="scalemass.fill" />
         <NativeTabs.Trigger.Label>Trial</NativeTabs.Trigger.Label>

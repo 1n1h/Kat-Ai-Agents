@@ -14,10 +14,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Keyboard,
   Pressable,
   ScrollView,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -33,7 +35,9 @@ import type { Msg } from "@/lib/store";
 export default function Assistant() {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
-  const { active, appendMessage } = useMatters();
+  const { width } = useWindowDimensions();
+  const { active, appendMessage, matters, activeId, setActive, createMatter, deleteMatter } =
+    useMatters();
   const [draft, setDraft] = useState("");
   const [live, setLive] = useState("");
   const [status, setStatus] = useState<string | null>(null);
@@ -57,6 +61,40 @@ export default function Assistant() {
       hide.remove();
     };
   }, []);
+
+  // Cases drawer (slides in from the left — mirrors the reference app).
+  const DRAWER_W = Math.min(width * 0.82, 320);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerX = useRef(new Animated.Value(-DRAWER_W)).current;
+  const backdrop = useRef(new Animated.Value(0)).current;
+  const openDrawer = () => {
+    Haptics.selectionAsync().catch(() => {});
+    setDrawerOpen(true);
+    Animated.parallel([
+      Animated.timing(drawerX, { toValue: 0, duration: 240, useNativeDriver: true }),
+      Animated.timing(backdrop, { toValue: 1, duration: 240, useNativeDriver: true }),
+    ]).start();
+  };
+  const closeDrawer = () => {
+    Animated.parallel([
+      Animated.timing(drawerX, { toValue: -DRAWER_W, duration: 200, useNativeDriver: true }),
+      Animated.timing(backdrop, { toValue: 0, duration: 200, useNativeDriver: true }),
+    ]).start(({ finished }) => finished && setDrawerOpen(false));
+  };
+  const switchCase = (id: string) => {
+    Haptics.selectionAsync().catch(() => {});
+    setActive(id);
+    closeDrawer();
+  };
+  const newCase = () => {
+    Alert.prompt?.("New case", "Name this matter", (name?: string) => {
+      const n = (name ?? "").trim();
+      if (n) {
+        createMatter(n);
+        closeDrawer();
+      }
+    });
+  };
 
   const messages = active?.messages ?? [];
   const empty = messages.length === 0 && !live;
@@ -250,22 +288,58 @@ export default function Assistant() {
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <View style={{ flex: 1, paddingBottom: kbHeight }}>
-          {/* header */}
+          {/* header: cases drawer · matter · new case */}
           <View
             style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: Spacing.sm,
               paddingHorizontal: Spacing.lg,
               paddingVertical: Spacing.sm,
               borderBottomWidth: 1,
               borderBottomColor: palette.divider,
             }}
           >
+            <Pressable
+              onPress={openDrawer}
+              hitSlop={8}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 17,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: palette.bgRaised,
+                borderWidth: 1,
+                borderColor: palette.divider,
+              }}
+            >
+              <SymbolView name="line.3.horizontal" size={16} tintColor={palette.ink} />
+            </Pressable>
             <ThemedText
               variant="eyebrow"
               tone="accent"
               numberOfLines={1}
+              style={{ flex: 1 }}
             >
               {active?.name ?? "—"} · Orchestrated
             </ThemedText>
+            <Pressable
+              onPress={newCase}
+              hitSlop={8}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 17,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: palette.bgRaised,
+                borderWidth: 1,
+                borderColor: palette.divider,
+              }}
+            >
+              <SymbolView name="square.and.pencil" size={15} tintColor={palette.brand} />
+            </Pressable>
           </View>
 
           <ScrollView
@@ -456,6 +530,87 @@ export default function Assistant() {
           </View>
         </View>
       </SafeAreaView>
+
+      {/* Cases drawer */}
+      {drawerOpen && (
+        <Animated.View
+          style={{ position: "absolute", inset: 0, opacity: backdrop }}
+          pointerEvents="auto"
+        >
+          <Pressable onPress={closeDrawer} style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }} />
+        </Animated.View>
+      )}
+      <Animated.View
+        pointerEvents={drawerOpen ? "auto" : "none"}
+        style={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: DRAWER_W,
+          backgroundColor: palette.card,
+          borderRightWidth: 1,
+          borderRightColor: palette.divider,
+          transform: [{ translateX: drawerX }],
+        }}
+      >
+        <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, paddingHorizontal: Spacing.md }}>
+          <ThemedText variant="eyebrow" tone="accent" style={{ marginTop: Spacing.sm, marginBottom: Spacing.sm }}>
+            Cases
+          </ThemedText>
+          <Pressable
+            onPress={newCase}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: Spacing.sm,
+              paddingVertical: 13,
+              borderRadius: Radius.lg,
+              borderWidth: 1,
+              borderColor: palette.divider,
+              backgroundColor: palette.bgRaised,
+            }}
+          >
+            <SymbolView name="plus" size={15} tintColor={palette.brand} />
+            <ThemedText variant="body" style={{ fontWeight: "700", color: palette.brand }}>
+              New case
+            </ThemedText>
+          </Pressable>
+          <ScrollView style={{ marginTop: Spacing.md }} contentContainerStyle={{ gap: 2 }} showsVerticalScrollIndicator={false}>
+            {matters.map((m) => {
+              const isActive = m.id === activeId;
+              return (
+                <View key={m.id} style={{ flexDirection: "row", alignItems: "center", gap: Spacing.sm, paddingVertical: 4 }}>
+                  <Pressable
+                    onPress={() => switchCase(m.id)}
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: Spacing.sm,
+                      paddingHorizontal: Spacing.sm,
+                      paddingVertical: 10,
+                      borderRadius: Radius.md,
+                      backgroundColor: isActive ? palette.brandSoft : "transparent",
+                    }}
+                  >
+                    <SymbolView name="briefcase.fill" size={14} tintColor={isActive ? palette.brand : palette.inkMuted} />
+                    <ThemedText variant="body" numberOfLines={1} style={{ flex: 1, fontWeight: isActive ? "700" : "500" }}>
+                      {m.name}
+                    </ThemedText>
+                  </Pressable>
+                  {matters.length > 1 && (
+                    <Pressable hitSlop={8} onPress={() => deleteMatter(m.id)}>
+                      <SymbolView name="trash" size={14} tintColor={palette.inkMuted} />
+                    </Pressable>
+                  )}
+                </View>
+              );
+            })}
+          </ScrollView>
+        </SafeAreaView>
+      </Animated.View>
     </View>
   );
 }
