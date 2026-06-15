@@ -71,8 +71,10 @@ const VOICE_NOTE =
 const CLOUD_NOTE =
   "\n\n[Cloud session: to deliver a finished document (letter, brief, memo, " +
   "or agreement), call the write_document tool with the full text as Markdown " +
-  "— the user gets a one-click Word and PDF download. To read an uploaded " +
-  "document's contents in this session, ask the user to paste the text.]";
+  "— the user gets a one-click Word and PDF download. When the user uploads a " +
+  "document, its full text is included inline in their message under a header " +
+  "like '[Attached document — name]'. Read and use that text directly; do not " +
+  "say you can't access files or ask the user to paste it.]";
 
 const MEMORY_NOTE =
   "\n\n[MEMORY — you may call the `remember` tool to save a durable fact about " +
