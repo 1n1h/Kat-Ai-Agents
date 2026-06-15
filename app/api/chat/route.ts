@@ -218,6 +218,33 @@ const cachedSystem = (text: string) => [
   },
 ];
 
+/**
+ * Return a copy of the message list with a single cache breakpoint on the last
+ * block of the last message. The whole prefix before it is cached, so across a
+ * multi-hop tool loop the conversation (incl. any large uploaded document) is
+ * written to cache once and READ on later hops — cache reads bill at 10% and,
+ * crucially, do NOT count toward the ITPM rate limit on Opus/Sonnet 4.x.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cacheTip = (turns: any[]): any[] => {
+  if (!turns.length) return turns;
+  const out = turns.slice();
+  const last = out[out.length - 1];
+  const cc = { type: "ephemeral" as const };
+  let content = last.content;
+  if (typeof content === "string") {
+    content = [{ type: "text" as const, text: content, cache_control: cc }];
+  } else if (Array.isArray(content) && content.length) {
+    content = content.map((b, i) =>
+      i === content.length - 1 ? { ...b, cache_control: cc } : b,
+    );
+  } else {
+    return turns;
+  }
+  out[out.length - 1] = { ...last, content };
+  return out;
+};
+
 type SpecialistId = Exclude<AgentId, "auto">;
 
 /**
@@ -386,7 +413,7 @@ async function cloudChat(
                 ...connTools,
                 ...researchTools,
               ],
-              messages: turns,
+              messages: cacheTip(turns),
             });
             let firstDelta = true;
             s.on("text", (t) => {
@@ -508,7 +535,7 @@ async function cloudChat(
               ...connTools,
               ...researchTools,
             ],
-            messages: turns,
+            messages: cacheTip(turns),
           });
           turns.push({ role: "assistant", content: resp.content });
 
