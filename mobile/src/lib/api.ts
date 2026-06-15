@@ -27,7 +27,7 @@ export async function streamChat(
   const res = await expoFetch(`${API_BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...opts, voice: false, provider: opts.provider ?? "together" }),
+    body: JSON.stringify({ ...opts, voice: false, provider: opts.provider }),
     signal,
   });
 
