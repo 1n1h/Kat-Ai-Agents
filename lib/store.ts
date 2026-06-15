@@ -13,6 +13,11 @@ export interface Msg {
   files?: string[];
   /** documents the agent drafted in the cloud (content carried for convert) */
   docs?: { name: string; content: string }[];
+  /**
+   * documents the USER uploaded for the agent to read — shown as a compact
+   * chip; the text is sent to the model but never rendered in the bubble.
+   */
+  attachments?: { name: string; text: string }[];
 }
 
 export interface Thread {

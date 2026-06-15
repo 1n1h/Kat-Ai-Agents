@@ -452,6 +452,7 @@ export default function Workspace() {
   async function handleSend(
     text: string,
     attached: string[],
+    docs?: { name: string; text: string }[],
     opts?: { voice?: boolean },
   ): Promise<string> {
     if (streaming || !matterId) return "";
@@ -462,17 +463,21 @@ export default function Workspace() {
       setTimeout(() => setHeroLeaving(false), 650);
     }
 
-    const content = attached.length
-      ? `${text}\n\n[Documents added to this matter's working directory: ${attached.join(", ")}]`
-      : text;
-    const userMsg: Msg = { role: "user", content };
+    // What's shown is just the typed text; uploaded docs are kept as
+    // attachments (their text is sent to the model, not rendered).
+    const userMsg: Msg = {
+      role: "user",
+      content: text,
+      ...(attached.length ? { files: attached } : {}),
+      ...(docs && docs.length ? { attachments: docs } : {}),
+    };
 
     let thread = activeThread;
     if (!thread) {
       thread = {
         id: uid(),
         matterId,
-        title: text.slice(0, 60),
+        title: text.slice(0, 60) || docs?.[0]?.name || "New thread",
         agentId,
         messages: [],
         createdAt: Date.now(),
@@ -497,7 +502,24 @@ export default function Workspace() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: history.map(({ role, content }) => ({ role, content })),
+          // expand uploaded-doc text + file notes into the model payload only
+          messages: history.map((m) => {
+            if (m.role !== "user") return { role: m.role, content: m.content };
+            let c = m.content;
+            if (m.attachments?.length) {
+              c +=
+                (c ? "\n\n" : "") +
+                m.attachments
+                  .map((a) => `[Attached document — ${a.name}]\n${a.text}`)
+                  .join("\n\n");
+            }
+            if (m.files?.length) {
+              c +=
+                (c ? "\n\n" : "") +
+                `[Files added to this matter: ${m.files.join(", ")}]`;
+            }
+            return { role: m.role, content: c };
+          }),
           agentId,
           matterId,
           voice: opts?.voice ?? false,
@@ -1430,7 +1452,7 @@ export default function Workspace() {
         open={voiceOpen}
         onClose={() => setVoiceOpen(false)}
         ask={(text) =>
-          handleSend(text, [], { voice: getSettings().voiceConcise })
+          handleSend(text, [], undefined, { voice: getSettings().voiceConcise })
         }
         agentName={agentById(agentId).name}
       />

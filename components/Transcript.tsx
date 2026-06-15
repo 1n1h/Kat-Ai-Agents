@@ -150,9 +150,41 @@ function Turn({
           {label}
         </p>
         {isUser ? (
-          <p className="whitespace-pre-wrap text-[1.05rem] leading-relaxed text-ink-soft">
-            {msg.content}
-          </p>
+          <>
+            {msg.content && (
+              <p className="whitespace-pre-wrap text-[1.05rem] leading-relaxed text-ink-soft">
+                {msg.content}
+              </p>
+            )}
+            {((msg.attachments && msg.attachments.length > 0) ||
+              (msg.files && msg.files.length > 0)) && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {msg.attachments?.map((a) => (
+                  <span
+                    key={a.name}
+                    className="flex items-center gap-2 rounded-lg border border-line bg-panel px-2.5 py-1.5"
+                    title="Document read by the assistant"
+                  >
+                    <FileText className="h-4 w-4 shrink-0 text-accent" />
+                    <span className="max-w-56 truncate font-mono text-[12px] text-ink">
+                      {a.name}
+                    </span>
+                  </span>
+                ))}
+                {msg.files?.map((f) => (
+                  <span
+                    key={f}
+                    className="flex items-center gap-2 rounded-lg border border-line bg-panel px-2.5 py-1.5"
+                  >
+                    <FileText className="h-4 w-4 shrink-0 text-accent" />
+                    <span className="max-w-56 truncate font-mono text-[12px] text-ink">
+                      {f}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <div className="prose-legal">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>

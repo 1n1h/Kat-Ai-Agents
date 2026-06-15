@@ -37,7 +37,11 @@ export default function Composer({
   onAgentChange: (id: AgentId) => void;
   disabled: boolean;
   matterId: string;
-  onSend: (text: string, attached: string[]) => void;
+  onSend: (
+    text: string,
+    attached: string[],
+    docs?: { name: string; text: string }[],
+  ) => void;
   onOpenConnectors: () => void;
   onOpenVoice: () => void;
   onMockTrial?: () => void;
@@ -154,19 +158,16 @@ export default function Composer({
 
   function send() {
     const t = value.trim();
-    if ((!t && !reads.length) || disabled || uploading || extracting) return;
-    const docBlock = reads.length
-      ? "\n\n" +
-        reads
-          .map((r) => `[Attached document — ${r.name}]\n${r.text}`)
-          .join("\n\n")
-      : "";
-    const content =
-      (t + docBlock).trim() ||
-      `Please review the attached document(s): ${reads
-        .map((r) => r.name)
-        .join(", ")}.`;
-    onSend(content, attached);
+    if (
+      (!t && !reads.length && !attached.length) ||
+      disabled ||
+      uploading ||
+      extracting
+    )
+      return;
+    // The typed text is what's shown; the read docs ride along as attachments
+    // (their text is sent to the model but not rendered in the bubble).
+    onSend(t, attached, reads.length ? reads : undefined);
     setAttached([]);
     setReads([]);
   }
@@ -227,7 +228,7 @@ export default function Composer({
   }, []);
 
   const canSend =
-    (Boolean(value.trim()) || reads.length > 0) &&
+    (Boolean(value.trim()) || reads.length > 0 || attached.length > 0) &&
     !disabled &&
     !uploading &&
     !extracting;
