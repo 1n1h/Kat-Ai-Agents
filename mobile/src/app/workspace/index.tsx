@@ -322,7 +322,7 @@ export default function Assistant() {
               numberOfLines={1}
               style={{ flex: 1 }}
             >
-              {active?.name ?? "—"} · Orchestrated
+              {active?.name ?? "—"} · Orchestrator
             </ThemedText>
             <Pressable
               onPress={newCase}

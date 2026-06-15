@@ -600,7 +600,7 @@ export default function OrchestrationShowcase() {
                   </div>
                   <div className="grow" />
                   <div className="model">
-                    Orchestrated{" "}
+                    Orchestrator{" "}
                     <svg viewBox="0 0 24 24">
                       <path d="M6 9l6 6 6-6" />
                     </svg>
@@ -665,7 +665,7 @@ export default function OrchestrationShowcase() {
                 verify every citation.
               </div>
               <div className="msg reply" id="reply">
-                <div className="rh">Lex · Orchestrated</div>
+                <div className="rh">Lex · Orchestrator</div>
                 <div className="rl">
                   <span>01</span>3 risk clauses flagged — severity ranked (§8.2,
                   §11.4, §14.1)

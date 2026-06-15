@@ -9,7 +9,7 @@ export type AgentId =
 
 export const AGENTS: { id: AgentId; label: string; name: string; sf: string }[] =
   [
-    { id: "auto", label: "Auto", name: "Orchestrated", sf: "square.grid.2x2" },
+    { id: "auto", label: "Auto", name: "Orchestrator", sf: "square.grid.2x2" },
     {
       id: "litigation-analysis",
       label: "Litigation",
@@ -33,4 +33,4 @@ export const AGENTS: { id: AgentId; label: string; name: string; sf: string }[] 
   ];
 
 export const agentName = (id: AgentId) =>
-  AGENTS.find((a) => a.id === id)?.name ?? "Orchestrated";
+  AGENTS.find((a) => a.id === id)?.name ?? "Orchestrator";

@@ -30,7 +30,7 @@ export const AGENTS: AgentMeta[] = [
   {
     id: "auto",
     label: "Auto",
-    name: "Orchestrated",
+    name: "Orchestrator",
     tagline: "Routes your matter to the right specialist automatically.",
     blurb:
       "The default mode. Triages your request, delegates analysis before drafting, and runs every draft through citation check before it reaches you.",
