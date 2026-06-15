@@ -83,21 +83,37 @@ export default function Composer({
     }
   }, [value, autoFocus]);
 
+  /** A doc whose text we can extract so the agent can actually read it. */
+  const isReadable = (f: File) =>
+    /\.(pdf|docx|txt|md|markdown|csv|json|rtf)$/i.test(f.name) ||
+    f.type === "application/pdf" ||
+    f.type.startsWith("text/");
+
   async function upload(files: FileList | File[]) {
     const list = Array.from(files);
     if (!list.length) return;
+
+    // Readable documents (PDF/Word/text): extract the text inline so the agent
+    // can read them. On the cloud deploy there's no working directory, so a
+    // stored file is invisible to the agent — the text is the access.
+    const readable = list.filter(isReadable);
+    if (readable.length) await extractDocs(readable);
+
+    // Anything else (images, etc.): store it in the matter.
+    const others = list.filter((f) => !isReadable(f));
+    if (!others.length) return;
     setUploading(true);
     try {
       const form = new FormData();
       form.set("matterId", matterId);
-      for (const f of list) form.append("files", f);
+      for (const f of others) form.append("files", f);
       const res = await fetch("/api/files", { method: "POST", body: form });
       if (res.ok) {
         const data = (await res.json()) as { saved?: string[] };
         setAttached((prev) => [...prev, ...(data.saved ?? [])]);
       } else {
         // cloud deploy has no disk — upload to Firebase Storage instead
-        const saved = await cloudUpload(matterId, list);
+        const saved = await cloudUpload(matterId, others);
         setAttached((prev) => [...prev, ...saved]);
       }
     } catch {
