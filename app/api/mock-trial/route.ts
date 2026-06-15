@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
       : Object.keys(c.sides)[0];
 
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
-  const client = new Anthropic();
+  const client = new Anthropic({ maxRetries: 5 });
 
   const stream = new ReadableStream({
     async start(controller) {

@@ -346,7 +346,9 @@ async function cloudChat(
     );
   }
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
-  const client = new Anthropic();
+  // Extra retries (with the SDK's exponential backoff) ride out short
+  // rate-limit windows so an orchestrated turn doesn't surface a 429.
+  const client = new Anthropic({ maxRetries: 5 });
   const { convo, historyNote } = await condenseHistory(client, messages);
   const firmCtx =
     firmContext(userEmail) +
