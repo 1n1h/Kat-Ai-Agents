@@ -228,6 +228,34 @@ function looksLikeDeliverable(t: string): boolean {
   );
 }
 
+/**
+ * A short chat-side summary of a deliverable: the Executive Summary if present,
+ * otherwise the opening prose — tables and headings stripped, capped. Shown in
+ * the transcript alongside the document chip while the full memo lives in the
+ * panel (mirrors how other assistants surface an artifact).
+ */
+function deliverableSummary(t: string): string {
+  const text = t.trim();
+  let body = "";
+  const exec = text.match(
+    /^#{1,3}\s*Executive Summary\s*\n+([\s\S]*?)(?=\n#{1,3}\s|\n\s*\|)/im,
+  );
+  if (exec) {
+    body = exec[1];
+  } else {
+    const afterTitle = text.replace(/^#\s+.+\n+/, "");
+    const m = afterTitle.match(/^([\s\S]*?)(?=\n#{1,3}\s|\n\s*\|)/);
+    body = m ? m[1] : afterTitle;
+  }
+  body = body
+    .replace(/^\s*\|.*$/gm, "")
+    .replace(/^#{1,6}\s*/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  if (body.length > 900) body = body.slice(0, 900).replace(/\s+\S*$/, "") + "…";
+  return body;
+}
+
 /** Best-effort title for a deliverable pulled from the model's own text. */
 function deliverableTitle(t: string): string {
   const md = t.match(/^#\s+(.+)$/m)?.[1]?.trim();
@@ -672,10 +700,13 @@ async function cloudChat(
                   line({ t: "document", name: dname, text: final }),
                 );
                 producedDoc = true;
+                const summary = deliverableSummary(final);
                 controller.enqueue(
                   line({
                     t: "text",
-                    text: `I've prepared **${title}** — it's open in the document panel on the right. Review it there, then download it as Word, PDF, or Markdown, or save it to the case.`,
+                    text:
+                      (summary ? summary + "\n\n" : "") +
+                      `**${title}** is open in the document panel — review it there, then download it as Word, PDF, or Markdown, or save it to the case.`,
                   }),
                 );
               } else {
