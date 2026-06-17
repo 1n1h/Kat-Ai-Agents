@@ -184,7 +184,12 @@ const ACT_NOTE =
   "turn. When the user asks for a document, deliverable, letter, memo, " +
   "agreement, or redline, you MUST actually generate the document with your " +
   "document tool so it is delivered and opens for them — never paste the full " +
-  "document inline as your reply, and never stop after merely describing it.]";
+  "document inline as your reply, and never stop after merely describing it. " +
+  "Any document you produce must be polished Markdown: a # title, a short " +
+  "Executive Summary (counts by severity), findings grouped under ## headings " +
+  "(Deal-Breakers, Material, Watch-List), and each issue list as a Markdown " +
+  "TABLE (| Section | Risk (plain English) | Suggested revised language |) " +
+  "rather than numbered prose, ending with a brief client-ready cover note.]";
 
 /** Formatting directive for the Drafting specialist — produces a polished memo. */
 const DRAFT_FORMAT_NOTE =
@@ -195,6 +200,36 @@ const DRAFT_FORMAT_NOTE =
   "| Section | Risk (plain English) | Suggested revised language |, not loose " +
   "prose. Use **bold** for labels. End with a short, client-ready cover note. " +
   "Prefer tables over paragraphs for any list of issues or terms.]";
+
+/**
+ * Last-resort detector: the orchestrator sometimes writes the whole deliverable
+ * as its chat reply instead of calling write_document. When its final text reads
+ * like a finished document (titled / sectioned / a redline memo), we route it to
+ * the document panel rather than dumping the full memo inline — matching how
+ * other assistants surface a deliverable.
+ */
+function looksLikeDeliverable(t: string): boolean {
+  const text = t.trim();
+  if (text.length < 700) return false;
+  const mdHeadings = (text.match(/^#{1,3}\s+\S/gm) || []).length;
+  const boldHeadings = (text.match(/^\s*\*\*[^*]+\*\*/gm) || []).length;
+  const cues =
+    /(suggested revised language|cover note|deal-?breaker|redlines?|issues?\s*(&|and)\s*redlines|unfavorable term|section\s+\d+\.\d+)/i.test(
+      text,
+    );
+  return mdHeadings >= 1 || (boldHeadings >= 3 && cues) || (cues && text.length > 1400);
+}
+
+/** Best-effort title for a deliverable pulled from the model's own text. */
+function deliverableTitle(t: string): string {
+  const md = t.match(/^#\s+(.+)$/m)?.[1]?.trim();
+  if (md) return md;
+  const titled = t.match(/titled\s+["“']([^"”']{4,90})["”']/i)?.[1]?.trim();
+  if (titled) return titled;
+  const bold = t.match(/^\s*\*\*([^*]{4,90})\*\*\s*$/m)?.[1]?.trim();
+  if (bold) return bold;
+  return "Document";
+}
 
 const ORCH_IDENTITY_NOTE =
   "\n\n[Identity: you are the firm's orchestrator and speak in one steady " +
@@ -619,7 +654,25 @@ async function cloudChat(
             }
             if (final) {
               streamedAny = true;
-              controller.enqueue(line({ t: "text", text: final }));
+              // The orchestrator wrote the deliverable inline instead of using
+              // the document tool — route it to the panel and hand off briefly.
+              if (!producedDoc && looksLikeDeliverable(final)) {
+                const title = deliverableTitle(final);
+                const dname =
+                  title.replace(/[^\w. -]/g, "_").slice(0, 80) || "Document";
+                controller.enqueue(
+                  line({ t: "document", name: dname, text: final }),
+                );
+                producedDoc = true;
+                controller.enqueue(
+                  line({
+                    t: "text",
+                    text: `I've prepared **${title}** — it's open in the document panel on the right. Review it there, then download it as Word, PDF, or Markdown, or save it to the case.`,
+                  }),
+                );
+              } else {
+                controller.enqueue(line({ t: "text", text: final }));
+              }
             }
             break;
           }
