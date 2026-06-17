@@ -607,9 +607,11 @@ export default function Workspace() {
               } else if (ev.t === "document" && ev.name && ev.text) {
                 // a cloud-drafted document (content carried for conversion)
                 docsMade.push({ name: ev.name, content: ev.text });
-                // pop the side panel so the user watches it land
+                // pop the side panel so the user watches it land; collapse the
+                // nav so the document gets room (Claude-style split view)
                 setDocPanel({ name: ev.name, content: ev.text });
                 setDocPanelOpen(true);
+                setSidebarOpen(false);
               } else if (ev.t === "memory" && ev.text) {
                 // the agent saved a durable fact for this matter
                 const note = ev.text.trim();
@@ -665,6 +667,7 @@ export default function Workspace() {
             if (text) {
               setDocPanel({ name: textDoc, content: text });
               setDocPanelOpen(true);
+              setSidebarOpen(false);
             }
           })
           .catch(() => {});
@@ -1451,6 +1454,7 @@ export default function Workspace() {
                 onOpenDoc={(d) => {
                   setDocPanel(d);
                   setDocPanelOpen(true);
+                  setSidebarOpen(false);
                 }}
               />
             </section>

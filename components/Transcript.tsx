@@ -2,7 +2,7 @@
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { FileText } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import { agentById, type AgentId } from "@/lib/agent-meta";
 import type { Msg } from "@/lib/store";
 import TurnActions from "./TurnActions";
@@ -78,52 +78,46 @@ function DocChip({
     a.remove();
     URL.revokeObjectURL(url);
   };
-  const convBtn =
-    "rounded border border-line px-1.5 py-0.5 font-mono text-[10px] text-muted transition-colors hover:border-accent hover:text-accent";
+  const kind = isCsv ? "XLSX" : "DOCX";
+  // Claude-style artifact card: click anywhere to open the panel; the download
+  // button (right) saves the primary format without opening.
   return (
-    <span className="flex items-center gap-2 rounded-lg border border-line bg-panel px-2.5 py-1.5">
-      <FileText className="h-4 w-4 shrink-0 text-accent" />
+    <div
+      onClick={onOpen}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen?.();
+        }
+      }}
+      title={onOpen ? `Open ${stem}` : stem}
+      className="group flex w-full max-w-md cursor-pointer items-center gap-3 rounded-xl border border-line bg-panel px-3 py-2.5 transition-colors hover:border-accent hover:bg-panel-deep"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-wash">
+        <FileText className="h-[18px] w-[18px] text-accent" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-medium text-ink">
+          {stem}
+        </span>
+        <span className="block font-mono text-[10px] tracking-wider text-faint uppercase">
+          Document · {kind}
+        </span>
+      </span>
       <button
-        onClick={onOpen}
-        className="max-w-56 truncate font-mono text-[12px] text-ink transition-colors hover:text-accent"
-        title={onOpen ? `Open ${name}` : name}
+        onClick={(e) => {
+          e.stopPropagation();
+          void download(isCsv ? "xlsx" : "docx");
+        }}
+        title={`Download ${kind}`}
+        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-[12px] font-medium text-ink-soft transition-colors hover:border-accent hover:text-accent"
       >
-        {name}
+        <Download className="h-3.5 w-3.5" />
+        Download
       </button>
-      {isCsv ? (
-        <button
-          onClick={() => download("xlsx")}
-          className={convBtn}
-          title="Download as Excel"
-        >
-          XLSX
-        </button>
-      ) : (
-        <>
-          <button
-            onClick={() => download("pdf")}
-            className={convBtn}
-            title="Download as PDF"
-          >
-            PDF
-          </button>
-          <button
-            onClick={() => download("docx")}
-            className={convBtn}
-            title="Download as Word"
-          >
-            DOCX
-          </button>
-          <button
-            onClick={() => download("md")}
-            className={convBtn}
-            title="Download Markdown"
-          >
-            MD
-          </button>
-        </>
-      )}
-    </span>
+    </div>
   );
 }
 

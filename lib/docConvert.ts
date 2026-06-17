@@ -42,30 +42,94 @@ const stripInline = (s: string) =>
     .replace(/`([^`]+)`/g, "$1")
     .trim();
 
-// ── markdown table helpers ──────────────────────────────────────────────
-const isTableBlock = (block: string): boolean => {
-  const lines = block.split(/\n/).filter((l) => l.trim());
-  return (
-    lines.length >= 2 &&
-    lines[0].includes("|") &&
-    /^\s*\|?[\s:|-]+\|?\s*$/.test(lines[1]) &&
-    lines[1].includes("-")
-  );
+// ── line-based markdown parser ───────────────────────────────────────────
+/** Split a table row "| a | b |" into ["a","b"] (outer pipes dropped). */
+const splitRow = (l: string): string[] =>
+  l
+    .replace(/^\s*\|/, "")
+    .replace(/\|\s*$/, "")
+    .split("|")
+    .map((c) => c.trim());
+
+/** A table separator row, e.g. "| --- | :--: |". */
+const isSeparator = (l: string): boolean => {
+  const t = l.trim();
+  return t.includes("|") && t.includes("-") && /^[\s|:-]+$/.test(t);
 };
 
-/** rows of cells; the separator row (|---|) is dropped */
-const parseTable = (block: string): string[][] =>
-  block
-    .split(/\n/)
-    .filter((l) => l.trim())
-    .filter((_, i) => i !== 1)
-    .map((l) =>
-      l
-        .replace(/^\s*\|/, "")
-        .replace(/\|\s*$/, "")
-        .split("|")
-        .map((c) => c.trim()),
-    );
+type Block =
+  | { kind: "heading"; level: number; text: string }
+  | { kind: "table"; rows: string[][] }
+  | { kind: "list"; items: string[] }
+  | { kind: "para"; text: string };
+
+/**
+ * Parse Markdown line-by-line into structural blocks. Works whether sections
+ * are separated by blank lines or only single newlines (some models omit the
+ * blank line), so headings and tables are never flattened into raw `##`/`|`
+ * prose in the exported PDF/Word file.
+ */
+function parseBlocks(md: string): Block[] {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const blocks: Block[] = [];
+  let para: string[] = [];
+  const flush = () => {
+    if (para.length) {
+      blocks.push({ kind: "para", text: para.join(" ").trim() });
+      para = [];
+    }
+  };
+  for (let i = 0; i < lines.length; ) {
+    const line = lines[i].trim();
+    if (!line) {
+      flush();
+      i++;
+      continue;
+    }
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h) {
+      flush();
+      blocks.push({
+        kind: "heading",
+        level: Math.min(h[1].length, 3),
+        text: h[2].trim(),
+      });
+      i++;
+      continue;
+    }
+    // table: a pipe row immediately followed by a separator row
+    if (
+      line.includes("|") &&
+      i + 1 < lines.length &&
+      isSeparator(lines[i + 1])
+    ) {
+      flush();
+      const rows: string[][] = [splitRow(line)];
+      i += 2;
+      while (i < lines.length && lines[i].trim() && lines[i].includes("|")) {
+        rows.push(splitRow(lines[i].trim()));
+        i++;
+      }
+      blocks.push({ kind: "table", rows });
+      continue;
+    }
+    // bullet list
+    if (/^[-*]\s+/.test(line)) {
+      flush();
+      const items: string[] = [];
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+        items.push(lines[i].trim().replace(/^[-*]\s+/, "").trim());
+        i++;
+      }
+      blocks.push({ kind: "list", items });
+      continue;
+    }
+    para.push(line);
+    i++;
+  }
+  flush();
+  return blocks;
+}
 
 /** Word runs that honor **bold** within a line. */
 const docxRuns = (text: string): TextRun[] => {
@@ -100,12 +164,16 @@ export function mdToPdf(md: string): Promise<Buffer> {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    for (const block of md.split(/\n{2,}/)) {
-      const text = block.trim();
-      if (!text) continue;
-
-      if (isTableBlock(text)) {
-        const [header, ...body] = parseTable(text);
+    for (const b of parseBlocks(md)) {
+      if (b.kind === "heading") {
+        doc
+          .moveDown(0.4)
+          .font("Times-Bold")
+          .fontSize(b.level === 1 ? 16 : b.level === 2 ? 14 : 12.5)
+          .text(stripInline(b.text));
+        doc.moveDown(0.2);
+      } else if (b.kind === "table") {
+        const [header, ...body] = b.rows;
         doc.moveDown(0.3);
         for (const row of body) {
           // first cell as a bold heading, remaining cells as labeled lines
@@ -115,28 +183,17 @@ export function mdToPdf(md: string): Promise<Buffer> {
             doc
               .font("Times-Roman")
               .fontSize(11)
-              .text(`${label ? `${label}: ` : ""}${stripInline(row[i] ?? "")}`, {
-                lineGap: 2,
-                paragraphGap: 3,
-              });
+              .text(
+                `${label ? `${label}: ` : ""}${stripInline(row[i] ?? "")}`,
+                { lineGap: 2, paragraphGap: 3 },
+              );
           }
           doc.moveDown(0.35);
         }
-        continue;
-      }
-
-      const h = text.match(/^(#{1,3})\s+([\s\S]*)$/);
-      if (h) {
-        doc
-          .moveDown(0.4)
-          .font("Times-Bold")
-          .fontSize(h[1].length === 1 ? 16 : h[1].length === 2 ? 14 : 12.5)
-          .text(stripInline(h[2]));
-        doc.moveDown(0.2);
-      } else if (/^\s*[-*]\s+/.test(text)) {
+      } else if (b.kind === "list") {
         doc.font("Times-Roman").fontSize(12);
         doc.list(
-          text.split(/\n/).map((l) => stripInline(l.replace(/^\s*[-*]\s+/, ""))),
+          b.items.map((it) => stripInline(it)),
           { bulletRadius: 1.5, textIndent: 16 },
         );
         doc.moveDown(0.4);
@@ -144,7 +201,7 @@ export function mdToPdf(md: string): Promise<Buffer> {
         doc
           .font("Times-Roman")
           .fontSize(12)
-          .text(stripInline(text.replace(/\n/g, " ")), {
+          .text(stripInline(b.text), {
             lineGap: 3,
             paragraphGap: 8,
             align: "left",
@@ -157,16 +214,24 @@ export function mdToPdf(md: string): Promise<Buffer> {
 
 export async function mdToDocx(md: string): Promise<Buffer> {
   const children: (Paragraph | Table)[] = [];
-  for (const block of md.split(/\n{2,}/)) {
-    const text = block.trim();
-    if (!text) continue;
-
-    if (isTableBlock(text)) {
-      const rows = parseTable(text);
+  for (const b of parseBlocks(md)) {
+    if (b.kind === "heading") {
+      children.push(
+        new Paragraph({
+          children: docxRuns(b.text),
+          heading:
+            b.level === 1
+              ? HeadingLevel.HEADING_1
+              : b.level === 2
+                ? HeadingLevel.HEADING_2
+                : HeadingLevel.HEADING_3,
+        }),
+      );
+    } else if (b.kind === "table") {
       children.push(
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: rows.map(
+          rows: b.rows.map(
             (cells, ri) =>
               new TableRow({
                 tableHeader: ri === 0,
@@ -189,33 +254,14 @@ export async function mdToDocx(md: string): Promise<Buffer> {
         }),
       );
       children.push(new Paragraph(""));
-      continue;
-    }
-
-    const h = text.match(/^(#{1,3})\s+([\s\S]*)$/);
-    if (h) {
-      children.push(
-        new Paragraph({
-          children: docxRuns(h[2]),
-          heading:
-            h[1].length === 1
-              ? HeadingLevel.HEADING_1
-              : h[1].length === 2
-                ? HeadingLevel.HEADING_2
-                : HeadingLevel.HEADING_3,
-        }),
-      );
-    } else if (/^\s*[-*]\s+/.test(text)) {
-      for (const l of text.split(/\n/)) {
+    } else if (b.kind === "list") {
+      for (const it of b.items) {
         children.push(
-          new Paragraph({
-            children: docxRuns(l.replace(/^\s*[-*]\s+/, "")),
-            bullet: { level: 0 },
-          }),
+          new Paragraph({ children: docxRuns(it), bullet: { level: 0 } }),
         );
       }
     } else {
-      children.push(new Paragraph({ children: docxRuns(text.replace(/\n/g, " ")) }));
+      children.push(new Paragraph({ children: docxRuns(b.text) }));
     }
   }
   return Packer.toBuffer(new Document({ sections: [{ children }] }));

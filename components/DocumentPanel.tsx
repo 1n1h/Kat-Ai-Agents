@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -43,8 +42,6 @@ export default function DocumentPanel({
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
-
-  if (typeof document === "undefined") return null;
 
   const name = doc?.name ?? "document";
   const stem = name.replace(/\.[^.]+$/, "") || "document";
@@ -94,21 +91,19 @@ export default function DocumentPanel({
   const dlBtn =
     "flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 font-sans text-[12px] font-medium text-ink-soft transition-colors hover:border-accent hover:text-accent disabled:opacity-50";
 
-  return createPortal(
-    <>
-      {/* backdrop (mobile / focus) */}
-      <div
-        className={`fixed inset-0 z-[55] bg-black/30 transition-opacity duration-300 ${
-          open ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
-        onClick={onClose}
-      />
-      <aside
-        className={`fixed inset-y-0 right-0 z-[60] flex w-full max-w-[680px] transform flex-col border-l border-line-strong bg-panel shadow-2xl transition-transform duration-300 ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-        aria-hidden={!open}
-      >
+  return (
+    <aside
+      // In-flow column (not an overlay): when open it takes width and the chat
+      // pane (main, flex-1) shrinks beside it — Claude-style split, not a cover.
+      className={`flex h-full shrink-0 flex-col overflow-hidden border-l border-line-strong bg-panel transition-[width] duration-300 ease-out ${
+        open
+          ? "w-full md:w-[46vw] md:max-w-[900px] md:min-w-[480px]"
+          : "w-0 border-l-0"
+      }`}
+      aria-hidden={!open}
+    >
+      {/* fixed-width inner so content doesn't reflow while the column animates */}
+      <div className="flex h-full w-full min-w-[320px] flex-col md:min-w-[480px]">
         {/* header */}
         <div className="flex items-center gap-2.5 border-b border-line px-4 py-3">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent-wash">
@@ -213,8 +208,7 @@ export default function DocumentPanel({
             )}
           </button>
         </div>
-      </aside>
-    </>,
-    document.body,
+      </div>
+    </aside>
   );
 }
