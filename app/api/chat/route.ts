@@ -210,14 +210,22 @@ const DRAFT_FORMAT_NOTE =
  */
 function looksLikeDeliverable(t: string): boolean {
   const text = t.trim();
-  if (text.length < 700) return false;
+  if (text.length < 500) return false;
+  // A Markdown table (a row plus a |---|---| separator) is the clearest signal
+  // of a structured deliverable — route it to the panel no matter what.
+  const hasTable = /^\s*\|.*\|\s*$/m.test(text) && /^\s*\|?[\s:|-]+\|[\s:|-]+\|?\s*$/m.test(text);
+  if (hasTable) return true;
   const mdHeadings = (text.match(/^#{1,3}\s+\S/gm) || []).length;
-  const boldHeadings = (text.match(/^\s*\*\*[^*]+\*\*/gm) || []).length;
+  const boldHeadings = (text.match(/^\s*\*\*[^*]+\*\*\s*:?\s*$/gm) || []).length;
   const cues =
-    /(suggested revised language|cover note|deal-?breaker|redlines?|issues?\s*(&|and)\s*redlines|unfavorable term|section\s+\d+\.\d+)/i.test(
+    /(suggested revised language|cover note|deal-?breaker|redlines?|issues?\s*(&|and)\s*redlines|unfavorable term|executive summary|section\s+\d+\.\d+)/i.test(
       text,
     );
-  return mdHeadings >= 1 || (boldHeadings >= 3 && cues) || (cues && text.length > 1400);
+  return (
+    mdHeadings >= 1 ||
+    (boldHeadings >= 2 && cues) ||
+    (cues && text.length > 1100)
+  );
 }
 
 /** Best-effort title for a deliverable pulled from the model's own text. */
