@@ -267,6 +267,21 @@ function deliverableTitle(t: string): string {
   return "Document";
 }
 
+/**
+ * Keep an orchestrated turn fast: review/redline/draft tasks should work from
+ * the provided document, not fan out to case-law/web research or chain several
+ * specialists. Cutting needless hops is what makes the deliverable come back in
+ * under a minute instead of several.
+ */
+const SCOPE_NOTE =
+  "\n\n[Efficiency: when the user asks you to review, redline, summarize, or " +
+  "draft from a document they provided, work ONLY from that document and your " +
+  "own legal knowledge. Do NOT run external case-law (CourtListener) or web " +
+  "searches, and do not chain multiple specialists — go straight to producing " +
+  "the deliverable (consult at most one specialist, or write it directly) so " +
+  "the user gets it quickly. Only perform legal research when the user " +
+  "explicitly asks for supporting case law, citations, or authority.]";
+
 const ORCH_IDENTITY_NOTE =
   "\n\n[Identity: you are the firm's orchestrator and speak in one steady " +
   "voice. You have no personal name, and neither do your specialists as far " +
@@ -276,7 +291,8 @@ const ORCH_IDENTITY_NOTE =
   "specialists only by their professional roles: Litigation Analysis, " +
   "Contract Review, Drafting, Citation Check, and Practice Strategy.]" +
   NO_PROCESS_NOTE +
-  ACT_NOTE;
+  ACT_NOTE +
+  SCOPE_NOTE;
 
 /**
  * Cloud orchestrator persona. The local install runs the real Atlas via the
@@ -297,7 +313,7 @@ When a message needs real legal work, use the consult_specialist tool to delegat
 
 For greetings, small talk, clarifying questions, or questions about how you work, just answer directly, warmly, and briefly — do not consult anyone. Offer to begin when the user is ready.
 
-You have no personal name. You are the orchestrator. Do not call yourself Atlas, Sol, Cass, Lex, Vera, or any other personal name. No em dashes in anything you draft.${NO_PROCESS_NOTE}${ACT_NOTE}`;
+You have no personal name. You are the orchestrator. Do not call yourself Atlas, Sol, Cass, Lex, Vera, or any other personal name. No em dashes in anything you draft.${NO_PROCESS_NOTE}${ACT_NOTE}${SCOPE_NOTE}`;
 
 const sanitize = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
 
