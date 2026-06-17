@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -42,6 +42,50 @@ export default function DocumentPanel({
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
+
+  // Resizable width (desktop): drag the left divider, like Claude. Persisted.
+  const [width, setWidth] = useState(720);
+  const widthRef = useRef(720);
+  const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
+    const saved = Number(localStorage.getItem("docPanelW"));
+    if (saved >= 380) {
+      setWidth(saved);
+      widthRef.current = saved;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const prevSelect = document.body.style.userSelect;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+    const onMove = (e: PointerEvent) => {
+      const w = Math.max(
+        380,
+        Math.min(window.innerWidth - e.clientX, window.innerWidth - 340),
+      );
+      widthRef.current = w;
+      setWidth(w);
+    };
+    const onUp = () => {
+      setDragging(false);
+      try {
+        localStorage.setItem("docPanelW", String(Math.round(widthRef.current)));
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      document.body.style.userSelect = prevSelect;
+      document.body.style.cursor = "";
+    };
+  }, [dragging]);
 
   const name = doc?.name ?? "document";
   const stem = name.replace(/\.[^.]+$/, "") || "document";
@@ -95,15 +139,42 @@ export default function DocumentPanel({
     <aside
       // In-flow column (not an overlay): when open it takes width and the chat
       // pane (main, flex-1) shrinks beside it — Claude-style split, not a cover.
-      className={`flex h-full shrink-0 flex-col overflow-hidden border-l border-line-strong bg-panel transition-[width] duration-300 ease-out ${
-        open
-          ? "w-full md:w-[46vw] md:max-w-[900px] md:min-w-[480px]"
-          : "w-0 border-l-0"
-      }`}
+      // Width is drag-resizable on desktop via the left divider.
+      style={
+        open ? ({ ["--doc-w"]: `${width}px` } as React.CSSProperties) : undefined
+      }
+      className={`relative flex h-full shrink-0 flex-col overflow-hidden border-l border-line-strong bg-panel ease-out ${
+        dragging ? "" : "transition-[width] duration-300"
+      } ${open ? "w-full md:w-[var(--doc-w)]" : "w-0 border-l-0"}`}
       aria-hidden={!open}
     >
-      {/* fixed-width inner so content doesn't reflow while the column animates */}
-      <div className="flex h-full w-full min-w-[320px] flex-col md:min-w-[480px]">
+      {/* drag-to-resize divider (desktop) */}
+      {open && (
+        <div
+          onPointerDown={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDoubleClick={() => {
+            setWidth(720);
+            widthRef.current = 720;
+            try {
+              localStorage.setItem("docPanelW", "720");
+            } catch {
+              /* ignore */
+            }
+          }}
+          title="Drag to resize · double-click to reset"
+          className="group absolute inset-y-0 left-0 z-20 hidden w-2.5 cursor-col-resize md:block"
+        >
+          <span
+            className={`absolute inset-y-0 left-0 w-[2px] transition-colors ${
+              dragging ? "bg-accent" : "bg-transparent group-hover:bg-accent/60"
+            }`}
+          />
+        </div>
+      )}
+      <div className="flex h-full w-full flex-col">
         {/* header */}
         <div className="flex items-center gap-2.5 border-b border-line px-4 py-3">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent-wash">
