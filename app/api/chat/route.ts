@@ -725,6 +725,19 @@ async function cloudChat(
                       `**${title}** is open in the document panel — review it there, then download it as Word, PDF, or Markdown, or save it to the case.`,
                   }),
                 );
+              } else if (producedDoc && looksLikeDeliverable(final)) {
+                // A document was already emitted via the tool, but the model
+                // also echoed the whole memo as its reply — show only a short
+                // summary so the transcript never dumps the full deliverable.
+                const summary = deliverableSummary(final);
+                controller.enqueue(
+                  line({
+                    t: "text",
+                    text: summary
+                      ? summary + "\n\nThe full document is open in the panel."
+                      : "Your document is ready — it's open in the panel on the right.",
+                  }),
+                );
               } else {
                 controller.enqueue(line({ t: "text", text: final }));
               }
