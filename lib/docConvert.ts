@@ -1,10 +1,21 @@
 /**
  * Document conversion (server-only, Node runtime). Markdown → PDF / Word, and
- * CSV → Excel. Shared by the local file-download route (reads the matter dir)
- * and the cloud convert route (works from posted content, no filesystem).
+ * CSV → Excel. Renders headings, bold, bullets, and Markdown tables so a
+ * structured legal memo keeps its shape on download. Shared by the local
+ * file-download route and the cloud convert route (works from posted content).
  */
 import PDFDocument from "pdfkit";
-import { Document, HeadingLevel, Packer, Paragraph } from "docx";
+import {
+  Document,
+  HeadingLevel,
+  Packer,
+  Paragraph,
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  WidthType,
+} from "docx";
 import ExcelJS from "exceljs";
 
 export const RAW_TYPES: Record<string, string> = {
@@ -22,7 +33,7 @@ export const RAW_TYPES: Record<string, string> = {
   ".jpeg": "image/jpeg",
 };
 
-/** strip inline markdown so converted documents read as prose */
+/** strip inline markdown so converted text reads as prose */
 const stripInline = (s: string) =>
   s
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
@@ -30,6 +41,53 @@ const stripInline = (s: string) =>
     .replace(/\*([^*]+)\*/g, "$1")
     .replace(/`([^`]+)`/g, "$1")
     .trim();
+
+// ── markdown table helpers ──────────────────────────────────────────────
+const isTableBlock = (block: string): boolean => {
+  const lines = block.split(/\n/).filter((l) => l.trim());
+  return (
+    lines.length >= 2 &&
+    lines[0].includes("|") &&
+    /^\s*\|?[\s:|-]+\|?\s*$/.test(lines[1]) &&
+    lines[1].includes("-")
+  );
+};
+
+/** rows of cells; the separator row (|---|) is dropped */
+const parseTable = (block: string): string[][] =>
+  block
+    .split(/\n/)
+    .filter((l) => l.trim())
+    .filter((_, i) => i !== 1)
+    .map((l) =>
+      l
+        .replace(/^\s*\|/, "")
+        .replace(/\|\s*$/, "")
+        .split("|")
+        .map((c) => c.trim()),
+    );
+
+/** Word runs that honor **bold** within a line. */
+const docxRuns = (text: string): TextRun[] => {
+  const clean = text
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/`([^`]+)`/g, "$1");
+  const runs: TextRun[] = [];
+  const re = /\*\*([^*]+)\*\*/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(clean))) {
+    if (m.index > last)
+      runs.push(
+        new TextRun(clean.slice(last, m.index).replace(/\*([^*]+)\*/g, "$1")),
+      );
+    runs.push(new TextRun({ text: m[1], bold: true }));
+    last = re.lastIndex;
+  }
+  if (last < clean.length)
+    runs.push(new TextRun(clean.slice(last).replace(/\*([^*]+)\*/g, "$1")));
+  return runs.length ? runs : [new TextRun(clean)];
+};
 
 export function mdToPdf(md: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -45,6 +103,28 @@ export function mdToPdf(md: string): Promise<Buffer> {
     for (const block of md.split(/\n{2,}/)) {
       const text = block.trim();
       if (!text) continue;
+
+      if (isTableBlock(text)) {
+        const [header, ...body] = parseTable(text);
+        doc.moveDown(0.3);
+        for (const row of body) {
+          // first cell as a bold heading, remaining cells as labeled lines
+          doc.font("Times-Bold").fontSize(11.5).text(stripInline(row[0] ?? ""));
+          for (let i = 1; i < row.length; i++) {
+            const label = stripInline(header?.[i] ?? "");
+            doc
+              .font("Times-Roman")
+              .fontSize(11)
+              .text(`${label ? `${label}: ` : ""}${stripInline(row[i] ?? "")}`, {
+                lineGap: 2,
+                paragraphGap: 3,
+              });
+          }
+          doc.moveDown(0.35);
+        }
+        continue;
+      }
+
       const h = text.match(/^(#{1,3})\s+([\s\S]*)$/);
       if (h) {
         doc
@@ -76,15 +156,47 @@ export function mdToPdf(md: string): Promise<Buffer> {
 }
 
 export async function mdToDocx(md: string): Promise<Buffer> {
-  const children: Paragraph[] = [];
+  const children: (Paragraph | Table)[] = [];
   for (const block of md.split(/\n{2,}/)) {
     const text = block.trim();
     if (!text) continue;
+
+    if (isTableBlock(text)) {
+      const rows = parseTable(text);
+      children.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: rows.map(
+            (cells, ri) =>
+              new TableRow({
+                tableHeader: ri === 0,
+                children: cells.map(
+                  (c) =>
+                    new TableCell({
+                      shading: ri === 0 ? { fill: "E6E1D3" } : undefined,
+                      children: [
+                        new Paragraph({
+                          children:
+                            ri === 0
+                              ? [new TextRun({ text: stripInline(c), bold: true })]
+                              : docxRuns(c),
+                        }),
+                      ],
+                    }),
+                ),
+              }),
+          ),
+        }),
+      );
+      children.push(new Paragraph(""));
+      continue;
+    }
+
     const h = text.match(/^(#{1,3})\s+([\s\S]*)$/);
     if (h) {
       children.push(
         new Paragraph({
-          text: stripInline(h[2]),
+          children: docxRuns(h[2]),
           heading:
             h[1].length === 1
               ? HeadingLevel.HEADING_1
@@ -97,15 +209,13 @@ export async function mdToDocx(md: string): Promise<Buffer> {
       for (const l of text.split(/\n/)) {
         children.push(
           new Paragraph({
-            text: stripInline(l.replace(/^\s*[-*]\s+/, "")),
+            children: docxRuns(l.replace(/^\s*[-*]\s+/, "")),
             bullet: { level: 0 },
           }),
         );
       }
     } else {
-      children.push(
-        new Paragraph({ text: stripInline(text.replace(/\n/g, " ")) }),
-      );
+      children.push(new Paragraph({ children: docxRuns(text.replace(/\n/g, " ")) }));
     }
   }
   return Packer.toBuffer(new Document({ sections: [{ children }] }));

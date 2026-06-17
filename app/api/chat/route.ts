@@ -88,9 +88,13 @@ const WRITE_DOC_TOOL = {
   name: "write_document",
   description:
     "Produce a finished deliverable for the user to download as Word or PDF. " +
-    "Provide the full document as Markdown (use #/## headings, blank lines " +
-    "between paragraphs, and - bullets). Use for letters, briefs, memos, and " +
-    "agreements — not for short chat replies.",
+    "Provide the full document as polished Markdown: a # title, ## section " +
+    "headings, blank lines between paragraphs, - bullets, and **bold** for " +
+    "emphasis. For any review, issues list, or comparison, present the items " +
+    "as a Markdown TABLE (e.g. | Section | Risk | Suggested revised language |) " +
+    "rather than loose prose, and open a review memo with a short executive " +
+    "summary. Use for letters, briefs, memos, redlines, and agreements — not " +
+    "for short chat replies.",
   input_schema: {
     type: "object" as const,
     properties: {
@@ -181,6 +185,16 @@ const ACT_NOTE =
   "agreement, or redline, you MUST actually generate the document with your " +
   "document tool so it is delivered and opens for them — never paste the full " +
   "document inline as your reply, and never stop after merely describing it.]";
+
+/** Formatting directive for the Drafting specialist — produces a polished memo. */
+const DRAFT_FORMAT_NOTE =
+  "\n\n[Formatting: produce a polished, professional document in Markdown. " +
+  "Open with a # title and a short Executive Summary (counts by severity). " +
+  "Group findings by severity under ## headings (Deal-Breakers, Material, " +
+  "Watch-List). Present each issue group as a Markdown TABLE with columns " +
+  "| Section | Risk (plain English) | Suggested revised language |, not loose " +
+  "prose. Use **bold** for labels. End with a short, client-ready cover note. " +
+  "Prefer tables over paragraphs for any list of issues or terms.]";
 
 const ORCH_IDENTITY_NOTE =
   "\n\n[Identity: you are the firm's orchestrator and speak in one steady " +
@@ -363,8 +377,13 @@ async function runSpecialist(
   const spec = SPECIALISTS[id];
   const res = await client.messages.create({
     model: modelFor(id),
-    max_tokens: 8000,
-    system: cachedSystem(spec.prompt + CLOUD_NOTE + identityNote(id)),
+    max_tokens: 16000,
+    system: cachedSystem(
+      spec.prompt +
+        CLOUD_NOTE +
+        identityNote(id) +
+        (id === "drafting" ? DRAFT_FORMAT_NOTE : ""),
+    ),
     // generous cap so the orchestrator can hand over a full contract, not a slice
     messages: [{ role: "user", content: instruction.slice(0, 200000) }],
   });
@@ -553,6 +572,7 @@ async function cloudChat(
         const turns: any[] = [...convo];
         let producedDoc = false;
         let nudged = false;
+        let lastDraft = ""; // the Drafting specialist's output, as a fallback
         for (let hop = 0; hop < 7; hop++) {
           const resp = await client.messages.create({
             model: ORCHESTRATOR_MODEL,
@@ -677,6 +697,7 @@ async function cloudChat(
               id,
               input.instruction ?? "",
             );
+            if (id === "drafting" && out.trim().length > 200) lastDraft = out;
             results.push({
               type: "tool_result",
               tool_use_id: call.id,
@@ -684,6 +705,19 @@ async function cloudChat(
             });
           }
           turns.push({ role: "user", content: results });
+        }
+
+        // Guarantee the deliverable reaches the panel: if a document was drafted
+        // but the orchestrator never called write_document (it inlined or just
+        // described it), emit the draft as a document now.
+        if (!producedDoc && lastDraft.trim().length > 400) {
+          const title =
+            lastDraft.match(/^#\s+(.+)$/m)?.[1]?.trim() || "Document";
+          const dname = title.replace(/[^\w. -]/g, "_").slice(0, 80) || "Document";
+          controller.enqueue(
+            line({ t: "document", name: dname, text: lastDraft }),
+          );
+          producedDoc = true;
         }
 
         controller.enqueue(line({ t: "done" }));
