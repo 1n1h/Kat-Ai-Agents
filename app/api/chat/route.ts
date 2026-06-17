@@ -168,6 +168,20 @@ const NO_PROCESS_NOTE =
   "description of how you made them. When a document is produced, summarize " +
   "what's in it briefly and let the user open it.]";
 
+/**
+ * Force action: the model must do the work this turn, not announce it. Stops
+ * the "Let me analyze and draft…" → end-of-turn failure.
+ */
+const ACT_NOTE =
+  "\n\n[Execution: do the requested work IN THIS TURN — call your tools and " +
+  'return the result. Never end a turn with only a statement of intent ("I\'ll ' +
+  'review…", "Let me analyze…", "then I\'ll draft…", "prepare your ' +
+  'deliverable"); if you say you will produce something, produce it in the same ' +
+  "turn. When the user asks for a document, deliverable, letter, memo, " +
+  "agreement, or redline, you MUST actually generate the document with your " +
+  "document tool so it is delivered and opens for them — never paste the full " +
+  "document inline as your reply, and never stop after merely describing it.]";
+
 const ORCH_IDENTITY_NOTE =
   "\n\n[Identity: you are the firm's orchestrator and speak in one steady " +
   "voice. You have no personal name, and neither do your specialists as far " +
@@ -176,7 +190,8 @@ const ORCH_IDENTITY_NOTE =
   "tooling or skills. If asked who you are or how you work, refer to the " +
   "specialists only by their professional roles: Litigation Analysis, " +
   "Contract Review, Drafting, Citation Check, and Practice Strategy.]" +
-  NO_PROCESS_NOTE;
+  NO_PROCESS_NOTE +
+  ACT_NOTE;
 
 /**
  * Cloud orchestrator persona. The local install runs the real Atlas via the
@@ -197,7 +212,7 @@ When a message needs real legal work, use the consult_specialist tool to delegat
 
 For greetings, small talk, clarifying questions, or questions about how you work, just answer directly, warmly, and briefly — do not consult anyone. Offer to begin when the user is ready.
 
-You have no personal name. You are the orchestrator. Do not call yourself Atlas, Sol, Cass, Lex, Vera, or any other personal name. No em dashes in anything you draft.${NO_PROCESS_NOTE}`;
+You have no personal name. You are the orchestrator. Do not call yourself Atlas, Sol, Cass, Lex, Vera, or any other personal name. No em dashes in anything you draft.${NO_PROCESS_NOTE}${ACT_NOTE}`;
 
 const sanitize = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
 
@@ -536,7 +551,9 @@ async function cloudChat(
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const turns: any[] = [...convo];
-        for (let hop = 0; hop < 6; hop++) {
+        let producedDoc = false;
+        let nudged = false;
+        for (let hop = 0; hop < 7; hop++) {
           const resp = await client.messages.create({
             model: ORCHESTRATOR_MODEL,
             max_tokens: 8000,
@@ -562,6 +579,24 @@ async function cloudChat(
           );
           if (resp.stop_reason !== "tool_use" || calls.length === 0) {
             const final = textOf(resp.content);
+            // Safety net: the model announced work ("Let me analyze… / I'll
+            // draft…") but ended without doing it. Nudge once to actually act.
+            if (
+              !nudged &&
+              !producedDoc &&
+              final.length < 700 &&
+              /\b(i'?ll|i will|let me|i'?m going to|prepare your deliverable|draft (the|your) (document|deliverable)|analyze the (full|document|agreement)|review (this|the) (agreement|contract|document))\b/i.test(
+                final,
+              )
+            ) {
+              nudged = true;
+              turns.push({
+                role: "user",
+                content:
+                  "Proceed now — complete the work in this turn: consult the specialists you need and produce the document with your tools. Do not reply with intent only.",
+              });
+              continue;
+            }
             if (final) {
               streamedAny = true;
               controller.enqueue(line({ t: "text", text: final }));
@@ -582,10 +617,12 @@ async function cloudChat(
                 "_",
               );
               const dcontent = String(di.content ?? "");
-              if (dcontent.trim())
+              if (dcontent.trim()) {
+                producedDoc = true;
                 controller.enqueue(
                   line({ t: "document", name: dname, text: dcontent }),
                 );
+              }
               results.push({
                 type: "tool_result",
                 tool_use_id: call.id,
