@@ -50,7 +50,15 @@ function FileChip({ name, matterId }: { name: string; matterId: string }) {
 }
 
 /** A document the agent drafted in the cloud — content is converted on click. */
-function DocChip({ name, content }: { name: string; content: string }) {
+function DocChip({
+  name,
+  content,
+  onOpen,
+}: {
+  name: string;
+  content: string;
+  onOpen?: () => void;
+}) {
   const stem = name.replace(/\.[^.]+$/, "");
   const isCsv = name.toLowerCase().endsWith(".csv");
   const download = async (to: string) => {
@@ -75,12 +83,13 @@ function DocChip({ name, content }: { name: string; content: string }) {
   return (
     <span className="flex items-center gap-2 rounded-lg border border-line bg-panel px-2.5 py-1.5">
       <FileText className="h-4 w-4 shrink-0 text-accent" />
-      <span
-        className="max-w-56 truncate font-mono text-[12px] text-ink"
-        title={name}
+      <button
+        onClick={onOpen}
+        className="max-w-56 truncate font-mono text-[12px] text-ink transition-colors hover:text-accent"
+        title={onOpen ? `Open ${name}` : name}
       >
         {name}
-      </span>
+      </button>
       {isCsv ? (
         <button
           onClick={() => download("xlsx")}
@@ -126,11 +135,13 @@ function Turn({
   index,
   showActions,
   matterId,
+  onOpenDoc,
 }: {
   msg: Msg;
   index: number;
   showActions?: boolean;
   matterId: string;
+  onOpenDoc?: (doc: { name: string; content: string }) => void;
 }) {
   const isUser = msg.role === "user";
   const label = isUser ? "You" : agentById(msg.agentId ?? "auto").name;
@@ -202,7 +213,12 @@ function Turn({
         {!isUser && msg.docs && msg.docs.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {msg.docs.map((d) => (
-              <DocChip key={d.name} name={d.name} content={d.content} />
+              <DocChip
+                key={d.name}
+                name={d.name}
+                content={d.content}
+                onOpen={() => onOpenDoc?.({ name: d.name, content: d.content })}
+              />
             ))}
           </div>
         )}
@@ -220,6 +236,7 @@ export default function Transcript({
   agentId,
   matterId,
   bottomRef,
+  onOpenDoc,
 }: {
   messages: Msg[];
   live: string;
@@ -228,11 +245,19 @@ export default function Transcript({
   agentId: AgentId;
   matterId: string;
   bottomRef: React.RefObject<HTMLDivElement | null>;
+  onOpenDoc?: (doc: { name: string; content: string }) => void;
 }) {
   return (
     <div className="mx-auto max-w-3xl px-4 pb-10 sm:px-6">
       {messages.map((m, i) => (
-        <Turn key={i} msg={m} index={i} showActions matterId={matterId} />
+        <Turn
+          key={i}
+          msg={m}
+          index={i}
+          showActions
+          matterId={matterId}
+          onOpenDoc={onOpenDoc}
+        />
       ))}
 
       {live && (

@@ -153,6 +153,21 @@ const identityNote = (id: Exclude<AgentId, "auto">) =>
  * never hear those — only the professional roles. (The cloud path enforces the
  * same via ORCH_CLOUD_PROMPT + identityNote.)
  */
+/**
+ * Suppress internal-process narration for the user-facing voice. The user wants
+ * the work product, not a play-by-play of how it was produced.
+ */
+const NO_PROCESS_NOTE =
+  "\n\n[Presentation: deliver the finished work product, and at most one or " +
+  "two plain sentences of status. Do NOT narrate your internal process — no " +
+  "hop-by-hop play-by-play ('first hop', 'next hop', 'final hop'), no " +
+  "describing which specialist you delegated to or consulted, no validation " +
+  "PASS/FAIL or rubric reasoning, no 'ORCHESTRATION NOTE', and never name an " +
+  "internal tool (consult_specialist, write_document, SendMessage, Task, etc.). " +
+  "Coordinate silently; the answer and any document ARE the output, not a " +
+  "description of how you made them. When a document is produced, summarize " +
+  "what's in it briefly and let the user open it.]";
+
 const ORCH_IDENTITY_NOTE =
   "\n\n[Identity: you are the firm's orchestrator and speak in one steady " +
   "voice. You have no personal name, and neither do your specialists as far " +
@@ -160,7 +175,8 @@ const ORCH_IDENTITY_NOTE =
   "names (e.g. Atlas, Sol, Cass, Lex, Vera) and never describe your internal " +
   "tooling or skills. If asked who you are or how you work, refer to the " +
   "specialists only by their professional roles: Litigation Analysis, " +
-  "Contract Review, Drafting, Citation Check, and Practice Strategy.]";
+  "Contract Review, Drafting, Citation Check, and Practice Strategy.]" +
+  NO_PROCESS_NOTE;
 
 /**
  * Cloud orchestrator persona. The local install runs the real Atlas via the
@@ -181,7 +197,7 @@ When a message needs real legal work, use the consult_specialist tool to delegat
 
 For greetings, small talk, clarifying questions, or questions about how you work, just answer directly, warmly, and briefly — do not consult anyone. Offer to begin when the user is ready.
 
-You have no personal name. You are the orchestrator. Do not call yourself Atlas, Sol, Cass, Lex, Vera, or any other personal name. No em dashes in anything you draft.`;
+You have no personal name. You are the orchestrator. Do not call yourself Atlas, Sol, Cass, Lex, Vera, or any other personal name. No em dashes in anything you draft.${NO_PROCESS_NOTE}`;
 
 const sanitize = (id: string) => id.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
 
@@ -334,7 +350,8 @@ async function runSpecialist(
     model: modelFor(id),
     max_tokens: 8000,
     system: cachedSystem(spec.prompt + CLOUD_NOTE + identityNote(id)),
-    messages: [{ role: "user", content: instruction.slice(0, 12000) }],
+    // generous cap so the orchestrator can hand over a full contract, not a slice
+    messages: [{ role: "user", content: instruction.slice(0, 200000) }],
   });
   return textOf(res.content) || "(no output)";
 }

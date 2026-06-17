@@ -51,6 +51,7 @@ import {
 } from "@/lib/team";
 import Onboarding from "./Onboarding";
 import Transcript from "./Transcript";
+import DocumentPanel, { type PanelDoc } from "./DocumentPanel";
 import Composer from "./Composer";
 import MockTrial from "./mocktrial/MockTrial";
 import ThemeToggle from "./ThemeToggle";
@@ -60,7 +61,7 @@ import SettingsDialog from "./SettingsDialog";
 import Tour from "./Tour";
 import { ConnectorsDialog } from "./connectors";
 import { getSettings, isLightTheme, setTheme } from "@/lib/settings";
-import { cloudList } from "@/lib/cloudFiles";
+import { cloudList, cloudUpload } from "@/lib/cloudFiles";
 
 interface MatterFile {
   name: string;
@@ -145,6 +146,12 @@ export default function Workspace() {
   const [streaming, setStreaming] = useState(false);
   const [live, setLive] = useState("");
   const [statuses, setStatuses] = useState<string[]>([]);
+  /* slide-in document viewer (opens when an agent drafts a document) */
+  const [docPanel, setDocPanel] = useState<PanelDoc | null>(null);
+  const [docPanelOpen, setDocPanelOpen] = useState(false);
+  const [docDrafting, setDocDrafting] = useState(false);
+  /* bump to re-pull the case file list after a save */
+  const [filesNonce, setFilesNonce] = useState(0);
   const [user, setUser] = useState<User | null>(null);
   /* chosen once per visit so it doesn't flicker between renders */
   const [greetingTpl] = useState(pickGreeting);
@@ -283,7 +290,39 @@ export default function Workspace() {
     return () => {
       alive = false;
     };
-  }, [matterId, streaming, user]);
+  }, [matterId, streaming, user, filesNonce]);
+
+  /** Convert the panel's document and store it in this matter's files. */
+  async function saveDocToCase(
+    to: "pdf" | "docx" | "md" | "xlsx",
+  ): Promise<boolean> {
+    if (!docPanel || !matterId) return false;
+    try {
+      const res = await fetch("/api/files/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: docPanel.name,
+          content: docPanel.content,
+          to,
+        }),
+      });
+      if (!res.ok) return false;
+      const blob = await res.blob();
+      const stem = docPanel.name.replace(/\.[^.]+$/, "") || "document";
+      const file = new File([blob], `${stem}.${to}`, { type: blob.type });
+      // local working dir if available, else the firm's cloud storage
+      const form = new FormData();
+      form.set("matterId", matterId);
+      form.append("files", file);
+      const up = await fetch("/api/files", { method: "POST", body: form });
+      if (!up.ok) await cloudUpload(matterId, [file]);
+      setFilesNonce((n) => n + 1);
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -568,6 +607,9 @@ export default function Workspace() {
               } else if (ev.t === "document" && ev.name && ev.text) {
                 // a cloud-drafted document (content carried for conversion)
                 docsMade.push({ name: ev.name, content: ev.text });
+                // pop the side panel so the user watches it land
+                setDocPanel({ name: ev.name, content: ev.text });
+                setDocPanelOpen(true);
               } else if (ev.t === "memory" && ev.text) {
                 // the agent saved a durable fact for this matter
                 const note = ev.text.trim();
@@ -607,6 +649,28 @@ export default function Workspace() {
         },
       ],
     }));
+
+    // The local runtime writes the document to a file (not a cloud "document"
+    // event), so open the panel for it by fetching the file's text.
+    if (!docsMade.length) {
+      const textDoc = [...filesMade].find((n) =>
+        /\.(md|markdown|txt)$/i.test(n),
+      );
+      if (textDoc) {
+        void fetch(
+          `/api/files/download?matterId=${encodeURIComponent(matterId)}&name=${encodeURIComponent(textDoc)}`,
+        )
+          .then((r) => (r.ok ? r.text() : null))
+          .then((text) => {
+            if (text) {
+              setDocPanel({ name: textDoc, content: text });
+              setDocPanelOpen(true);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+
     setLive("");
     setStatuses([]);
     setStreaming(false);
@@ -1384,6 +1448,10 @@ export default function Workspace() {
                 agentId={agentId}
                 matterId={matterId}
                 bottomRef={bottomRef}
+                onOpenDoc={(d) => {
+                  setDocPanel(d);
+                  setDocPanelOpen(true);
+                }}
               />
             </section>
             <div className="px-4 pb-4 sm:px-6">
@@ -1461,6 +1529,14 @@ export default function Workspace() {
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         userEmail={user?.email}
+      />
+
+      <DocumentPanel
+        doc={docPanel}
+        open={docPanelOpen}
+        drafting={docDrafting}
+        onClose={() => setDocPanelOpen(false)}
+        onSaveToCase={saveDocToCase}
       />
 
       {threadMenuPortal}
