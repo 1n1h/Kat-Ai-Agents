@@ -843,6 +843,9 @@ async function cloudChat(
 
         controller.enqueue(line({ t: "done" }));
       } catch (err) {
+        // Surface the real cause in server logs — a fallback to the backup
+        // model is a quality downgrade, so we want to know why Anthropic failed.
+        console.error("[cloudChat] orchestrator error -> fallback:", err);
         // Anthropic failed. If nothing reached the user yet and Together AI is
         // configured, answer from the backup model (text-only — no tools).
         if (!streamedAny && togetherEnabled()) {
@@ -853,17 +856,38 @@ async function cloudChat(
                 identityNote(agentId as SpecialistId) +
                 firmCtx;
             controller.enqueue(line({ t: "status", text: "backup engine" }));
-            let any = false;
+            // Buffer the backup model's reply so a drafted deliverable still
+            // opens in the document panel (the backup has no document tool, so
+            // without this it would dump the whole memo into the transcript).
+            let buf = "";
             await streamTogether({
               system: sys,
               messages: convo,
-              maxTokens: 4000,
+              maxTokens: 8000,
               onText: (t) => {
-                any = true;
-                controller.enqueue(line({ t: "delta", text: t }));
+                buf += t;
               },
             });
-            if (any) {
+            if (buf.trim()) {
+              if (looksLikeDeliverable(buf)) {
+                const title = deliverableTitle(buf);
+                const dname =
+                  title.replace(/[^\w. -]/g, "_").slice(0, 80) || "Document";
+                controller.enqueue(
+                  line({ t: "document", name: dname, text: buf }),
+                );
+                const summary = deliverableSummary(buf);
+                controller.enqueue(
+                  line({
+                    t: "text",
+                    text:
+                      (summary ? summary + "\n\n" : "") +
+                      `**${title}** is open in the document panel — review it there, then download it as Word, PDF, or Markdown, or save it to the case.`,
+                  }),
+                );
+              } else {
+                controller.enqueue(line({ t: "text", text: buf }));
+              }
               controller.enqueue(line({ t: "done" }));
               return;
             }
